@@ -952,89 +952,6 @@
   .review-header { display: flex; justify-content: space-between; margin-bottom: 5px; }
   .review-author { font-size: 0.82rem; font-weight: bold; color: var(--glow); }
   .review-text { font-size: 0.82rem; color: var(--text); line-height: 1.5; }
-
-  /* ===== AI RECOMMEND ===== */
-  .recommend-section {
-    margin-top: 20px;
-    padding: 16px;
-    background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(13,11,64,0.4));
-    border: 1px solid rgba(167,139,250,0.3);
-    border-radius: 10px;
-  }
-  .recommend-title {
-    font-size: 0.95rem;
-    color: var(--accent);
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .recommend-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-    gap: 10px;
-  }
-  .recommend-card {
-    background: var(--card-bg);
-    border: 1px solid rgba(167,139,250,0.2);
-    border-radius: 8px;
-    padding: 10px;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-align: center;
-  }
-  .recommend-card:hover { border-color: var(--glow); transform: translateY(-2px); box-shadow: 0 4px 15px rgba(167,139,250,0.2); }
-  .recommend-card .rec-emoji { font-size: 2.2rem; display: block; margin-bottom: 5px; }
-  .recommend-card .rec-name { font-size: 0.72rem; color: var(--text); line-height: 1.3; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  .recommend-card .rec-price { font-size: 0.78rem; color: var(--accent); font-weight: bold; }
-  .recommend-card .rec-reason { font-size: 0.68rem; color: var(--glow); margin-top: 3px; font-style: italic; }
-  .recommend-loading {
-    text-align: center;
-    padding: 20px;
-    color: var(--glow);
-    font-size: 0.85rem;
-    animation: pulse 1s infinite;
-  }
-  .recommend-loading .spinner { font-size: 1.5rem; display: block; margin-bottom: 6px; animation: spin 1.5s linear infinite; }
-  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-  /* トップページ おすすめセクション */
-  .top-recommend-section {
-    max-width: 1400px;
-    margin: 0 auto 20px;
-    padding: 0 20px;
-  }
-  .top-recommend-section .recommend-section {
-    margin-top: 0;
-  }
-
-  /* カートに追加後のポップアップ */
-  .cart-add-popup {
-    position: fixed;
-    top: 80px;
-    right: 20px;
-    width: 320px;
-    background: var(--card-bg);
-    border: 1px solid var(--glow);
-    border-radius: 12px;
-    box-shadow: 0 8px 30px rgba(167,139,250,0.3);
-    z-index: 2500;
-    transform: translateX(400px);
-    opacity: 0;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  }
-  .cart-add-popup.show { transform: translateX(0); opacity: 1; }
-  .cart-add-popup-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 14px 8px;
-    border-bottom: 1px solid rgba(167,139,250,0.2);
-  }
-  .cart-add-popup-header span { font-size: 0.85rem; color: var(--success); font-weight: bold; }
-  .cart-add-popup-close { background: none; border: none; color: var(--silver); cursor: pointer; font-size: 1rem; }
-  .cart-add-popup-body { padding: 12px 14px; }
-  .cart-add-popup-title { font-size: 0.8rem; color: var(--glow); margin-bottom: 8px; }
 </style>
 </head>
 <body>
@@ -1097,6 +1014,12 @@
     <button class="nav-item" onclick="filterCategory('food', this)">🍖 食料・珍味</button>
     <button class="nav-item" onclick="filterCategory('transport', this)">🦅 乗り物</button>
     <button class="nav-item" onclick="filterCategory('home', this)">🏠 城・家具</button>
+    <button class="nav-item" onclick="filterCategory('fashion', this)">👘 ファッション</button>
+    <button class="nav-item" onclick="filterCategory('tool', this)">⚙️ 道具・ツール</button>
+    <button class="nav-item" onclick="filterCategory('skill', this)">📖 スキル・知識</button>
+    <button class="nav-item" onclick="filterCategory('dungeon', this)">🗝️ ダンジョン用品</button>
+    <button class="nav-item" onclick="filterCategory('guild', this)">🏆 ギルドサービス</button>
+    <button class="nav-item" onclick="filterCategory('cosmetic', this)">✨ 美容・健康</button>
   </div>
 </header>
 
@@ -1105,32 +1028,6 @@
   <h2>🌟 今だけ！魔界セール開催中 🌟</h2>
   <p>ドラゴンの卵からエルフの弓まで、ファンタジー世界のあらゆるものが揃う</p>
   <div class="hero-badge">⚡ プライム会員なら魔法陣転送で翌日お届け</div>
-</div>
-
-<!-- TOP RECOMMEND SECTION -->
-<div class="top-recommend-section" id="topRecommendSection">
-  <div class="recommend-section">
-    <div class="recommend-title">🤖✨ あなたへのおすすめ（AI魔法鑑定士より）</div>
-    <div class="recommend-loading" id="topRecommendLoading">
-      <span class="spinner">🔮</span>冒険履歴を解析中...
-    </div>
-    <div class="recommend-cards" id="topRecommendCards" style="display:none;"></div>
-  </div>
-</div>
-
-<!-- CART ADD POPUP -->
-<div class="cart-add-popup" id="cartAddPopup">
-  <div class="cart-add-popup-header">
-    <span>✅ カートに追加しました！</span>
-    <button class="cart-add-popup-close" onclick="closeCartPopup()">✕</button>
-  </div>
-  <div class="cart-add-popup-body">
-    <div class="cart-add-popup-title">🤖 一緒に買われています</div>
-    <div class="recommend-loading" id="cartPopupLoading">
-      <span class="spinner">⚗️</span>相性の良い商品を探しています...
-    </div>
-    <div class="recommend-cards" id="cartPopupCards" style="display:none;"></div>
-  </div>
 </div>
 
 <!-- MAIN -->
@@ -1178,6 +1075,9 @@
       <label class="filter-option"><input type="checkbox"> <span>🧝 エルフ工房</span></label>
       <label class="filter-option"><input type="checkbox"> <span>⚒️ ドワーフ鍛冶</span></label>
       <label class="filter-option"><input type="checkbox"> <span>💀 闇商人</span></label>
+      <label class="filter-option"><input type="checkbox"> <span>✨ 天界商会</span></label>
+      <label class="filter-option"><input type="checkbox"> <span>🌊 深海商会</span></label>
+      <label class="filter-option"><input type="checkbox"> <span>🏆 冒険者ギルド</span></label>
     </div>
   </aside>
 
@@ -1258,320 +1158,1332 @@
 <script>
 // ========== DATA ==========
 const products = [
-  // WEAPONS
+  // ===== WEAPON (8点) =====
   {
     id: 1, category: 'weapon',
+    image: 'https://www.genspark.ai/api/files/s/p5vYSXkH?cache_control=3600',
     emoji: '⚔️', name: '伝説の剣「エクスカリバー改」- 魔力強化版',
     seller: 'ドワーフ鍛冶マスター工房', rarity: 'legendary',
     price: 99800, originalPrice: 150000, discount: 33,
     rating: 4.9, reviews: 4823,
     prime: true, isNew: false,
-    desc: '湖の乙女より改造許可を得た最強の聖剣。魔力を300%増幅し、悪を圧倒する伝説の一振り。切れ味は永遠に保証（魔界の存在には別途5%増し）。ドラゴンの鱗すら一撃で貫く。',
-    specs: [['種別', '両手剣（片手でも可・魔力消費あり）'], ['攻撃力', '+9999'], ['魔法耐性', '+500'], ['重量', '3.5kg（持ち主補正あり）'], ['対応レベル', '999以上推奨'], ['素材', 'ミスリル合金・龍の牙・光の結晶']],
-    tags: ['#聖剣', '#最強武器', '#魔王討伐'],
-    delivery: '呪文転送（即日）'
+    desc: '湖の乙女より改造許可を得た最強の聖剣。魔力を300%増幅し、悪を圧倒する伝説の一振り。',
+    specs: [['攻撃力', '999'], ['魔法増幅', '+300%'], ['耐久度', '∞'], ['対応クラス', '全職業']],
+    tags: ['#聖剣', '#レジェンダリー', '#魔力強化'],
+    delivery: '魔法陣転送（翌日）'
   },
   {
     id: 2, category: 'weapon',
+    image: 'https://www.genspark.ai/api/files/s/3ut4JHns?cache_control=3600',
     emoji: '🗡️', name: 'エルフ製 曲剣「月光の刃」（限定品）',
-    seller: 'シルヴァーエルフ工房', rarity: 'epic',
-    price: 45000, originalPrice: 52000, discount: 13,
-    rating: 4.7, reviews: 1209,
+    seller: 'エルフ工房シルバーフォレスト', rarity: 'epic',
+    price: 45800, originalPrice: 58000, discount: 21,
+    rating: 4.7, reviews: 1203,
     prime: true, isNew: false,
-    desc: 'エルフの職人が300年かけて仕上げた最高傑作。月光を帯びるたびに威力が増す不思議な曲剣。夜間戦闘に特化しており、闇の生物に対してダメージ2倍。',
-    specs: [['種別', '片手曲剣'], ['攻撃力', '+3200'], ['特殊効果', '月光充電・暗闇ダメージ2倍'], ['重量', '1.2kg'], ['素材', 'ムーンシルバー'], ['耐久度', '無限（月光補充が必要）']],
-    tags: ['#エルフ製', '#夜戦特化', '#レア'],
+    desc: '満月の夜にのみ鍛えられる幻の曲剣。月光を纏い、夜間の攻撃力が2倍になる。',
+    specs: [['攻撃力', '750'], ['夜間ボーナス', '+100%'], ['重量', '1.2kg'], ['素材', 'ミスリル']],
+    tags: ['#エルフ', '#月光', '#夜間強化'],
     delivery: '鷹便（翌日）'
   },
   {
     id: 3, category: 'weapon',
+    image: 'https://www.genspark.ai/api/files/s/Cky9dXSP?cache_control=3600',
     emoji: '🏹', name: '天使の弓「聖光アロー」+ 矢100本セット',
-    seller: '天空神殿公式ショップ', rarity: 'rare',
-    price: 28000, originalPrice: 35000, discount: 20,
-    rating: 4.5, reviews: 892,
-    prime: false, isNew: true,
-    desc: '天使族が使用する神聖な弓。矢に神聖魔法が付与され、アンデッド系には即死効果あり。射程は通常の3倍。付属の矢は使い終わると天に戻り、翌日再補充される。',
-    specs: [['種別', '魔法弓'], ['攻撃力', '+2800'], ['射程', '500m'], ['特殊効果', 'アンデッド即死・聖属性'], ['素材', '聖木・天使の羽根']],
-    tags: ['#聖属性', '#アンデッド特効', '#矢セット'],
-    delivery: '馬車便（3日）'
+    seller: '天界武器商会', rarity: 'epic',
+    price: 38500, originalPrice: 52000, discount: 26,
+    rating: 4.8, reviews: 892,
+    prime: true, isNew: false,
+    desc: '天界の羽根で作られた聖弓。放った矢は必ず悪の心臓を貫く聖なる力を持つ。',
+    specs: [['攻撃力', '680'], ['射程', '500m'], ['貫通力', 'A+'], ['矢の補充', '月1回無料']],
+    tags: ['#天界', '#弓', '#聖属性'],
+    delivery: '魔法陣転送（翌日）'
   },
   {
     id: 4, category: 'weapon',
+    image: 'https://www.genspark.ai/api/files/s/YXKEmi1Q?cache_control=3600',
     emoji: '🛡️', name: '竜鱗の大盾「難攻不落」（ゴールド伝説仕様）',
-    seller: 'ドラゴンスレイヤー商会', rarity: 'legendary',
-    price: 75000, originalPrice: 75000, discount: 0,
-    rating: 4.8, reviews: 2341,
-    prime: true, isNew: false,
-    desc: 'ゴールドドラゴンの鱗500枚を使用した防御最強の盾。魔法攻撃を97%反射し、物理攻撃もほぼ無効化。重すぎてドワーフでも持てないため、魔力で浮かせる機能付き。',
-    specs: [['種別', '大型魔法盾'], ['防御力', '+8000'], ['魔法反射率', '97%'], ['重量', '80kg（重力軽減付き）'], ['素材', 'ゴールドドラゴン鱗']],
-    tags: ['#最強盾', '#魔法反射', '#伝説防具'],
+    seller: 'ドラゴンスレイヤー工房', rarity: 'legendary',
+    price: 78000, originalPrice: 110000, discount: 29,
+    rating: 4.6, reviews: 567,
+    prime: false, isNew: false,
+    desc: '討伐した古龍の鱗から作られた最強の盾。あらゆる魔法攻撃を完全吸収する。',
+    specs: [['防御力', '999'], ['魔法耐性', '100%'], ['重量', '8kg'], ['耐久度', '伝説級']],
+    tags: ['#盾', '#竜鱗', '#魔法無効'],
     delivery: '馬車便（3日）'
   },
+  {
+    id: 26, category: 'weapon',
+    image: 'https://www.genspark.ai/api/files/s/HkPlQYst?cache_control=3600',
+    emoji: '🔱', name: '海神の三叉槍「ポセイドン」（水属性MAX）',
+    seller: '深海鍛冶師ネレウス', rarity: 'legendary',
+    price: 88000, originalPrice: 120000, discount: 27,
+    rating: 4.8, reviews: 334,
+    prime: true, isNew: false,
+    desc: '深海の神殿で鍛えられた三叉槍。水属性攻撃+500%、嵐を呼ぶ力を持つ。',
+    specs: [['攻撃力', '880'], ['水属性', '+500%'], ['射程', '近〜中距離'], ['特殊能力', '津波召喚']],
+    tags: ['#海神', '#水属性', '#三叉槍'],
+    delivery: '魔法陣転送（翌日）'
+  },
+  {
+    id: 27, category: 'weapon',
+    image: 'https://www.genspark.ai/api/files/s/1yxSywRo?cache_control=3600',
+    emoji: '🪓', name: 'ドワーフ製 戦斧「山砕き」鉱山限定版',
+    seller: 'ドワーフ鍛冶マスター工房', rarity: 'rare',
+    price: 32000, originalPrice: 42000, discount: 24,
+    rating: 4.5, reviews: 789,
+    prime: true, isNew: true,
+    desc: '地下鉱山の最硬鉱石で作られた戦斧。岩山すら両断する圧倒的な破壊力。',
+    specs: [['攻撃力', '820'], ['対岩石', '+200%'], ['重量', '12kg'], ['素材', 'アダマンタイト']],
+    tags: ['#ドワーフ', '#戦斧', '#破壊力'],
+    delivery: '馬車便（3日）'
+  },
+  {
+    id: 28, category: 'weapon',
+    image: 'https://www.genspark.ai/api/files/s/C6lN0y22?cache_control=3600',
+    emoji: '🗡️', name: '暗殺者の短剣「影斬り」（毒付き×10）',
+    seller: '闇商人ギルド', rarity: 'epic',
+    price: 29800, originalPrice: 38000, discount: 22,
+    rating: 4.4, reviews: 1567,
+    prime: false, isNew: false,
+    desc: '影の中から放つ一撃必殺の短剣。毒効果付きで敵を確実に仕留める暗殺者の必需品。',
+    specs: [['攻撃力', '520'], ['毒ダメージ', '50/秒×30秒'], ['重量', '0.3kg'], ['隠蔽性', 'S']],
+    tags: ['#暗殺', '#毒', '#ステルス'],
+    delivery: '鷹便（翌日）'
+  },
+  {
+    id: 29, category: 'weapon',
+    image: 'https://www.genspark.ai/api/files/s/Pg4wI4zs?cache_control=3600',
+    emoji: '⚡', name: '雷神の大剣「サンダーボルト」（神話級）',
+    seller: '天界武器商会', rarity: 'legendary',
+    price: 125000, originalPrice: 180000, discount: 31,
+    rating: 4.9, reviews: 2341,
+    prime: true, isNew: false,
+    desc: '雷神より授かった神話級の大剣。一振りで稲妻を呼び、周囲500mを電撃で焼き払う。',
+    specs: [['攻撃力', '1200'], ['雷属性', '+∞'], ['範囲攻撃', '半径50m'], ['特殊', '落雷召喚']],
+    tags: ['#雷神', '#神話', '#範囲攻撃'],
+    delivery: '魔法陣転送（翌日）'
+  },
 
-  // MAGIC
+  // ===== MAGIC (8点) =====
   {
     id: 5, category: 'magic',
+    image: 'https://www.genspark.ai/api/files/s/M3VrHTdt?cache_control=3600',
     emoji: '📜', name: '禁断の魔法書「ネクロノミコン 復刻版」',
-    seller: '闇の書店ヴォールデン', rarity: 'legendary',
-    price: 120000, originalPrice: 200000, discount: 40,
-    rating: 4.2, reviews: 333,
+    seller: '魔法師ギルド禁書部', rarity: 'legendary',
+    price: 188000, originalPrice: 250000, discount: 25,
+    rating: 4.3, reviews: 234,
     prime: false, isNew: false,
-    desc: '古代の闇魔法がすべて記された禁書の復刻版。アンデッド召喚・時間操作・次元転移など99種類の魔法を習得できる。読了後に一時的に狂気に陥ることがあります（仕様です）。使用は自己責任で。',
-    specs: [['種別', '魔法書（禁書指定）'], ['収録魔法数', '99種'], ['難易度', '最高（要魔法師等級10以上）'], ['ページ数', '666ページ'], ['言語', '古代悪魔語（翻訳呪文付き）'], ['副作用', '一時的狂気・悪夢']],
-    tags: ['#禁書', '#闇魔法', '#強力'],
-    delivery: '闇の使者（3日）'
+    desc: '古代の禁断魔法を全収録した伝説の魔法書。使用には魔法師ギルドの許可証が必要。',
+    specs: [['収録魔法', '666種'], ['言語', '古代語'], ['危険度', 'SSS'], ['推奨レベル', '99以上']],
+    tags: ['#禁書', '#ネクロマンシー', '#上級者向け'],
+    delivery: '特殊転送（要申請）'
   },
   {
     id: 6, category: 'magic',
+    image: 'https://www.genspark.ai/api/files/s/3HoFYSCb?cache_control=3600',
     emoji: '💎', name: '魔力結晶「マナストーン」SSグレード 5個セット',
-    seller: '魔法師ギルド公式', rarity: 'epic',
-    price: 35000, originalPrice: 42000, discount: 16,
-    rating: 4.6, reviews: 5621,
+    seller: '魔法師ギルド本部', rarity: 'epic',
+    price: 15800, originalPrice: 22000, discount: 28,
+    rating: 4.8, reviews: 5621,
     prime: true, isNew: false,
-    desc: '魔法使いに必須のマナストーン最高品質版。1個で1000マナを蓄積できる。色が深いほど純度が高く、このSSグレードは色が透明に輝く最高品質。',
-    specs: [['グレード', 'SS（最高品質）'], ['蓄積マナ', '1000/個'], ['純度', '99.9%'], ['持続時間', '半永久（定期充電必要）'], ['産地', 'マナの泉産（世界最高地）']],
-    tags: ['#マナ', '#魔法必需品', '#高品質'],
-    delivery: '呪文転送（即日）'
+    desc: '最高品質のマナストーン5個セット。魔力の充填・増幅・保存が可能な万能結晶。',
+    specs: [['魔力容量', '10000MP×5'], ['充填速度', '超高速'], ['グレード', 'SS'], ['有効期限', '永久']],
+    tags: ['#マナストーン', '#魔力', '#セット商品'],
+    delivery: '魔法陣転送（翌日）'
   },
   {
     id: 7, category: 'magic',
+    image: 'https://www.genspark.ai/api/files/s/LX8HYK13?cache_control=3600',
     emoji: '🔮', name: '未来予知の水晶玉（精度98%・クーポン対応）',
-    seller: '予言者サラの店', rarity: 'rare',
-    price: 18800, originalPrice: 25000, discount: 25,
-    rating: 4.0, reviews: 782,
+    seller: '予言者の館', rarity: 'epic',
+    price: 55000, originalPrice: 75000, discount: 27,
+    rating: 4.2, reviews: 891,
     prime: true, isNew: false,
-    desc: '未来を98%の精度で予言できる水晶玉。残り2%は「運命の揺らぎ」により変化します（返品対象外）。使い方は簡単で、触れて念じるだけ。1日3回まで占い可能。',
-    specs: [['予知精度', '98%（± 2%）'], ['サイズ', '直径20cm'], ['1日使用回数', '3回'], ['電源', '不要（魔力自給式）'], ['素材', '古代水晶']],
-    tags: ['#占い', '#未来予知', '#便利'],
+    desc: '精度98%の未来予知が可能な高品質水晶玉。1日1回まで未来を覗ける。',
+    specs: [['予知精度', '98%'], ['予知範囲', '72時間先まで'], ['サイズ', '直径15cm'], ['素材', '純粋水晶']],
+    tags: ['#予知', '#水晶', '#未来'],
     delivery: '鷹便（翌日）'
   },
   {
     id: 8, category: 'magic',
+    image: 'https://www.genspark.ai/api/files/s/leX5rpuq?cache_control=3600',
     emoji: '🌀', name: '転移魔法陣セット（10回分使い切り）',
-    seller: '転移魔法師組合', rarity: 'uncommon',
-    price: 8800, originalPrice: 12000, discount: 26,
-    rating: 4.3, reviews: 3401,
+    seller: '魔法師ギルド本部', rarity: 'rare',
+    price: 12800, originalPrice: 18000, discount: 29,
+    rating: 4.6, reviews: 3421,
+    prime: true, isNew: false,
+    desc: '好きな場所へ瞬間移動できる転移魔法陣セット。設置から3秒で転移完了。',
+    specs: [['使用回数', '10回'], ['転移距離', '無制限'], ['設置時間', '3秒'], ['持続時間', '24時間']],
+    tags: ['#転移', '#瞬間移動', '#便利'],
+    delivery: '魔法陣転送（翌日）'
+  },
+  {
+    id: 30, category: 'magic',
+    image: 'https://www.genspark.ai/api/files/s/947zd9ge?cache_control=3600',
+    emoji: '🌟', name: '召喚術の古文書「千の眷属」完全版',
+    seller: '魔法師ギルド禁書部', rarity: 'legendary',
+    price: 145000, originalPrice: 200000, discount: 28,
+    rating: 4.7, reviews: 445,
+    prime: false, isNew: false,
+    desc: '1000種類の生物を召喚できる究極の召喚術書。神獣から精霊まで全て収録。',
+    specs: [['収録召喚獣', '1000種'], ['最大同時召喚', '99体'], ['必要MP', '可変'], ['難易度', '上級']],
+    tags: ['#召喚術', '#古文書', '#神獣'],
+    delivery: '特殊転送（要申請）'
+  },
+  {
+    id: 31, category: 'magic',
+    image: 'https://www.genspark.ai/api/files/s/RkuJ43MT?cache_control=3600',
+    emoji: '🔥', name: '炎の魔法石「イグニス」大型（希少品）',
+    seller: '火山地帯採掘組合', rarity: 'epic',
+    price: 42000, originalPrice: 55000, discount: 24,
+    rating: 4.5, reviews: 678,
     prime: true, isNew: true,
-    desc: '好きな場所に瞬時に転移できる魔法陣シート。1枚で1回、10枚セット。座標を書き込んで踏むだけで転移完了。魔界・異界への転移は追加料金1000ゴールド必要。',
-    specs: [['使用回数', '10回分（10枚セット）'], ['転移距離', '最大10000km'], ['精度', '±5m（近距離はより正確）'], ['サイズ', 'A4サイズ（折りたたみ可）'], ['有効期限', '購入後1年']],
-    tags: ['#転移', '#便利グッズ', '#コスパ最強'],
-    delivery: '呪文転送（即日）'
+    desc: '火山の核から採掘された最高品質の炎の魔法石。炎系魔法を大幅に強化する。',
+    specs: [['炎属性強化', '+400%'], ['魔力容量', '8000MP'], ['サイズ', '大型（20cm）'], ['温度', '常時1200℃']],
+    tags: ['#炎魔法', '#魔法石', '#希少'],
+    delivery: '特殊梱包便（2日）'
+  },
+  {
+    id: 32, category: 'magic',
+    image: 'https://www.genspark.ai/api/files/s/02muQP4e?cache_control=3600',
+    emoji: '❄️', name: '氷結魔法書「永久凍土の秘術」初版本',
+    seller: '北極魔法学院', rarity: 'epic',
+    price: 67000, originalPrice: 90000, discount: 26,
+    rating: 4.6, reviews: 312,
+    prime: false, isNew: false,
+    desc: '北極の氷河で書かれた氷結魔法の集大成。触れたものを絶対零度で凍結させる。',
+    specs: [['収録魔法', '200種'], ['最低温度', '-273℃'], ['言語', '氷精語'], ['難易度', '中〜上級']],
+    tags: ['#氷結', '#北極', '#初版本'],
+    delivery: '鷹便（翌日）'
+  },
+  {
+    id: 33, category: 'magic',
+    image: 'https://www.genspark.ai/api/files/s/kSEwv8Wy?cache_control=3600',
+    emoji: '⚗️', name: '錬金術セット「賢者の石 製造キット」',
+    seller: '錬金術師組合', rarity: 'rare',
+    price: 35000, originalPrice: 48000, discount: 27,
+    rating: 4.4, reviews: 1023,
+    prime: true, isNew: false,
+    desc: '賢者の石を自作できる完全キット。金属の変換から不老不死の薬まで作れる。',
+    specs: [['セット内容', '試薬×50、器具×20'], ['難易度', '中級'], ['成功率', '基本65%'], ['保証', '初回失敗時全額返金']],
+    tags: ['#錬金術', '#賢者の石', '#DIY'],
+    delivery: '馬車便（3日）'
   },
 
-  // POTIONS
+  // ===== POTION (8点) =====
   {
     id: 9, category: 'potion',
+    image: 'https://www.genspark.ai/api/files/s/G7NE3qsy?cache_control=3600',
     emoji: '🧪', name: '最高級 HP回復ポーション「不死の命水」1本',
-    seller: '錬金術師協会公認ショップ', rarity: 'epic',
-    price: 12000, originalPrice: 15000, discount: 20,
-    rating: 4.8, reviews: 8923,
+    seller: '王立薬師ギルド', rarity: 'legendary',
+    price: 9800, originalPrice: 15000, discount: 35,
+    rating: 4.9, reviews: 12043,
     prime: true, isNew: false,
-    desc: '即座にHP全回復＋最大HP20%増加効果。伝説の薬草「イモータルハーブ」を使用。飲んだ瞬間に光り輝き、傷が見る見るうちに閉じていきます。1本で致命傷から復活可能。',
-    specs: [['HP回復量', '全回復 + MAX HP +20%'], ['効果時間', '即時'], ['容量', '100ml'], ['原材料', 'イモータルハーブ・龍の血・光の水'], ['賞味期限', '50年'], ['副作用', 'なし（体質による）']],
-    tags: ['#HP回復', '#必需品', '#冒険者必携'],
-    delivery: '呪文転送（即日）'
+    desc: '瀕死状態からでも完全回復できる最高級ポーション。戦場での必需品。',
+    specs: [['HP回復量', '全回復+1000'], ['効果時間', '即時'], ['容量', '500ml'], ['賞味期限', '10年']],
+    tags: ['#HP回復', '#必需品', '#最高級'],
+    delivery: '魔法陣転送（翌日）'
   },
   {
     id: 10, category: 'potion',
+    image: 'https://www.genspark.ai/api/files/s/lkaQgoBl?cache_control=3600',
     emoji: '💜', name: 'MP完全回復薬「賢者の水」特別版',
-    seller: '魔法師ギルド公式', rarity: 'rare',
-    price: 9500, originalPrice: 9500, discount: 0,
-    rating: 4.6, reviews: 4201,
+    seller: '王立薬師ギルド', rarity: 'epic',
+    price: 7500, originalPrice: 11000, discount: 32,
+    rating: 4.8, reviews: 8932,
     prime: true, isNew: false,
-    desc: '魔法師に必須のMP全回復薬。特別版はさらにMP最大値も500増加する特典付き。無色透明で無味無臭。戦闘中でも1秒で効果が発動するほど即効性が高い。',
-    specs: [['MP回復量', '全回復 + MAX MP +500'], ['効果時間', '即時（1秒）'], ['容量', '50ml'], ['持続ボーナス', '24時間MP消費25%減'], ['賞味期限', '30年']],
-    tags: ['#MP回復', '#魔法師必携', '#即効性'],
-    delivery: '呪文転送（即日）'
+    desc: '魔力を一瞬で全回復させる特別版。連続詠唱にも対応した魔法使いの必需品。',
+    specs: [['MP回復量', '全回復+500'], ['効果時間', '即時'], ['容量', '300ml'], ['副作用', 'なし']],
+    tags: ['#MP回復', '#魔法使い', '#必需品'],
+    delivery: '魔法陣転送（翌日）'
   },
   {
     id: 11, category: 'potion',
+    image: 'https://www.genspark.ai/api/files/s/gBEwuzh9?cache_control=3600',
     emoji: '🌿', name: '変身ポーション「千の顔」セット（5種×2本）',
-    seller: '謎の錬金術師 ミスター X', rarity: 'rare',
-    price: 22000, originalPrice: 30000, discount: 26,
-    rating: 3.9, reviews: 521,
-    prime: false, isNew: true,
-    desc: '5種類の変身が楽しめるポーションセット。オーク・エルフ・ドワーフ・ドラゴン人・天使に変身できる。効果時間は各2時間。変身中は声も変わります。',
-    specs: [['種類', '5種×2本 計10本'], ['変身可能種族', 'オーク/エルフ/ドワーフ/ドラゴン人/天使'], ['効果時間', '各2時間'], ['解除方法', '水に浸かる or 専用解除薬'], ['副作用', 'まれに変身が解けなくなる（1/10000の確率）']],
-    tags: ['#変身', '#変装', '#面白ポーション'],
+    seller: '闇商人ギルド', rarity: 'rare',
+    price: 18000, originalPrice: 25000, discount: 28,
+    rating: 4.1, reviews: 2341,
+    prime: false, isNew: false,
+    desc: '飲むと任意の姿に変身できるポーション。5種の変身形態×2本の10本セット。',
+    specs: [['変身可能形態', '5種'], ['持続時間', '8時間'], ['セット内容', '10本'], ['解除方法', '水を飲む']],
+    tags: ['#変身', '#変装', '#冒険者向け'],
     delivery: '鷹便（翌日）'
   },
   {
     id: 12, category: 'potion',
-    emoji: '❤️‍🔥', name: '恋愛ポーション「運命の赤糸」（効果72時間）',
-    seller: '愛の魔女 ロザリア', rarity: 'uncommon',
-    price: 5800, originalPrice: 8000, discount: 27,
-    rating: 3.2, reviews: 10234,
+    image: 'https://www.genspark.ai/api/files/s/6AY6fbd9?cache_control=3600',
+    emoji: '❤️', name: '恋愛ポーション「運命の赤糸」（効果72時間）',
+    seller: '愛の魔法工房', rarity: 'epic',
+    price: 22000, originalPrice: 30000, discount: 27,
+    rating: 4.0, reviews: 5678,
+    prime: true, isNew: false,
+    desc: '72時間効果が持続する恋愛ポーション。飲んだ相手があなたに夢中になること保証。',
+    specs: [['効果時間', '72時間'], ['成功率', '98%'], ['解毒方法', '専用解毒薬'], ['対象', '全種族対応']],
+    tags: ['#恋愛', '#ポーション', '#72時間'],
+    delivery: '魔法陣転送（翌日）'
+  },
+  {
+    id: 34, category: 'potion',
+    image: 'https://www.genspark.ai/api/files/s/t3vPcnLQ?cache_control=3600',
+    emoji: '💪', name: '筋力強化ポーション「巨人の血」24時間版',
+    seller: '王立薬師ギルド', rarity: 'rare',
+    price: 5800, originalPrice: 8000, discount: 28,
+    rating: 4.6, reviews: 4521,
+    prime: true, isNew: false,
+    desc: '巨人の血から抽出した筋力強化ポーション。24時間、筋力が10倍になる。',
+    specs: [['筋力強化', '×10'], ['効果時間', '24時間'], ['容量', '200ml'], ['副作用', '一時的な食欲増加']],
+    tags: ['#筋力', '#強化', '#戦士向け'],
+    delivery: '鷹便（翌日）'
+  },
+  {
+    id: 35, category: 'potion',
+    image: 'https://www.genspark.ai/api/files/s/UT9LbT12?cache_control=3600',
+    emoji: '🌈', name: '虹色ポーション「七つの恵み」（全ステUP）',
+    seller: '錬金術師組合', rarity: 'legendary',
+    price: 48000, originalPrice: 65000, discount: 26,
+    rating: 4.9, reviews: 789,
+    prime: true, isNew: true,
+    desc: '全ステータスを24時間2倍にする超レアポーション。虹の精から採れる幻の素材使用。',
+    specs: [['全ステUP', '×2'], ['効果時間', '24時間'], ['容量', '100ml'], ['入手難度', 'SSS']],
+    tags: ['#全ステUP', '#虹色', '#超レア'],
+    delivery: '魔法陣転送（翌日）'
+  },
+  {
+    id: 36, category: 'potion',
+    image: 'https://www.genspark.ai/api/files/s/DDODJdkO?cache_control=3600',
+    emoji: '👁️', name: '透視ポーション「千里眼の雫」（3回分）',
+    seller: '予言者の館', rarity: 'epic',
+    price: 16500, originalPrice: 22000, discount: 25,
+    rating: 4.3, reviews: 1234,
     prime: false, isNew: false,
-    desc: '飲んだ後に最初に目が合った相手に恋をしてしまうポーション。効果時間は72時間。注意：効果中は理性的判断が低下します。使用は相手の同意を得てからどうぞ（倫理憲章第3条）。',
-    specs: [['効果時間', '72時間'], ['対象', '異性・同性・種族問わず対応'], ['副作用', '理性低下・食欲増進'], ['解除方法', '解毒ポーション or 自然消滅待ち'], ['推奨年齢', '18歳以上']],
-    tags: ['#恋愛', '#ロマンス', '#要注意'],
-    delivery: '馬車便（3日）'
+    desc: '透視能力を得られるポーション。壁越しや遠距離も見通せる3回使い切り。',
+    specs: [['効果時間', '1時間/回'], ['視野距離', '1km'], ['回数', '3回分'], ['副作用', 'なし']],
+    tags: ['#透視', '#千里眼', '#スパイ向け'],
+    delivery: '鷹便（翌日）'
+  },
+  {
+    id: 37, category: 'potion',
+    image: 'https://www.genspark.ai/api/files/s/RDULaNCf?cache_control=3600',
+    emoji: '🌙', name: '不老不死薬「月光の甘露」（世界に3本のみ）',
+    seller: '月の神殿', rarity: 'legendary',
+    price: 5000000, originalPrice: 9999999, discount: 50,
+    rating: 5.0, reviews: 3,
+    prime: false, isNew: false,
+    desc: '世界に3本しか存在しない究極の不老不死薬。飲んだ者は永遠の命を得る。',
+    specs: [['効果', '永遠の命'], ['副作用', '時間感覚の喪失'], ['在庫', '残り1本'], ['保証', '永久保証']],
+    tags: ['#不老不死', '#超レア', '#世界最高峰'],
+    delivery: '神殿直送（要儀式）'
   },
 
-  // CREATURES
+  // ===== CREATURE (8点) =====
   {
     id: 13, category: 'creature',
+    image: 'https://www.genspark.ai/api/files/s/9tGzMNG8?cache_control=3600',
     emoji: '🐉', name: 'レッドドラゴン幼体（雌・飼育証明書付き）',
-    seller: 'ドラゴンブリーダー王国公認', rarity: 'legendary',
-    price: 5000000, originalPrice: 8000000, discount: 37,
-    rating: 4.9, reviews: 88,
+    seller: 'ドラゴンブリーダー協会', rarity: 'legendary',
+    price: 2980000, originalPrice: 5000000, discount: 40,
+    rating: 4.5, reviews: 127,
     prime: false, isNew: false,
-    desc: '希少なレッドドラゴンの幼体を限定販売。飼育証明書・王立許可証付き。炎のブレスは生後6ヶ月から使用可能。最大成長時には人語を話します。餌代は別途かかります（推奨：牛20頭/月）。',
-    specs: [['現在のサイズ', '約1.5m'], ['成長後のサイズ', '約50m'], ['ブレス属性', '炎（温度3000℃）'], ['寿命', '5000年'], ['餌', '牛・羊（生）/月20頭'], ['必要な住居', '最低2000㎡の岩窟']],
-    tags: ['#ドラゴン', '#ペット', '#最強召喚獣'],
-    delivery: '特別大型便（7日）'
+    desc: '純血レッドドラゴンの幼体。飼育証明書・育て方マニュアル・初回エサ1ヶ月分付き。',
+    specs: [['現在サイズ', '全長1.2m'], ['成体サイズ', '全長30m'], ['性別', '雌'], ['飼育難度', '上級']],
+    tags: ['#ドラゴン', '#幼体', '#希少'],
+    delivery: '専用ドラゴン便（要相談）'
   },
   {
     id: 14, category: 'creature',
+    image: 'https://www.genspark.ai/api/files/s/HkPX3bql?cache_control=3600',
     emoji: '🦄', name: 'ユニコーン（虹色鬣・癒し効果付き）',
-    seller: '聖なる生き物保護協会', rarity: 'epic',
-    price: 800000, originalPrice: 1200000, discount: 33,
-    rating: 5.0, reviews: 412,
+    seller: '聖獣牧場エデン', rarity: 'legendary',
+    price: 1580000, originalPrice: 2200000, discount: 28,
+    rating: 4.9, reviews: 89,
     prime: false, isNew: false,
-    desc: '純白の体に虹色の鬣を持つ幸運の象徴・ユニコーン。乗馬すると自動的に幸運値が+100上昇。角の光で傷を癒す聖なる能力あり。穏やかで従順な性格。',
-    specs: [['体長', '約2m'], ['最大速度', '時速300km（飛行時500km）'], ['特殊能力', '幸運付与・聖なる光による癒し'], ['性格', '穏やか・従順'], ['平均寿命', '1000年'], ['好物', '虹色の草・泉の水']],
-    tags: ['#ユニコーン', '#幸運', '#聖なる生き物'],
-    delivery: '特別護送（5日）'
+    desc: '虹色の鬣を持つ希少なユニコーン。触れるだけで全ての傷と病を癒す奇跡の聖獣。',
+    specs: [['体長', '2.1m'], ['癒し効果', '全傷病回復'], ['気性', '温和'], ['寿命', '1000年']],
+    tags: ['#ユニコーン', '#聖獣', '#癒し'],
+    delivery: '専用ユニコーン護送（1週間）'
   },
   {
     id: 15, category: 'creature',
+    image: 'https://www.genspark.ai/api/files/s/RmPwLIO7?cache_control=3600',
     emoji: '🦅', name: '巨大フェニックス（転生機能付き・一回分）',
-    seller: '不死鳥繁殖組合', rarity: 'legendary',
-    price: 2800000, originalPrice: 4000000, discount: 30,
-    rating: 4.7, reviews: 62,
+    seller: '不死鳥研究所', rarity: 'legendary',
+    price: 8800000, originalPrice: 12000000, discount: 27,
+    rating: 4.8, reviews: 12,
     prime: false, isNew: false,
-    desc: '伝説の不死鳥フェニックス。死んでも炎から蘇生する能力を持つ。主人が一度だけ死亡した際に命を分けることも可能（主人蘇生1回限定機能付き）。全身が炎に包まれているが攻撃には使用不可（飾り仕様）。',
-    specs: [['翼開長', '30m'], ['炎の温度', '5000℃（無害化処理済み）'], ['転生回数', '無限（主人への命分け：1回）'], ['飛行速度', '時速1000km'], ['寿命', '無限'], ['必要な飼育環境', '温泉付き岩山']],
-    tags: ['#フェニックス', '#不死', '#最強召喚獣'],
-    delivery: '特別大型便（10日）'
+    desc: '本物のフェニックス。炎の翼で空を舞い、死亡時に転生できる一回分の権利付き。',
+    specs: [['翼開長', '15m'], ['炎温度', '5000℃'], ['転生回数', '1回'], ['寿命', '無限']],
+    tags: ['#フェニックス', '#転生', '#究極'],
+    delivery: '空輸（要許可申請）'
   },
   {
     id: 16, category: 'creature',
+    image: 'https://www.genspark.ai/api/files/s/7LPLn15C?cache_control=3600',
     emoji: '🧚', name: '家庭用妖精「フェアリーメイド」（家事サポート型）',
-    seller: '妖精工房 ティンカー', rarity: 'uncommon',
-    price: 45000, originalPrice: 60000, discount: 25,
-    rating: 4.4, reviews: 6701,
+    seller: '妖精工房ティンカーベル', rarity: 'rare',
+    price: 88000, originalPrice: 120000, discount: 27,
+    rating: 4.7, reviews: 3421,
     prime: true, isNew: false,
-    desc: '家事全般をこなす便利な妖精。掃除・洗濯・料理が得意で、主人に忠実。体長15cmとコンパクト。魔法で家の隅々まで清潔に保ちます。語学：エルフ語・人語・ドワーフ語対応。',
-    specs: [['体長', '約15cm'], ['専門', '掃除・洗濯・料理'], ['言語', 'エルフ語/人語/ドワーフ語'], ['稼働時間', '18時間/日'], ['主食', '砂糖・蜂蜜（少量）'], ['性格', '陽気・勤勉']],
-    tags: ['#家事', '#妖精', '#家庭向け'],
-    delivery: '呪文転送（即日）'
+    desc: '家事全般をサポートする家庭用妖精。掃除・料理・洗濯・子守まで何でもこなす。',
+    specs: [['体長', '15cm'], ['得意家事', '全般'], ['言語', '7ヶ国語対応'], ['寿命', '200年']],
+    tags: ['#妖精', '#家事', '#癒し系'],
+    delivery: '特殊小型便（翌日）'
+  },
+  {
+    id: 38, category: 'creature',
+    image: 'https://www.genspark.ai/api/files/s/DrXJWCIG?cache_control=3600',
+    emoji: '🐺', name: '魔狼「フェンリル子」（純血・訓練済み）',
+    seller: '北欧神獣牧場', rarity: 'epic',
+    price: 450000, originalPrice: 650000, discount: 31,
+    rating: 4.6, reviews: 234,
+    prime: false, isNew: true,
+    desc: '神話の魔狼フェンリルの子孫。高い知性と忠誠心を持ち、主人を守る最強の護衛獣。',
+    specs: [['体長', '1.8m（成体3.5m）'], ['知性', '人間並み'], ['訓練状況', '基礎訓練済み'], ['気性', '主人に従順']],
+    tags: ['#魔狼', '#神話', '#護衛'],
+    delivery: '専用護送（3日）'
+  },
+  {
+    id: 39, category: 'creature',
+    image: 'https://www.genspark.ai/api/files/s/5NFnqg9V?cache_control=3600',
+    emoji: '🦋', name: '精霊蝶「ルーミア」×5匹セット（光属性）',
+    seller: '精霊園ルミナ', rarity: 'rare',
+    price: 75000, originalPrice: 100000, discount: 25,
+    rating: 4.8, reviews: 567,
+    prime: true, isNew: false,
+    desc: '光属性を持つ幻の精霊蝶。5匹セットで販売。周囲に光の加護を与える神秘の生き物。',
+    specs: [['体長', '30cm'], ['光属性効果', '周囲の幸運+50%'], ['飼育難度', '易'], ['寿命', '500年']],
+    tags: ['#精霊', '#蝶', '#光属性'],
+    delivery: '特殊小型便（翌日）'
+  },
+  {
+    id: 40, category: 'creature',
+    image: 'https://www.genspark.ai/api/files/s/wGFbSDXe?cache_control=3600',
+    emoji: '🐙', name: '海の魔獣「クラーケン幼体」（水槽付き）',
+    seller: '深海生物研究所', rarity: 'epic',
+    price: 680000, originalPrice: 900000, discount: 24,
+    rating: 4.2, reviews: 89,
+    prime: false, isNew: false,
+    desc: '伝説の海の魔獣クラーケンの幼体。専用大型水槽付き。成体になると船を沈める力を持つ。',
+    specs: [['現在サイズ', '触手長1m'], ['成体サイズ', '触手長50m'], ['水槽サイズ', '5m×5m×3m'], ['エサ', '魚類何でも']],
+    tags: ['#クラーケン', '#海の魔獣', '#希少'],
+    delivery: '大型専用便（1週間）'
+  },
+  {
+    id: 41, category: 'creature',
+    image: 'https://www.genspark.ai/api/files/s/QAyzM7dm?cache_control=3600',
+    emoji: '🦁', name: 'キメラ「獅虎竜」（三種混合・成体）',
+    seller: 'キメラ研究所ラボ', rarity: 'legendary',
+    price: 3200000, originalPrice: 4500000, discount: 29,
+    rating: 4.4, reviews: 45,
+    prime: false, isNew: false,
+    desc: 'ライオン・トラ・ドラゴンのDNAを掛け合わせた究極のキメラ。三種の能力を持つ。',
+    specs: [['体長', '4m'], ['攻撃力', 'SSS'], ['能力', 'ライオンの力・トラの速度・ドラゴンの炎'], ['管理難度', '最上級']],
+    tags: ['#キメラ', '#合成獣', '#最強'],
+    delivery: '最高級護送便（要相談）'
   },
 
-  // CURSED
+  // ===== CURSED (6点) =====
   {
     id: 17, category: 'cursed',
+    image: 'https://www.genspark.ai/api/files/s/Zo9Uiwef?cache_control=3600',
     emoji: '💀', name: '呪われた指輪「終焉の一環」（解呪チケット付き）',
-    seller: '闇商人ダーク・ヴォールド', rarity: 'legendary',
-    price: 150000, originalPrice: 150000, discount: 0,
-    rating: 3.5, reviews: 98,
+    seller: '闇商人ギルド', rarity: 'legendary',
+    price: 66600, originalPrice: 99999, discount: 33,
+    rating: 4.1, reviews: 666,
     prime: false, isNew: false,
-    desc: '装備すると絶大な力を得られる代わりに毎日1のHPが永続的に消えていく指輪。解呪チケット（1枚）付属。強大な力が欲しい方には最高の品。1万人の勇者が使用し、生還率は3割。',
-    specs: [['攻撃力補正', '+99999（全能力）'], ['呪い効果', 'HP-1/日（永続）'], ['解呪難易度', 'A+（神官レベル100必要）'], ['素材', '呪われたミスリル・死者の魂'], ['解呪チケット', '1枚付属（市場価格80000G相当）']],
-    tags: ['#呪い', '#強力', '#危険'],
-    delivery: '闇の使者（3日）'
+    desc: '装備者を最強にする代わりに魂を蝕む呪いの指輪。解呪チケット1枚同梱。',
+    specs: [['全能力', '+666%'], ['呪い度', 'MAX'], ['解呪難度', '上級'], ['解呪チケット', '1枚']],
+    tags: ['#呪い', '#指輪', '#ハイリスクハイリターン'],
+    delivery: '闇便（翌日）'
   },
   {
     id: 18, category: 'cursed',
+    image: 'https://www.genspark.ai/api/files/s/FZhty7og?cache_control=3600',
     emoji: '🪄', name: '無限ループ杖「永遠の魔法陣」（バグ品・激安）',
-    seller: '訳あり品商店 B級市場', rarity: 'rare',
-    price: 2980, originalPrice: 50000, discount: 94,
-    rating: 2.8, reviews: 1823,
+    seller: '闇商人ギルド', rarity: 'epic',
+    price: 1980, originalPrice: 50000, discount: 96,
+    rating: 2.8, reviews: 234,
     prime: false, isNew: false,
-    desc: 'バグにより魔法が永遠に発動し続ける壊れた杖。止め方は不明。購入者の半数が魔法を止めることができずに困っています。「止まらない魔法が欲しい」方には最高の品です。返品不可。',
-    specs: [['魔法発動回数', '無限（止まりません）'], ['魔法種類', 'ランダム'], ['MP消費', '0（なぜか）'], ['バグ原因', '不明'], ['修理可否', '修理不可能'], ['返品', '返品不可（仕様のため）']],
-    tags: ['#バグ品', '#激安', '#要注意'],
-    delivery: '馬車便（3日）'
+    desc: '魔法が止まらなくなる激安バグ品。使用は自己責任。解除方法不明。激安につき返品不可。',
+    specs: [['魔法出力', '∞（制御不能）'], ['停止方法', '不明'], ['バグレベル', 'S'], ['返品', '不可']],
+    tags: ['#バグ品', '#危険', '#激安'],
+    delivery: '闇便（翌日）'
+  },
+  {
+    id: 42, category: 'cursed',
+    image: 'https://www.genspark.ai/api/files/s/KB7uPj1i?cache_control=3600',
+    emoji: '🖤', name: '呪いの鏡「真実の反射」（見た者に呪いを移す）',
+    seller: '魔女の骨董品店', rarity: 'epic',
+    price: 44000, originalPrice: 60000, discount: 27,
+    rating: 3.9, reviews: 178,
+    prime: false, isNew: false,
+    desc: '映った者の真実の姿を見せる魔鏡。見た者に呪いを移すことができる危険な品。',
+    specs: [['呪い強度', 'A'], ['反射精度', '100%の真実'], ['対応呪い', '100種類'], ['解除条件', '真実の愛']],
+    tags: ['#呪いの鏡', '#真実', '#危険'],
+    delivery: '闇便（翌日）'
+  },
+  {
+    id: 43, category: 'cursed',
+    image: 'https://www.genspark.ai/api/files/s/PgVQLy3Q?cache_control=3600',
+    emoji: '💎', name: '呪われたダイヤ「コ・イ・ヌール 複製品」',
+    seller: '闇商人ギルド', rarity: 'legendary',
+    price: 888000, originalPrice: 1200000, discount: 26,
+    rating: 3.5, reviews: 88,
+    prime: false, isNew: false,
+    desc: '世界最強の呪いを持つダイヤモンドの精巧な複製品。所有者に圧倒的な富と不幸をもたらす。',
+    specs: [['呪い強度', 'SSS'], ['金運効果', '+1000%'], ['不幸度', '+500%'], ['解除条件', '不明']],
+    tags: ['#呪われたダイヤ', '#富と不幸', '#レジェンダリー'],
+    delivery: '特殊梱包（3日）'
+  },
+  {
+    id: 44, category: 'cursed',
+    image: 'https://www.genspark.ai/api/files/s/WfVcYX7V?cache_control=3600',
+    emoji: '📦', name: 'パンドラの箱（未開封・中身不明）',
+    seller: '神々のフリマ', rarity: 'legendary',
+    price: 9999, originalPrice: 9999, discount: 0,
+    rating: 4.9, reviews: 1,
+    prime: false, isNew: true,
+    desc: '本物のパンドラの箱。中身は一切不明。開けると何かが起こる。返品絶対不可。',
+    specs: [['中身', '不明'], ['開封後', '何かが起こる'], ['返品', '絶対不可'], ['保証', '一切なし']],
+    tags: ['#パンドラ', '#謎', '#ギャンブル'],
+    delivery: '神殿直送'
+  },
+  {
+    id: 45, category: 'cursed',
+    image: 'https://www.genspark.ai/api/files/s/6xVBTf69?cache_control=3600',
+    emoji: '🕯️', name: '魂を食べるロウソク「ソウルキャンドル」',
+    seller: '死神工房', rarity: 'epic',
+    price: 13800, originalPrice: 18000, discount: 23,
+    rating: 4.2, reviews: 345,
+    prime: false, isNew: false,
+    desc: '灯すと周囲の死霊を吸収し魔力に変換する呪いのロウソク。霊場での使用に最適。',
+    specs: [['燃焼時間', '666時間'], ['魂吸収効率', '95%'], ['変換魔力', '1霊=1000MP'], ['香り', '死の花']],
+    tags: ['#死霊', '#魂', '#魔力変換'],
+    delivery: '闇便（翌日）'
   },
 
-  // FOOD
+  // ===== FOOD (8点) =====
   {
     id: 19, category: 'food',
+    image: 'https://www.genspark.ai/api/files/s/Yl2QgZQh?cache_control=3600',
     emoji: '🍖', name: 'ドラゴン肉の特製ステーキ（1ポンド・冷凍）',
-    seller: 'ドラゴン料理専門店 竜の厨', rarity: 'rare',
-    price: 38000, originalPrice: 50000, discount: 24,
-    rating: 4.8, reviews: 2012,
+    seller: 'ドラゴンスレイヤー食肉工房', rarity: 'epic',
+    price: 15800, originalPrice: 22000, discount: 28,
+    rating: 4.7, reviews: 2341,
     prime: true, isNew: false,
-    desc: '絶滅危惧種除外のファームドラゴン100%使用。調理するだけで異常なほど旨味が広がる幻の肉。食べると24時間だけ炎への耐性が+100上昇。付属の特製スパイスで焼くのがおすすめ。',
-    specs: [['重量', '1ポンド（約450g）'], ['産地', 'ファームドラゴン（養殖）'], ['調理法', 'グリル・炙り推奨'], ['食後効果', '炎耐性+100（24時間）'], ['保存方法', '冷凍保存（賞味期限1年）']],
-    tags: ['#グルメ', '#ドラゴン料理', '#食後効果あり'],
-    delivery: '冷凍便（2日）'
+    desc: 'A級ドラゴンの最高部位を使った幻のステーキ。食べると一時的に炎耐性を得る。',
+    specs: [['重量', '1ポンド(450g)'], ['炎耐性', '+50%/24h'], ['カロリー', '999kcal'], ['調理方法', '強火で3分']],
+    tags: ['#ドラゴン肉', '#炎耐性', '#グルメ'],
+    delivery: '冷凍便（翌日）'
   },
   {
     id: 20, category: 'food',
+    image: 'https://www.genspark.ai/api/files/s/b2raSaiw?cache_control=3600',
     emoji: '🍄', name: '神秘のキノコ「世界樹の実」（知力+200効果）',
-    seller: 'エルフ農園 ガラドリエル', rarity: 'epic',
-    price: 15000, originalPrice: 20000, discount: 25,
-    rating: 4.5, reviews: 891,
-    prime: false, isNew: true,
-    desc: '世界樹の根元でのみ採れる幻のキノコ。食べると30日間知力が200上昇し、学習速度が3倍になる。魔法の習得も格段に早くなる。1個で高額ですが、その価値は十分あります。',
-    specs: [['効果', '知力+200（30日間）'], ['サイズ', '直径10cm'], ['産地', '世界樹の根元（年産20個のみ）'], ['賞味期限', '6ヶ月（生）'], ['調理法', 'そのまま食べる or 煎じる']],
-    tags: ['#知力UP', '#世界樹', '#希少食材'],
+    seller: 'エルフ農園シルバーウッド', rarity: 'legendary',
+    price: 28000, originalPrice: 40000, discount: 30,
+    rating: 4.8, reviews: 1567,
+    prime: false, isNew: false,
+    desc: '世界樹の根元にのみ生えるキノコ。食べると72時間、知力が+200される。',
+    specs: [['知力増加', '+200/72h'], ['味', '絶品（森の香り）'], ['賞味期限', '1週間'], ['生産地', '世界樹根元']],
+    tags: ['#世界樹', '#知力UP', '#激レア'],
     delivery: '鷹便（翌日）'
   },
   {
     id: 21, category: 'food',
+    image: 'https://www.genspark.ai/api/files/s/jr40Bmms?cache_control=3600',
     emoji: '🍷', name: '1000年熟成 エルフワイン「永遠の雫」（1本）',
-    seller: 'エルフの里 醸造所', rarity: 'legendary',
-    price: 500000, originalPrice: 500000, discount: 0,
-    rating: 5.0, reviews: 17,
+    seller: 'エルフ農園シルバーウッド', rarity: 'legendary',
+    price: 380000, originalPrice: 500000, discount: 24,
+    rating: 4.9, reviews: 423,
     prime: false, isNew: false,
-    desc: '1000年熟成させたエルフ族秘蔵のワイン。飲むだけで10年若返り、魔法の親和性が永続的に+50増加。年間3本のみ市場に出回る超希少品。空き瓶でも高値がつく伝説の一本。',
-    specs: [['熟成期間', '1000年'], ['若返り効果', '10年（永続）'], ['魔法親和性', '永続+50'], ['アルコール度数', '12%'], ['産地', 'エルフ聖域 天然ブドウ'], ['年間生産', '3本のみ']],
-    tags: ['#伝説', '#若返り', '#超希少'],
-    delivery: '特別護送（5日）'
+    desc: '1000年かけて熟成されたエルフ最高峰のワイン。飲んだ者に10年の若返り効果。',
+    specs: [['熟成年数', '1000年'], ['若返り効果', '10年分'], ['アルコール度', '12%'], ['生産量', '年間12本のみ']],
+    tags: ['#エルフワイン', '#若返り', '#1000年熟成'],
+    delivery: '特殊梱包便（2日）'
+  },
+  {
+    id: 46, category: 'food',
+    image: 'https://www.genspark.ai/api/files/s/4LTyAaAH?cache_control=3600',
+    emoji: '🍯', name: '天界蜂蜜「アンブロシア」小瓶（神の食事）',
+    seller: '天界食材商会', rarity: 'legendary',
+    price: 120000, originalPrice: 180000, discount: 33,
+    rating: 5.0, reviews: 56,
+    prime: false, isNew: false,
+    desc: '神々が食する天界の蜂蜜。一舐めで全ステータスが1週間最大値になる神の食物。',
+    specs: [['効果', '全ステMAX/1週間'], ['容量', '50ml'], ['カロリー', '∞'], ['入手難度', 'SSS']],
+    tags: ['#天界', '#神の食事', '#全ステMAX'],
+    delivery: '神殿直送（要儀式）'
+  },
+  {
+    id: 47, category: 'food',
+    image: 'https://www.genspark.ai/api/files/s/PEWboQQD?cache_control=3600',
+    emoji: '🐟', name: '人魚の涙で炊いた「幻の魚介炊き込みご飯」',
+    seller: '深海料理人マーメイドキッチン', rarity: 'epic',
+    price: 18000, originalPrice: 25000, discount: 28,
+    rating: 4.6, reviews: 789,
+    prime: true, isNew: false,
+    desc: '人魚の涙と深海の珍しい魚介で炊いた魔法の炊き込みご飯。幸運+100効果あり。',
+    specs: [['幸運UP', '+100/24h'], ['人前', '2〜3人分'], ['賞味期限', '3日'], ['アレルギー', '魚介類注意']],
+    tags: ['#人魚', '#幸運UP', '#深海料理'],
+    delivery: '冷凍便（翌日）'
+  },
+  {
+    id: 48, category: 'food',
+    image: 'https://www.genspark.ai/api/files/s/BLpS5guy?cache_control=3600',
+    emoji: '🌺', name: '魔界の果実「デス・フルーツ」（覚悟ある方のみ）',
+    seller: '闇商人ギルド食品部', rarity: 'epic',
+    price: 5500, originalPrice: 8000, discount: 31,
+    rating: 3.8, reviews: 1234,
+    prime: false, isNew: false,
+    desc: '魔界に生育する激辛・猛毒・麻痺効果付きの問題果実。耐性を持つ者には究極の美味。',
+    specs: [['辛さ', '100万スコヴィル'], ['毒性', '要耐性'], ['麻痺時間', '1時間'], ['美味度', '耐性者には10/10']],
+    tags: ['#魔界', '#激辛', '#チャレンジ'],
+    delivery: '特殊梱包便（2日）'
+  },
+  {
+    id: 49, category: 'food',
+    image: 'https://www.genspark.ai/api/files/s/9OkOULDd?cache_control=3600',
+    emoji: '🎂', name: '祝福のケーキ「誕生日の奇跡」（1ホール）',
+    seller: '妖精菓子工房スイートマジック', rarity: 'rare',
+    price: 12800, originalPrice: 18000, discount: 29,
+    rating: 4.9, reviews: 3456,
+    prime: true, isNew: false,
+    desc: '精霊の祝福を込めた特別なケーキ。食べた全員にランダムで幸運の贈り物が届く。',
+    specs: [['祝福効果', 'ランダム幸運イベント'], ['直径', '30cm（約12切れ）'], ['賞味期限', '3日'], ['アレルギー', '小麦・乳']],
+    tags: ['#祝福', '#誕生日', '#幸運'],
+    delivery: '冷蔵便（当日）'
+  },
+  {
+    id: 50, category: 'food',
+    image: 'https://www.genspark.ai/api/files/s/NHfySiUj?cache_control=3600',
+    emoji: '🍵', name: '仙人茶「不老の雫」100包セット（仙界産）',
+    seller: '仙界茶葉商会', rarity: 'epic',
+    price: 35000, originalPrice: 50000, discount: 30,
+    rating: 4.7, reviews: 2341,
+    prime: true, isNew: false,
+    desc: '仙界の山頂で育てられた仙人茶。毎日飲むと老化が止まり、寿命が延びると言われる。',
+    specs: [['老化防止', '1日1杯で効果継続'], ['含有成分', '仙気エキス'], ['入数', '100包'], ['産地', '仙界最高峰']],
+    tags: ['#仙界', '#不老', '#お茶'],
+    delivery: '鷹便（翌日）'
   },
 
-  // TRANSPORT
+  // ===== TRANSPORT (6点) =====
   {
     id: 22, category: 'transport',
+    image: 'https://www.genspark.ai/api/files/s/K46P6bNE?cache_control=3600',
     emoji: '🦅', name: 'グリフォン「空の王者」（乗用・調教済み）',
-    seller: 'グリフォン牧場 ヒポ', rarity: 'epic',
-    price: 650000, originalPrice: 900000, discount: 27,
-    rating: 4.6, reviews: 234,
+    seller: '空中牧場ハイネスト', rarity: 'epic',
+    price: 850000, originalPrice: 1200000, discount: 29,
+    rating: 4.7, reviews: 345,
     prime: false, isNew: false,
-    desc: '空陸両用のグリフォン。完全に調教済みで初心者でも扱いやすい。最高時速600kmで大陸間移動もラクラク。荷物は100kgまで積載可能。名前「アクィラ」（変更可）。',
-    specs: [['飛行速度', '最高時速600km'], ['積載量', '100kg'], ['航続距離', '2000km（連続飛行）'], ['性格', '従順（調教済み）'], ['獰猛度', '低（ペット向け）'], ['名前', 'アクィラ（変更可）']],
-    tags: ['#乗り物', '#空飛ぶ', '#グリフォン'],
-    delivery: '特別大型便（7日）'
+    desc: '最速の空中移動が可能なグリフォン。調教済みで誰でも乗れる空の王者。',
+    specs: [['最高速度', '時速300km'], ['積載量', '200kg'], ['航続距離', '無制限'], ['調教状況', '完了']],
+    tags: ['#グリフォン', '#空中移動', '#調教済み'],
+    delivery: '空輸（要申請）'
   },
   {
     id: 23, category: 'transport',
+    image: 'https://www.genspark.ai/api/files/s/tPkg1TTQ?cache_control=3600',
     emoji: '🧙', name: '自動操縦 魔法ほうき「スカイマスター X1」',
-    seller: '空飛ぶ道具工房', rarity: 'rare',
-    price: 88000, originalPrice: 120000, discount: 26,
-    rating: 4.3, reviews: 3210,
-    prime: true, isNew: true,
-    desc: '最新型の魔法ほうき。自動操縦モード搭載で目的地を言うだけで連れて行ってくれる。最高時速300km。嵐の中でも安定して飛行できる嵐耐性機能付き。定期メンテ不要。',
-    specs: [['飛行速度', '最高時速300km'], ['自動操縦', '搭載（音声認識）'], ['悪天候耐性', '嵐・吹雪・砂嵐対応'], ['積載量', '2名+荷物30kg'], ['動力', '魔力自給式（補充不要）'], ['色', '漆黒（他5色対応）']],
-    tags: ['#ほうき', '#自動操縦', '#快適'],
-    delivery: '呪文転送（即日）'
+    seller: '魔法師ギルド交通部', rarity: 'rare',
+    price: 198000, originalPrice: 280000, discount: 29,
+    rating: 4.5, reviews: 1567,
+    prime: true, isNew: false,
+    desc: '最新の自動操縦機能付き魔法ほうき。目的地を言うだけで自動で届けてくれる。',
+    specs: [['最高速度', '時速200km'], ['自動操縦', '音声認識対応'], ['定員', '2名'], ['燃料', '魔力（月1回充填）']],
+    tags: ['#魔法ほうき', '#自動操縦', '#便利'],
+    delivery: '魔法陣転送（翌日）'
+  },
+  {
+    id: 51, category: 'transport',
+    image: 'https://www.genspark.ai/api/files/s/MFCC9m0v?cache_control=3600',
+    emoji: '🚀', name: '魔導飛空艇「クラウドシップ Ⅲ」（12人乗り）',
+    seller: '王立飛空艇製造所', rarity: 'legendary',
+    price: 12800000, originalPrice: 18000000, discount: 29,
+    rating: 4.8, reviews: 56,
+    prime: false, isNew: false,
+    desc: '12人乗りの豪華魔導飛空艇。雲の上を優雅に飛行できる最高級の移動手段。',
+    specs: [['定員', '12名+スタッフ'], ['最高速度', '時速500km'], ['高度', '最大1万m'], ['設備', 'VIPルーム・食堂完備']],
+    tags: ['#飛空艇', '#豪華', '#12人乗り'],
+    delivery: '現地お届け（1ヶ月）'
+  },
+  {
+    id: 52, category: 'transport',
+    image: 'https://www.genspark.ai/api/files/s/9R3925Kn?cache_control=3600',
+    emoji: '🐎', name: '天馬「ペガサス」（純白・成体・訓練済み）',
+    seller: '聖獣牧場エデン', rarity: 'legendary',
+    price: 2200000, originalPrice: 3000000, discount: 27,
+    rating: 4.9, reviews: 123,
+    prime: false, isNew: false,
+    desc: '純白の翼を持つ伝説の天馬ペガサス。時速400kmで空を駆け抜ける神話の生き物。',
+    specs: [['最高速度', '時速400km'], ['翼開長', '8m'], ['積載量', '150kg'], ['訓練状況', '完了']],
+    tags: ['#ペガサス', '#天馬', '#純白'],
+    delivery: '空輸護送（3日）'
+  },
+  {
+    id: 53, category: 'transport',
+    image: 'https://www.genspark.ai/api/files/s/dPakf7FU?cache_control=3600',
+    emoji: '🌊', name: '海竜馬車「シーサーペント号」（水陸両用）',
+    seller: '深海交通機関ネプチューン', rarity: 'epic',
+    price: 3800000, originalPrice: 5000000, discount: 24,
+    rating: 4.5, reviews: 89,
+    prime: false, isNew: false,
+    desc: '海竜が引く豪華水陸両用馬車。陸上も水中も快適に移動できる珍しい乗り物。',
+    specs: [['定員', '6名'], ['陸上速度', '時速80km'], ['水中速度', '時速120km'], ['潜水', '最大500m']],
+    tags: ['#海竜', '#水陸両用', '#豪華馬車'],
+    delivery: '現地お届け（2週間）'
+  },
+  {
+    id: 54, category: 'transport',
+    image: 'https://www.genspark.ai/api/files/s/GALExyw6?cache_control=3600',
+    emoji: '⏰', name: '時間転移装置「クロノス・ゲート」（1回分）',
+    seller: '時間魔法研究所', rarity: 'legendary',
+    price: 50000000, originalPrice: 99999999, discount: 50,
+    rating: 4.7, reviews: 7,
+    prime: false, isNew: false,
+    desc: '1回だけ過去または未来へ移動できる時間転移装置。使用後は消滅するため慎重に。',
+    specs: [['転移可能期間', '過去〜未来（無制限）'], ['使用回数', '1回限り'], ['定員', '1名'], ['注意事項', 'パラドックス注意']],
+    tags: ['#時間転移', '#タイムマシン', '#1回限り'],
+    delivery: '神殿直送（要儀式）'
   },
 
-  // HOME
+  // ===== HOME (8点) =====
   {
     id: 24, category: 'home',
+    image: 'https://www.genspark.ai/api/files/s/2xwr7t3e?cache_control=3600',
     emoji: '🏰', name: '移動城「ハウルの動く城タイプ」（コンパクト版）',
-    seller: '城建築師ハウル工房', rarity: 'legendary',
-    price: 99000000, originalPrice: 150000000, discount: 34,
-    rating: 4.7, reviews: 8,
+    seller: '魔法建築師ギルド', rarity: 'legendary',
+    price: 88000000, originalPrice: 120000000, discount: 27,
+    rating: 4.6, reviews: 23,
     prime: false, isNew: false,
-    desc: '歩いて移動できる城。コンパクト版でも内部は広大な空間（外観4m×内部100m×多次元空間拡張可）。魔法部屋・錬金術室・温泉・ダンジョン（訓練用）付き。年間維持費：石炭1000トン分の魔力。',
-    specs: [['外観サイズ', '4m × 4m × 6m'], ['内部広さ', '100m × 多次元拡張可'], ['移動速度', '時速30km'], ['付帯設備', '温泉・錬金術室・魔法部屋・訓練ダンジョン'], ['維持費', '魔力（石炭1000t相当/年）'], ['重量', '800t（反重力装置付き）']],
-    tags: ['#城', '#移動城', '#豪邸'],
-    delivery: '特別搬入（30日）'
+    desc: 'どこへでも移動できる魔法の城。コンパクト版でも100部屋完備の豪華仕様。',
+    specs: [['部屋数', '100室'], ['移動速度', '時速50km'], ['動力', '魔力炉'], ['設備', '温泉・図書館・ダンジョン完備']],
+    tags: ['#移動城', '#豪華', '#夢の家'],
+    delivery: '魔法建設（1ヶ月）'
   },
   {
     id: 25, category: 'home',
+    image: 'https://www.genspark.ai/api/files/s/zO0t884F?cache_control=3600',
     emoji: '🛏️', name: '雲製ベッド「夢幻の寝床」（天使推奨品）',
-    seller: '天空工芸品 ネブラ', rarity: 'epic',
-    price: 320000, originalPrice: 400000, discount: 20,
-    rating: 4.9, reviews: 1203,
+    seller: '天界家具商会クラウズ', rarity: 'epic',
+    price: 158000, originalPrice: 220000, discount: 28,
+    rating: 4.9, reviews: 2341,
     prime: true, isNew: false,
-    desc: '本物の雲を圧縮して作ったベッド。寝るだけで良い夢を見ることができる魔法付き。疲労回復効率3倍。悪夢を見ないように悪夢封じの術式が織り込まれている。定員2名。',
-    specs: [['素材', '第7天国産 積乱雲（圧縮）'], ['疲労回復', '効率3倍'], ['夢の質', '至高（悪夢封じ術式込み）'], ['定員', '2名'], ['浮力', '有（天井付近で浮遊）'], ['サイズ', '200cm × 180cm']],
-    tags: ['#寝具', '#夢', '#疲労回復'],
+    desc: '本物の雲を素材にしたベッド。横になると即座に深い眠りに落ち、疲労が完全回復する。',
+    specs: [['素材', '純粋雲（天界産）'], ['睡眠効果', '1時間で8時間分の回復'], ['サイズ', 'キング'], ['浮遊', 'あり（地上30cm）']],
+    tags: ['#雲ベッド', '#天界', '#完全回復'],
+    delivery: '魔法陣転送（翌日）'
+  },
+  {
+    id: 55, category: 'home',
+    image: 'https://www.genspark.ai/api/files/s/OmcZueFj?cache_control=3600',
+    emoji: '🔮', name: '魔法の鏡「スマートミラー Ω」（AI家事管理）',
+    seller: '魔法家電メーカーエンチャント', rarity: 'epic',
+    price: 88000, originalPrice: 120000, discount: 27,
+    rating: 4.7, reviews: 1567,
+    prime: true, isNew: true,
+    desc: '城の管理から天気予報まで何でもこなす次世代魔法鏡。AI精霊内蔵で会話もできる。',
+    specs: [['サイズ', '縦180cm×横80cm'], ['AI精霊', '内蔵（声・会話対応）'], ['機能', '家事管理・地図・天気・占い'], ['設置', '壁掛け・自立両用']],
+    tags: ['#魔法鏡', '#AI精霊', '#スマートホーム'],
+    delivery: '魔法陣転送（翌日）'
+  },
+  {
+    id: 56, category: 'home',
+    image: 'https://www.genspark.ai/api/files/s/tCZdkjmz?cache_control=3600',
+    emoji: '🏡', name: '縮小携帯式 秘密基地「ポケットダンジョン」',
+    seller: '次元建築師ディメンション', rarity: 'legendary',
+    price: 2500000, originalPrice: 3500000, discount: 29,
+    rating: 4.8, reviews: 234,
+    prime: false, isNew: false,
+    desc: 'ポケットサイズに縮小できる個人用ダンジョン型秘密基地。内部は50部屋のフル装備。',
+    specs: [['内部スペース', '50部屋'], ['縮小時サイズ', '直径3cm'], ['設備', '訓練場・宝物庫・風呂完備'], ['入居可能数', '最大20名']],
+    tags: ['#ポケットダンジョン', '#秘密基地', '#縮小'],
+    delivery: '魔法陣転送（翌日）'
+  },
+  {
+    id: 57, category: 'home',
+    image: 'https://www.genspark.ai/api/files/s/H7p9Oz1O?cache_control=3600',
+    emoji: '🌿', name: '精霊の庭園セット「エデンの園 ミニチュア版」',
+    seller: 'エルフ農園シルバーウッド', rarity: 'epic',
+    price: 45000, originalPrice: 65000, discount: 31,
+    rating: 4.6, reviews: 789,
+    prime: true, isNew: false,
+    desc: '精霊が住む伝説の庭園をミニチュアで再現。育てた植物は全て魔法効果を持つ。',
+    specs: [['サイズ', '2m×2m'], ['住みつく精霊', '5〜10体'], ['植物効果', '各種魔法効果あり'], ['維持費', '魔力月100MP']],
+    tags: ['#精霊の庭', '#エデン', '#魔法植物'],
+    delivery: '魔法建設（3日）'
+  },
+  {
+    id: 58, category: 'home',
+    image: 'https://www.genspark.ai/api/files/s/O5j5LVIY?cache_control=3600',
+    emoji: '🛁', name: '温泉効果付き 魔法風呂「不老泉」（据え置き型）',
+    seller: '天界家具商会クラウズ', rarity: 'rare',
+    price: 380000, originalPrice: 520000, discount: 27,
+    rating: 4.8, reviews: 1234,
+    prime: true, isNew: false,
+    desc: '不老泉の水が常時湧き出る魔法の浴槽。入るたびに若返り・全回復効果を得られる。',
+    specs: [['若返り効果', '1回入浴で1年分'], ['HP/MP回復', '全回復'], ['湯量', '無限（自動補充）'], ['設置スペース', '2m×1.5m']],
+    tags: ['#不老泉', '#温泉', '#若返り'],
+    delivery: '魔法設置便（3日）'
+  },
+  {
+    id: 59, category: 'home',
+    image: 'https://www.genspark.ai/api/files/s/2e2EsdgP?cache_control=3600',
+    emoji: '📚', name: '全知の図書館「アカシック本棚」（全知識収録）',
+    seller: '知識の神殿アテナ', rarity: 'legendary',
+    price: 5500000, originalPrice: 8000000, discount: 31,
+    rating: 4.9, reviews: 167,
+    prime: false, isNew: false,
+    desc: 'アカシックレコードの全情報にアクセスできる魔法の本棚。この世の全知識を検索できる。',
+    specs: [['収録知識', '宇宙誕生から現在まで全て'], ['検索速度', '即時'], ['サイズ', '高さ3m幅2m'], ['更新', 'リアルタイム自動更新']],
+    tags: ['#全知識', '#アカシック', '#図書館'],
+    delivery: '魔法設置便（1週間）'
+  },
+
+  // ===== FASHION (8点) =====
+  {
+    id: 60, category: 'fashion',
+    image: 'https://www.genspark.ai/api/files/s/rc9nacXv?cache_control=3600',
+    emoji: '👘', name: '不可視マント「シャドウクローク」（完全透明化）',
+    seller: '魔法師ギルド服飾部', rarity: 'legendary',
+    price: 350000, originalPrice: 500000, discount: 30,
+    rating: 4.8, reviews: 2341,
+    prime: true, isNew: false,
+    desc: '着用すると完全に透明になれる最高級マント。魔法探知も回避できる最強のステルス装備。',
+    specs: [['透明度', '100%'], ['魔法探知回避', 'A+'], ['素材', '影の布（幻獣産）'], ['サイズ', '全サイズ対応']],
+    tags: ['#透明マント', '#ステルス', '#探知回避'],
+    delivery: '魔法陣転送（翌日）'
+  },
+  {
+    id: 61, category: 'fashion',
+    image: 'https://www.genspark.ai/api/files/s/HCngLp1L?cache_control=3600',
+    emoji: '👑', name: '竜王の王冠「クロムノス」（カリスマ+500）',
+    seller: 'ドラゴンスレイヤー工房', rarity: 'legendary',
+    price: 2800000, originalPrice: 4000000, discount: 30,
+    rating: 4.9, reviews: 134,
+    prime: false, isNew: false,
+    desc: '古代竜王が被っていた伝説の王冠。装備するとカリスマが+500され誰でも従わせる。',
+    specs: [['カリスマ', '+500'], ['支配力', 'SSS'], ['素材', '古代竜の骨・宝玉'], ['認識魔法', '内蔵（偽者識別）']],
+    tags: ['#王冠', '#カリスマ', '#支配力'],
+    delivery: '特殊護送便（3日）'
+  },
+  {
+    id: 62, category: 'fashion',
+    image: 'https://www.genspark.ai/api/files/s/ilKlcvKB?cache_control=3600',
+    emoji: '🥿', name: '七里靴「スピードブーツ」（移動速度×10）',
+    seller: '魔法師ギルド服飾部', rarity: 'epic',
+    price: 78000, originalPrice: 110000, discount: 29,
+    rating: 4.7, reviews: 3456,
+    prime: true, isNew: false,
+    desc: '履くと移動速度が10倍になる伝説の靴。一歩で七里（約28km）を移動できる。',
+    specs: [['移動速度', '×10'], ['一歩の距離', '28km'], ['耐久度', 'A'], ['サイズ', '全サイズ対応']],
+    tags: ['#七里靴', '#高速移動', '#移動速度UP'],
+    delivery: '魔法陣転送（翌日）'
+  },
+  {
+    id: 63, category: 'fashion',
+    image: 'https://www.genspark.ai/api/files/s/ynMEr2GQ?cache_control=3600',
+    emoji: '🧤', name: '龍の手甲「ドラゴングローブ」（素手攻撃+300%）',
+    seller: 'ドラゴンスレイヤー工房', rarity: 'epic',
+    price: 95000, originalPrice: 130000, discount: 27,
+    rating: 4.6, reviews: 891,
+    prime: true, isNew: false,
+    desc: '龍の前足から作られた手甲。素手攻撃力が+300%になり、炎を纏った拳が放てる。',
+    specs: [['素手攻撃', '+300%'], ['炎ダメージ', '+200%'], ['防御力', 'A'], ['素材', '龍の前足（希少）']],
+    tags: ['#手甲', '#素手強化', '#炎の拳'],
     delivery: '鷹便（翌日）'
+  },
+  {
+    id: 64, category: 'fashion',
+    image: 'https://www.genspark.ai/api/files/s/e6D7LKsP?cache_control=3600',
+    emoji: '🎭', name: '千面のマスク「パーフェクトディスガイズ」',
+    seller: '魔法工芸師ファントム', rarity: 'epic',
+    price: 125000, originalPrice: 170000, discount: 26,
+    rating: 4.5, reviews: 678,
+    prime: false, isNew: false,
+    desc: 'どんな人物にも完璧に変装できる魔法のマスク。声・体型・魔力まで完全コピーできる。',
+    specs: [['変装可能対象', '無制限'], ['声の変換', '完全一致'], ['体型変換', '対応'], ['魔力偽装', '対応']],
+    tags: ['#変装', '#マスク', '#完全偽装'],
+    delivery: '鷹便（翌日）'
+  },
+  {
+    id: 65, category: 'fashion',
+    image: 'https://www.genspark.ai/api/files/s/5kRvrkMp?cache_control=3600',
+    emoji: '🧣', name: '防御スカーフ「バリアクロス」（魔法盾内蔵）',
+    seller: '魔法家電メーカーエンチャント', rarity: 'rare',
+    price: 42000, originalPrice: 58000, discount: 28,
+    rating: 4.6, reviews: 2345,
+    prime: true, isNew: true,
+    desc: '巻くだけで自動的に魔法バリアが展開されるスカーフ。攻撃を受けると自動でシールドを張る。',
+    specs: [['バリア強度', '1000ダメージ吸収/回'], ['回数', '無制限（MP消費）'], ['MP消費', '100/回'], ['発動速度', '0.01秒']],
+    tags: ['#バリア', '#防御', '#自動防御'],
+    delivery: '魔法陣転送（翌日）'
+  },
+  {
+    id: 66, category: 'fashion',
+    image: 'https://www.genspark.ai/api/files/s/RyQgH2Cr?cache_control=3600',
+    emoji: '💍', name: '精霊の指輪「エレメントリング」5属性セット',
+    seller: 'エルフ工房シルバーフォレスト', rarity: 'epic',
+    price: 185000, originalPrice: 250000, discount: 26,
+    rating: 4.8, reviews: 1234,
+    prime: true, isNew: false,
+    desc: '火・水・土・風・雷の5属性それぞれの精霊が宿った指輪セット。全属性魔法が使用可能に。',
+    specs: [['属性', '5種（火水土風雷）'], ['素材', 'ミスリル+各精霊石'], ['着け心地', '超軽量'], ['属性強化', '各+200%']],
+    tags: ['#精霊の指輪', '#5属性', '#全属性対応'],
+    delivery: '魔法陣転送（翌日）'
+  },
+  {
+    id: 67, category: 'fashion',
+    image: 'https://www.genspark.ai/api/files/s/DvjqlK05?cache_control=3600',
+    emoji: '🪖', name: '全知のヘルム「オールサイト」（360度視野）',
+    seller: '天界武器商会', rarity: 'legendary',
+    price: 280000, originalPrice: 400000, discount: 30,
+    rating: 4.7, reviews: 567,
+    prime: true, isNew: false,
+    desc: '装備すると360度全方位の視野と千里眼を得られる神話級のヘルメット。奇襲絶対不可能。',
+    specs: [['視野', '360度+千里眼（10km先まで）'], ['暗視', '完全対応'], ['魔法探知', '対応'], ['重量', '50g']],
+    tags: ['#全知ヘルム', '#360度視野', '#千里眼'],
+    delivery: '魔法陣転送（翌日）'
+  },
+
+  // ===== TOOL (8点) =====
+  {
+    id: 68, category: 'tool',
+    image: 'https://www.genspark.ai/api/files/s/qsZSR10U?cache_control=3600',
+    emoji: '🗺️', name: '全知の地図「オムニマップ」（リアルタイム更新）',
+    seller: '冒険者ギルド本部', rarity: 'epic',
+    price: 68000, originalPrice: 95000, discount: 28,
+    rating: 4.8, reviews: 4521,
+    prime: true, isNew: false,
+    desc: '世界中の地図をリアルタイムで表示する魔法の地図。ダンジョン内部も全て見渡せる。',
+    specs: [['対応範囲', '全世界+地下+海中'], ['更新速度', 'リアルタイム'], ['サイズ', 'A4（折りたたみ可）'], ['ダンジョン対応', 'あり']],
+    tags: ['#全知の地図', '#リアルタイム', '#ダンジョン対応'],
+    delivery: '魔法陣転送（翌日）'
+  },
+  {
+    id: 69, category: 'tool',
+    image: 'https://www.genspark.ai/api/files/s/y3wv2xp0?cache_control=3600',
+    emoji: '⚙️', name: '万能工具「ゴッドハンド」（1000種の工具内蔵）',
+    seller: 'ドワーフ鍛冶マスター工房', rarity: 'rare',
+    price: 28000, originalPrice: 40000, discount: 30,
+    rating: 4.7, reviews: 5678,
+    prime: true, isNew: false,
+    desc: '1000種類の工具が1つになった魔法の多機能工具。どんな修理・製作も一本でこなす。',
+    specs: [['内蔵工具数', '1000種'], ['重量', '200g'], ['耐久度', '永久'], ['自動変形', '思念で切り替え']],
+    tags: ['#万能工具', '#多機能', '#ドワーフ製'],
+    delivery: '鷹便（翌日）'
+  },
+  {
+    id: 70, category: 'tool',
+    image: 'https://www.genspark.ai/api/files/s/HixBYmc0?cache_control=3600',
+    emoji: '💡', name: '魔力ランプ「ルーメン」（無限発光・防水）',
+    seller: '魔法家電メーカーエンチャント', rarity: 'common',
+    price: 3800, originalPrice: 5500, discount: 31,
+    rating: 4.5, reviews: 12345,
+    prime: true, isNew: false,
+    desc: '魔力で永遠に輝くランプ。防水・防爆・落下耐性付きでダンジョン探索に最適。',
+    specs: [['輝度', '調節可（1〜100000ルーメン）'], ['防水', 'IPX8'], ['電源', '魔力（月1000MP）'], ['重量', '150g']],
+    tags: ['#魔力ランプ', '#ダンジョン必需品', '#防水'],
+    delivery: '魔法陣転送（翌日）'
+  },
+  {
+    id: 71, category: 'tool',
+    image: 'https://www.genspark.ai/api/files/s/dvCZUsY9?cache_control=3600',
+    emoji: '🎒', name: '次元袋「インフィニティバッグ」（容量無限）',
+    seller: '次元建築師ディメンション', rarity: 'epic',
+    price: 145000, originalPrice: 200000, discount: 28,
+    rating: 4.9, reviews: 8901,
+    prime: true, isNew: false,
+    desc: '内部が無限の次元空間に繋がったバッグ。どんな大きな物でも入り、重さを感じない。',
+    specs: [['容量', '無限'], ['重量', '常に200g'], ['取り出し', '思念で即座に'], ['対応物', 'ドラゴンも入る']],
+    tags: ['#次元袋', '#容量無限', '#冒険者必需品'],
+    delivery: '魔法陣転送（翌日）'
+  },
+  {
+    id: 72, category: 'tool',
+    image: 'https://www.genspark.ai/api/files/s/LoFBr49N?cache_control=3600',
+    emoji: '📡', name: '魔法通信石「テレパストーン」ペアセット',
+    seller: '魔法師ギルド通信部', rarity: 'rare',
+    price: 22000, originalPrice: 32000, discount: 31,
+    rating: 4.6, reviews: 6789,
+    prime: true, isNew: false,
+    desc: 'ペアになった石で距離無制限の会話が可能。映像送受信・秘話機能・録音機能付き。',
+    specs: [['通信距離', '無制限（異界間も可）'], ['映像送信', '対応'], ['秘話機能', 'あり'], ['録音', '対応']],
+    tags: ['#通信石', '#テレパシー', '#ペア'],
+    delivery: '魔法陣転送（翌日）'
+  },
+  {
+    id: 73, category: 'tool',
+    image: 'https://www.genspark.ai/api/files/s/reEOap6p?cache_control=3600',
+    emoji: '🔑', name: 'マスターキー「全扉解錠」（鍵なし扉専用）',
+    seller: '盗賊ギルド公式ショップ', rarity: 'epic',
+    price: 55000, originalPrice: 80000, discount: 31,
+    rating: 4.4, reviews: 2341,
+    prime: false, isNew: false,
+    desc: 'どんな鍵でも一瞬で解錠できる魔法の鍵。魔法錠・神殿扉・宝物庫にも対応。',
+    specs: [['対応錠', '全種類（神話級錠以外）'], ['解錠時間', '0.1秒'], ['使用回数', '無制限'], ['違法性', '各界の法に従うこと']],
+    tags: ['#マスターキー', '#解錠', '#盗賊向け'],
+    delivery: '闇便（翌日）'
+  },
+  {
+    id: 74, category: 'tool',
+    image: 'https://www.genspark.ai/api/files/s/Y3e9mNxo?cache_control=3600',
+    emoji: '⏱️', name: '時間停止時計「フリーズウォッチ」（30秒版）',
+    seller: '時間魔法研究所', rarity: 'legendary',
+    price: 980000, originalPrice: 1500000, discount: 35,
+    rating: 4.8, reviews: 456,
+    prime: false, isNew: false,
+    desc: 'ボタンを押すと周囲の時間が30秒間停止する伝説の時計。使用者のみ自由に動ける。',
+    specs: [['時間停止時間', '30秒/回'], ['使用回数', '1日3回まで'], ['クールタイム', '1時間'], ['影響範囲', '半径100m']],
+    tags: ['#時間停止', '#最強', '#レジェンダリー'],
+    delivery: '特殊護送（3日）'
+  },
+  {
+    id: 75, category: 'tool',
+    image: 'https://www.genspark.ai/api/files/s/Jv69CHTd?cache_control=3600',
+    emoji: '🌐', name: '異界通信機「ワールドゲート端末」（全界通信）',
+    seller: '次元通信社ゲートウェイ', rarity: 'epic',
+    price: 320000, originalPrice: 450000, discount: 29,
+    rating: 4.5, reviews: 789,
+    prime: true, isNew: true,
+    desc: '異なる界層間でも通信できる最新端末。神界・魔界・異世界どこでも繋がる。',
+    specs: [['通信可能界', '全99界層'], ['通信速度', '光速'], ['映像品質', '8Kホログラム'], ['月額費用', '魔力500MP']],
+    tags: ['#異界通信', '#全界対応', '#ホログラム'],
+    delivery: '魔法陣転送（翌日）'
+  },
+
+  // ===== SKILL (6点) =====
+  {
+    id: 76, category: 'skill',
+    image: 'https://www.genspark.ai/api/files/s/Pqpsesxo?cache_control=3600',
+    emoji: '📖', name: 'スキル書「剣聖の極意」（即時習得版）',
+    seller: '剣聖ギルド公式', rarity: 'legendary',
+    price: 580000, originalPrice: 800000, discount: 28,
+    rating: 4.9, reviews: 789,
+    prime: false, isNew: false,
+    desc: '読むだけで剣術の最高奥義を即時習得できるスキル書。剣聖ランクに一瞬でなれる。',
+    specs: [['習得スキル', '剣術全100種（剣聖奥義含む）'], ['習得時間', '読書中のみ（約10分）'], ['前提条件', 'なし'], ['使用回数', '1回限り']],
+    tags: ['#スキル書', '#剣聖', '#即時習得'],
+    delivery: '魔法陣転送（翌日）'
+  },
+  {
+    id: 77, category: 'skill',
+    image: 'https://www.genspark.ai/api/files/s/Oo25N0k7?cache_control=3600',
+    emoji: '🧠', name: '記憶移植カプセル「天才の記憶」（理系全般）',
+    seller: '記憶商会メモリーズ', rarity: 'epic',
+    price: 245000, originalPrice: 350000, discount: 30,
+    rating: 4.7, reviews: 1234,
+    prime: true, isNew: false,
+    desc: '服用するだけで天才科学者の全記憶を移植。理系全分野の知識を瞬時に習得できる。',
+    specs: [['移植知識', '理系全分野（PhD相当）'], ['副作用', '一時的な頭痛（3時間）'], ['永続性', '永久'], ['対象年齢', '7歳以上']],
+    tags: ['#記憶移植', '#天才', '#知識習得'],
+    delivery: '魔法陣転送（翌日）'
+  },
+  {
+    id: 78, category: 'skill',
+    image: 'https://www.genspark.ai/api/files/s/AqKsNUJh?cache_control=3600',
+    emoji: '🗣️', name: '全言語習得の巻物「バベルの解呪」（全種族語）',
+    seller: '言語魔法師協会', rarity: 'epic',
+    price: 180000, originalPrice: 250000, discount: 28,
+    rating: 4.8, reviews: 2345,
+    prime: true, isNew: false,
+    desc: '開封するだけで全種族・全言語が話せるようになる伝説の巻物。古代語・竜語・妖精語まで。',
+    specs: [['対応言語', '全999言語（古代語・絶滅語含む）'], ['習得時間', '開封後即時'], ['書き言葉', '対応'], ['使用回数', '1回限り']],
+    tags: ['#全言語習得', '#バベル', '#翻訳不要'],
+    delivery: '鷹便（翌日）'
+  },
+  {
+    id: 79, category: 'skill',
+    image: 'https://www.genspark.ai/api/files/s/UX8UIanl?cache_control=3600',
+    emoji: '🎵', name: '吟遊詩人の魂「バードソウル」（全楽器習得）',
+    seller: '音楽精霊ハーモニア', rarity: 'rare',
+    price: 95000, originalPrice: 135000, discount: 30,
+    rating: 4.6, reviews: 3456,
+    prime: true, isNew: false,
+    desc: '全楽器の演奏技術と作曲能力を即時習得。神々さえも魅了する音楽が奏でられるようになる。',
+    specs: [['習得楽器', '全500種'], ['作曲能力', 'マスター級'], ['歌唱力', '天使レベル'], ['魔法効果', '演奏で感情操作可']],
+    tags: ['#吟遊詩人', '#音楽', '#全楽器'],
+    delivery: '魔法陣転送（翌日）'
+  },
+  {
+    id: 80, category: 'skill',
+    image: 'https://www.genspark.ai/api/files/s/ENzT1aSx?cache_control=3600',
+    emoji: '🥋', name: '武道の極み「百技之書」（格闘全流派）',
+    seller: '武術家ギルド龍虎', rarity: 'epic',
+    price: 320000, originalPrice: 450000, discount: 29,
+    rating: 4.8, reviews: 1567,
+    prime: false, isNew: false,
+    desc: '全世界・全種族の格闘技術を完全網羅。読むだけで格闘最強の技を全習得できる。',
+    specs: [['収録流派', '全999流派'], ['体への負担', 'なし'], ['習得時間', '30分'], ['使用回数', '1回限り']],
+    tags: ['#武道', '#格闘技', '#最強'],
+    delivery: '鷹便（翌日）'
+  },
+  {
+    id: 81, category: 'skill',
+    image: 'https://www.genspark.ai/api/files/s/j7Bu3NgA?cache_control=3600',
+    emoji: '✨', name: '魔法才能の結晶「マジックジーン」（全属性開花）',
+    seller: '魔法師ギルド本部', rarity: 'legendary',
+    price: 1200000, originalPrice: 1800000, discount: 33,
+    rating: 4.9, reviews: 456,
+    prime: false, isNew: false,
+    desc: '魔法の才能がない者でも全属性魔法の才能を開花させる究極の魔法結晶。',
+    specs: [['開花属性', '全属性（光・闇含む）'], ['才能ランク', 'S→SS保証'], ['副作用', '3日間の発熱'], ['対象', '才能なし限定']],
+    tags: ['#魔法才能', '#全属性', '#才能開花'],
+    delivery: '魔法陣転送（翌日）'
+  },
+
+  // ===== DUNGEON (6点) =====
+  {
+    id: 82, category: 'dungeon',
+    image: 'https://www.genspark.ai/api/files/s/SyjHiNMX?cache_control=3600',
+    emoji: '🗝️', name: 'Sランクダンジョン攻略マップ「黄金の迷宮」完全版',
+    seller: '冒険者ギルド本部', rarity: 'epic',
+    price: 48000, originalPrice: 65000, discount: 26,
+    rating: 4.7, reviews: 3456,
+    prime: true, isNew: false,
+    desc: '最高難度Sランクダンジョン「黄金の迷宮」の完全攻略マップ。全100層の罠・宝箱・ボスを網羅。',
+    specs: [['対応ダンジョン', '黄金の迷宮（全100層）'], ['情報精度', '99%'], ['更新頻度', '週次'], ['形式', '魔法地図（AR対応）']],
+    tags: ['#ダンジョン', '#攻略マップ', '#Sランク'],
+    delivery: '魔法陣転送（翌日）'
+  },
+  {
+    id: 83, category: 'dungeon',
+    image: 'https://www.genspark.ai/api/files/s/xbOHUJfT?cache_control=3600',
+    emoji: '💣', name: '罠解除キット「トラップバスター」プロ仕様',
+    seller: '冒険者ギルド本部', rarity: 'rare',
+    price: 35000, originalPrice: 50000, discount: 30,
+    rating: 4.6, reviews: 5678,
+    prime: true, isNew: false,
+    desc: 'ダンジョン内の全種類の罠を検知・解除できるプロ仕様キット。魔法罠にも対応。',
+    specs: [['検知範囲', '半径20m'], ['対応罠', '全種類（魔法罠含む）'], ['解除成功率', '99.9%'], ['セット内容', '20種の解除道具']],
+    tags: ['#罠解除', '#ダンジョン', '#プロ仕様'],
+    delivery: '鷹便（翌日）'
+  },
+  {
+    id: 84, category: 'dungeon',
+    image: 'https://www.genspark.ai/api/files/s/xKdXpJD7?cache_control=3600',
+    emoji: '🏺', name: '宝箱鑑定書「トレジャーアイ」（呪い判定付き）',
+    seller: '鑑定師ギルド', rarity: 'rare',
+    price: 18000, originalPrice: 25000, discount: 28,
+    rating: 4.5, reviews: 4321,
+    prime: true, isNew: false,
+    desc: 'ダンジョンの宝箱を安全に鑑定できるアイテム。呪い・罠・ミミック判定まで対応。',
+    specs: [['鑑定精度', '99%'], ['呪い判定', '対応'], ['ミミック判定', '対応'], ['使用回数', '100回分']],
+    tags: ['#鑑定', '#宝箱', '#ミミック判定'],
+    delivery: '魔法陣転送（翌日）'
+  },
+  {
+    id: 85, category: 'dungeon',
+    image: 'https://www.genspark.ai/api/files/s/nbEU2anl?cache_control=3600',
+    emoji: '⛺', name: '携帯式 野営テント「ダンジョンキャンプ」（安全結界付き）',
+    seller: '冒険者装備屋アドベンチャー', rarity: 'rare',
+    price: 42000, originalPrice: 60000, discount: 30,
+    rating: 4.8, reviews: 6789,
+    prime: true, isNew: false,
+    desc: 'ダンジョン内でも安全に休める結界付き携帯テント。展開5秒・完全回復睡眠効果付き。',
+    specs: [['展開時間', '5秒'], ['結界強度', 'Sランクモンスターを防御'], ['回復効果', '6時間で完全回復'], ['収納サイズ', '手のひら大']],
+    tags: ['#野営', '#結界', '#ダンジョン必需品'],
+    delivery: '鷹便（翌日）'
+  },
+  {
+    id: 86, category: 'dungeon',
+    image: 'https://www.genspark.ai/api/files/s/WdabXA0y?cache_control=3600',
+    emoji: '👁️', name: 'ボス弱点スキャナー「アナライザーEX」',
+    seller: '冒険者ギルド本部', rarity: 'epic',
+    price: 88000, originalPrice: 120000, discount: 27,
+    rating: 4.7, reviews: 2345,
+    prime: true, isNew: true,
+    desc: 'ボスモンスターの弱点・スキル・HP・耐性を全て瞬時にスキャンできる。',
+    specs: [['スキャン速度', '0.5秒'], ['取得情報', 'HP・弱点・耐性・スキル全て'], ['射程距離', '500m'], ['更新DB', '毎日自動更新']],
+    tags: ['#ボス分析', '#弱点', '#スキャナー'],
+    delivery: '魔法陣転送（翌日）'
+  },
+  {
+    id: 87, category: 'dungeon',
+    image: 'https://www.genspark.ai/api/files/s/VgQgFO0s?cache_control=3600',
+    emoji: '🎯', name: 'ダンジョン自動クリア装置「オートクリアー」',
+    seller: '禁断技術研究所', rarity: 'legendary',
+    price: 3500000, originalPrice: 5000000, discount: 30,
+    rating: 4.3, reviews: 234,
+    prime: false, isNew: false,
+    desc: 'セットするだけでダンジョンを自動クリアする禁断の装置。冒険者協会非公認。',
+    specs: [['対応ランク', 'F〜SS'], ['クリア時間', 'F→30分、SS→3日'], ['報酬取得', '自動'], ['協会公認', '非公認（自己責任）']],
+    tags: ['#自動クリア', '#禁断', '#時短'],
+    delivery: '闇便（翌日）'
+  },
+
+  // ===== GUILD (6点) =====
+  {
+    id: 88, category: 'guild',
+    image: 'https://www.genspark.ai/api/files/s/B9HWz0qM?cache_control=3600',
+    emoji: '📋', name: '冒険者登録代行「Sランク直行パック」',
+    seller: '冒険者ギルド本部', rarity: 'legendary',
+    price: 2000000, originalPrice: 3000000, discount: 33,
+    rating: 4.2, reviews: 456,
+    prime: false, isNew: false,
+    desc: '面倒な冒険者登録をすっ飛ばしてSランクから始められる夢のパック。実績証明書付き。',
+    specs: [['開始ランク', 'S'], ['登録期間', '即日'], ['実績証明書', '偽造済み（高品質）'], ['保証', '没収の場合返金']],
+    tags: ['#Sランク', '#登録代行', '#時短'],
+    delivery: '魔法陣転送（翌日）'
+  },
+  {
+    id: 89, category: 'guild',
+    image: 'https://www.genspark.ai/api/files/s/4G24aCi0?cache_control=3600',
+    emoji: '🤝', name: 'パーティー自動マッチング石「コンパニオン」',
+    seller: '冒険者ギルド本部', rarity: 'rare',
+    price: 28000, originalPrice: 40000, discount: 30,
+    rating: 4.7, reviews: 3456,
+    prime: true, isNew: false,
+    desc: '最適なパーティーメンバーを自動で探し出す魔法石。相性・戦力・専門性まで考慮。',
+    specs: [['マッチング精度', '98%'], ['検索範囲', '半径100km'], ['条件設定', '20項目'], ['応答速度', '平均5分']],
+    tags: ['#パーティー', '#マッチング', '#ソロ脱出'],
+    delivery: '魔法陣転送（翌日）'
+  },
+  {
+    id: 90, category: 'guild',
+    image: 'https://www.genspark.ai/api/files/s/fmZ8IDqS?cache_control=3600',
+    emoji: '🏆', name: '依頼書「最高報酬クエスト」特別選定セット×5',
+    seller: '冒険者ギルド本部', rarity: 'epic',
+    price: 55000, originalPrice: 80000, discount: 31,
+    rating: 4.5, reviews: 1234,
+    prime: true, isNew: false,
+    desc: 'ギルドの高報酬クエストを5件先行予約できる特権セット。通常の10倍の報酬が保証される。',
+    specs: [['クエスト数', '5件'], ['報酬倍率', '×10'], ['ランク', 'B〜S選択可'], ['有効期限', '購入から6ヶ月']],
+    tags: ['#高報酬', '#クエスト', '#先行予約'],
+    delivery: '魔法陣転送（翌日）'
+  },
+  {
+    id: 91, category: 'guild',
+    image: 'https://www.genspark.ai/api/files/s/Yxt19Scx?cache_control=3600',
+    emoji: '🛡️', name: '護衛依頼代行「黒騎士団 24時間ガード」1週間',
+    seller: '黒騎士団護衛サービス', rarity: 'epic',
+    price: 350000, originalPrice: 500000, discount: 30,
+    rating: 4.9, reviews: 567,
+    prime: false, isNew: false,
+    desc: '最強の傭兵集団「黒騎士団」が1週間24時間あなたを護衛します。暗殺者対応可。',
+    specs: [['護衛人数', '5名'], ['対応脅威', 'SSSランクまで'], ['24時間対応', 'あり'], ['追加費用', '1週間以降は相談']],
+    tags: ['#護衛', '#黒騎士団', '#安心安全'],
+    delivery: '現地集合（翌日）'
+  },
+  {
+    id: 92, category: 'guild',
+    image: 'https://www.genspark.ai/api/files/s/6rGiK97Z?cache_control=3600',
+    emoji: '📊', name: 'モンスター図鑑「全知獣典」デジタル最新版',
+    seller: '魔物研究所モンスタロジー', rarity: 'rare',
+    price: 15000, originalPrice: 22000, discount: 32,
+    rating: 4.8, reviews: 8901,
+    prime: true, isNew: false,
+    desc: '全世界の魔物10万種以上を収録した完全図鑑。弱点・生息地・討伐方法が全て分かる。',
+    specs: [['収録数', '10万種以上'], ['更新', '毎日自動'], ['検索機能', 'AI対応'], ['オフライン', '対応']],
+    tags: ['#モンスター図鑑', '#全10万種', '#必需品'],
+    delivery: '魔法陣転送（翌日）'
+  },
+  {
+    id: 93, category: 'guild',
+    image: 'https://www.genspark.ai/api/files/s/20ai8HiQ?cache_control=3600',
+    emoji: '💰', name: '錬金術師の財布「無限の富」（所持金×2化）',
+    seller: '錬金術師組合', rarity: 'legendary',
+    price: 1500000, originalPrice: 2200000, discount: 32,
+    rating: 4.6, reviews: 234,
+    prime: false, isNew: false,
+    desc: '入れたお金が自動的に2倍になって出てくる伝説の魔法財布。1日1回まで使用可能。',
+    specs: [['倍率', '×2'], ['上限金額', '100万ゴールド/日'], ['使用回数', '1日1回'], ['素材', '黄金竜の鱗']],
+    tags: ['#魔法財布', '#資産増加', '#錬金術'],
+    delivery: '特殊護送（3日）'
+  },
+
+  // ===== COSMETIC (7点) =====
+  {
+    id: 94, category: 'cosmetic',
+    image: 'https://www.genspark.ai/api/files/s/GgnC7Kiv?cache_control=3600',
+    emoji: '✨', name: '美の女神の化粧品セット「アフロディーテ」',
+    seller: '天界コスメ', rarity: 'legendary',
+    price: 280000, originalPrice: 400000, discount: 30,
+    rating: 4.9, reviews: 5678,
+    prime: true, isNew: false,
+    desc: '美の女神アフロディーテが使う天界コスメの完全セット。使用すると誰もが振り返る美しさに。',
+    specs: [['魅力UP', '+999'], ['効果持続', '24時間'], ['セット内容', 'ファンデ・口紅・アイライン他全30品'], ['副作用', 'モテすぎ注意']],
+    tags: ['#天界コスメ', '#美の女神', '#魅力MAX'],
+    delivery: '魔法陣転送（翌日）'
+  },
+  {
+    id: 95, category: 'cosmetic',
+    image: 'https://www.genspark.ai/api/files/s/ulLfpWaS?cache_control=3600',
+    emoji: '💆', name: '精霊のマッサージ師「ヒーリングハンズ」派遣（1回）',
+    seller: '精霊サービス協会', rarity: 'epic',
+    price: 85000, originalPrice: 120000, discount: 29,
+    rating: 5.0, reviews: 1234,
+    prime: true, isNew: false,
+    desc: '本物の精霊がマッサージしてくれる夢の体験。1回のセッションで全傷・病・呪いを治癒。',
+    specs: [['施術時間', '60分'], ['治癒効果', '全傷病・呪い解除'], ['施術者', '上位精霊（認定済み）'], ['場所', '出張対応']],
+    tags: ['#精霊マッサージ', '#治癒', '#癒し体験'],
+    delivery: '精霊直接派遣（翌日）'
+  },
+  {
+    id: 96, category: 'cosmetic',
+    image: 'https://www.genspark.ai/api/files/s/dmFOLmjh?cache_control=3600',
+    emoji: '🧴', name: '竜の油「ドラゴンオイル」（皮膚を竜鱗化）',
+    seller: 'ドラゴンスレイヤー食肉工房', rarity: 'epic',
+    price: 48000, originalPrice: 68000, discount: 29,
+    rating: 4.5, reviews: 2345,
+    prime: true, isNew: false,
+    desc: '塗ると皮膚が竜鱗のように硬化し、物理攻撃を90%軽減。見た目は普通の肌のまま。',
+    specs: [['防御UP', '物理90%軽減'], ['見た目変化', 'なし'], ['効果時間', '24時間'], ['容量', '100ml（約30回分）']],
+    tags: ['#竜の油', '#防御UP', '#スキンケア'],
+    delivery: '鷹便（翌日）'
+  },
+  {
+    id: 97, category: 'cosmetic',
+    image: 'https://www.genspark.ai/api/files/s/cCVj5IAS?cache_control=3600',
+    emoji: '🌸', name: 'エルフの美容液「永春の雫」（10年若返り）',
+    seller: 'エルフ工房シルバーフォレスト', rarity: 'legendary',
+    price: 320000, originalPrice: 450000, discount: 29,
+    rating: 4.8, reviews: 3456,
+    prime: true, isNew: false,
+    desc: 'エルフの秘伝美容液。1本使い切ると外見が10年若返り、肌が完璧に整う。',
+    specs: [['若返り', '10年分'], ['肌改善', '全肌悩み解決'], ['容量', '30ml（1本使い切り）'], ['成分', 'エルフの涙+世界樹エキス']],
+    tags: ['#エルフ美容液', '#若返り10年', '#肌改善'],
+    delivery: '魔法陣転送（翌日）'
+  },
+  {
+    id: 98, category: 'cosmetic',
+    image: 'https://www.genspark.ai/api/files/s/BlqJoufE?cache_control=3600',
+    emoji: '💪', name: '鍛錬不要の筋肉石「マッスルストーン」（体型改造）',
+    seller: '戦士ギルド公式', rarity: 'rare',
+    price: 68000, originalPrice: 95000, discount: 28,
+    rating: 4.4, reviews: 4567,
+    prime: true, isNew: false,
+    desc: 'ポケットに入れて歩くだけで理想の体型に変化していく魔法の石。1ヶ月で完璧な体に。',
+    specs: [['効果時間', '1ヶ月で理想体型'], ['使用方法', '持ち歩くだけ'], ['副作用', 'なし'], ['食事制限', '不要']],
+    tags: ['#体型改造', '#筋肉', '#ダイエット不要'],
+    delivery: '魔法陣転送（翌日）'
+  },
+  {
+    id: 99, category: 'cosmetic',
+    image: 'https://www.genspark.ai/api/files/s/Nft3Ffhw?cache_control=3600',
+    emoji: '🎨', name: '変色タトゥーインク「カラーソウル」（感情連動）',
+    seller: '魔法工芸師ファントム', rarity: 'rare',
+    price: 25000, originalPrice: 35000, discount: 29,
+    rating: 4.6, reviews: 2345,
+    prime: true, isNew: false,
+    desc: '感情に連動して色が変わる魔法のタトゥーインク。嘘をつくと赤く光るオプション付き。',
+    specs: [['色変化', '感情に連動（12色）'], ['嘘発見', 'オプション（+5000G）'], ['消去', '専用消去液で可能'], ['アレルギー', 'なし（全種族対応）']],
+    tags: ['#魔法タトゥー', '#感情連動', '#個性的'],
+    delivery: '鷹便（翌日）'
+  },
+  {
+    id: 100, category: 'cosmetic',
+    image: 'https://www.genspark.ai/api/files/s/4trJpVXB?cache_control=3600',
+    emoji: '🌙', name: '月の女神の香水「ルナパフューム」（魅了効果付き）',
+    seller: '天界コスメ', rarity: 'epic',
+    price: 95000, originalPrice: 135000, discount: 30,
+    rating: 4.7, reviews: 6789,
+    prime: true, isNew: false,
+    desc: '月の女神が愛用する香水の地上版。つけると周囲の全員を魅了する神話の香り。',
+    specs: [['魅了効果', '半径10m全員'], ['持続時間', '12時間'], ['容量', '50ml'], ['対象', '全種族・全性別']],
+    tags: ['#天界香水', '#魅了', '#月の女神'],
+    delivery: '魔法陣転送（翌日）'
   },
 ];
 
@@ -1608,7 +2520,9 @@ function renderProducts(data) {
       ${firstBadge}
       ${rankBadge}
       <button class="btn-wishlist ${wishActive}" onclick="toggleWishlist(event, ${p.id})">♥</button>
-      <div class="product-img">${p.emoji}</div>
+      <div class="product-img" style="overflow:hidden;border-radius:8px;">
+        ${p.image ? `<img src="${p.image}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" loading="lazy">` : `<span style="font-size:3rem;">${p.emoji}</span>`}
+      </div>
       <div class="product-info">
         <div class="product-name">${p.name}</div>
         <div class="product-seller">出品：${p.seller}</div>
@@ -1694,7 +2608,7 @@ function addToCart(id) {
     cart.push({ ...product, qty: 1 });
   }
   updateCartBadge();
-  showCartPopupRecommend(id);
+  showToast(`✨ 「${product.emoji} ${product.name.substring(0,15)}...」をカートに追加しました！`);
 }
 
 function updateCartBadge() {
@@ -1765,7 +2679,9 @@ function openDetail(id) {
   document.getElementById('detailBody').innerHTML = `
     <div class="product-detail-grid">
       <div>
-        <div class="product-detail-img">${p.emoji}</div>
+        <div class="product-detail-img" style="overflow:hidden;padding:0;">
+          ${p.image ? `<img src="${p.image}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">` : `<span style="font-size:8rem;">${p.emoji}</span>`}
+        </div>
         <div style="margin-top:10px;">
           ${p.tags.map(t => `<span style="background:var(--secondary);padding:3px 8px;border-radius:20px;font-size:0.75rem;margin:2px;display:inline-block;color:var(--glow);">${t}</span>`).join('')}
         </div>
@@ -1794,22 +2710,12 @@ function openDetail(id) {
     <div class="detail-tabs">
       <button class="detail-tab active" onclick="switchTab(this, 'reviews-tab')">💬 レビュー</button>
       <button class="detail-tab" onclick="switchTab(this, 'qa-tab')">❓ Q&A</button>
-      <button class="detail-tab" onclick="switchTab(this, 'recommend-tab'); loadDetailRecommend(${p.id})">🤖 おすすめ</button>
     </div>
     <div id="reviews-tab">
       ${generateReviews(p)}
     </div>
     <div id="qa-tab" style="display:none;">
       ${generateQA(p)}
-    </div>
-    <div id="recommend-tab" style="display:none;">
-      <div class="recommend-section" style="margin-top:10px;">
-        <div class="recommend-title">🤖✨ この商品を見た人はこちらも購入しています</div>
-        <div class="recommend-loading" id="detailRecommendLoading">
-          <span class="spinner">🔮</span>AI魔法鑑定士が解析中...
-        </div>
-        <div class="recommend-cards" id="detailRecommendCards" style="display:none;"></div>
-      </div>
     </div>
   `;
   document.getElementById('productDetailModal').classList.add('active');
@@ -1822,17 +2728,18 @@ function closeDetail() {
 function switchTab(btn, tabId) {
   document.querySelectorAll('.detail-tab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  ['reviews-tab', 'qa-tab', 'recommend-tab'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = id === tabId ? 'block' : 'none';
-  });
+  document.getElementById('reviews-tab').style.display = tabId === 'reviews-tab' ? 'block' : 'none';
+  document.getElementById('qa-tab').style.display = tabId === 'qa-tab' ? 'block' : 'none';
 }
 
-// キャッシュ
-const reviewCache = {};
-const qaCache = {};
+function generateReviews(p) {
+  const reviewData = [
+    { author: '勇者アーサー', rating: 5, text: '最高の商品でした！冒険で何度も命を救ってもらいました。プライム配送も早くて感動。また買います！' },
+    { author: '魔法使い・メルラン', rating: 4, text: '品質はさすが。ただ取扱説明書がエルフ語のみなので読むのが大変でした。翻訳呪文を忘れずに。' },
+    { author: '女戦士カリン', rating: 5, text: '期待以上！魔王討伐でも大活躍してくれました。絶対おすすめです。' },
+    { author: 'ドワーフのボルドー', rating: 3, text: '悪くはないが、ドワーフの手には少し小さかった。次は大きいサイズも出してほしい。' },
+  ];
 
-function renderReviewsHTML(reviewData) {
   return reviewData.map(r => `
     <div class="review">
       <div class="review-header">
@@ -1844,95 +2751,19 @@ function renderReviewsHTML(reviewData) {
   `).join('');
 }
 
-function renderQAHTML(qaData) {
+function generateQA(p) {
+  const qaData = [
+    { q: 'この商品は魔界でも使えますか？', a: 'はい、魔界・異界でも使用可能です。ただし一部の効果が20%減少する場合があります。' },
+    { q: '返品・返金は可能ですか？', a: '未使用品に限り7日以内であれば返品可能です。ただし呪いがかかった商品・生き物の返品はお断りしております。' },
+    { q: 'レベル1でも使えますか？', a: '推奨レベルがございます。低レベルでの使用は危険な場合もありますので、スペックをご確認ください。' },
+  ];
+
   return qaData.map(qa => `
     <div class="review">
       <div class="review-author">❓ Q: ${qa.q}</div>
       <div class="review-text">💬 A: ${qa.a}</div>
     </div>
   `).join('');
-}
-
-function loadingPlaceholder(icon, msg) {
-  return `<div class="recommend-loading"><span class="spinner">${icon}</span>${msg}</div>`;
-}
-
-function generateReviews(p) {
-  if (reviewCache[p.id]) return renderReviewsHTML(reviewCache[p.id]);
-
-  // ローディング表示しつつ非同期で生成
-  setTimeout(() => fetchAndRenderReviews(p), 0);
-  return loadingPlaceholder('📜', 'レビューを魔法水晶から召喚中...');
-}
-
-function generateQA(p) {
-  if (qaCache[p.id]) return renderQAHTML(qaCache[p.id]);
-
-  setTimeout(() => fetchAndRenderQA(p), 0);
-  return loadingPlaceholder('🔮', 'Q&Aを賢者の書から取得中...');
-}
-
-async function fetchAndRenderReviews(p) {
-  const el = document.getElementById('reviews-tab');
-  if (!el) return;
-  try {
-    const prompt = `あなたはファンタジー世界の通販サイト「ファマゾン」のシステムです。
-以下の商品のリアルなユーザーレビューを4件生成してください。
-
-商品名: ${p.name}
-説明: ${p.desc}
-カテゴリ: ${p.category}
-平均評価: ${p.rating}
-価格: ${p.price}G
-
-・レビュアーはファンタジー世界の住人（勇者・魔法使い・騎士・エルフ・ドワーフ・商人など多様に）
-・評価は${p.rating}前後でばらつかせる（5段階整数）
-・各レビューは商品の特徴・スペックを踏まえた具体的な内容（50〜80文字）
-・世界観に合った自然な口コミ文体で
-
-以下のJSON形式のみで返してください（前置き・説明不要）:
-[{"author":"名前","rating":数値,"text":"レビュー文"},...]`;
-
-    const text = await callGemini(prompt);
-    const parsed = JSON.parse(text);
-    reviewCache[p.id] = parsed;
-    const tab = document.getElementById('reviews-tab');
-    if (tab) tab.innerHTML = renderReviewsHTML(parsed);
-  } catch(e) {
-    const tab = document.getElementById('reviews-tab');
-    if (tab) tab.innerHTML = '<div style="color:var(--silver);padding:15px;font-size:0.85rem;">📜 レビューの取得に失敗しました</div>';
-  }
-}
-
-async function fetchAndRenderQA(p) {
-  const el = document.getElementById('qa-tab');
-  if (!el) return;
-  try {
-    const prompt = `あなたはファンタジー世界の通販サイト「ファマゾン」のシステムです。
-以下の商品に関するよくある質問と回答を3件生成してください。
-
-商品名: ${p.name}
-説明: ${p.desc}
-カテゴリ: ${p.category}
-スペック: ${p.specs.map(([k,v]) => k+':'+v).join('、')}
-
-・質問はファンタジー世界のユーザー視点で商品の実用的な疑問
-・回答は出品者または運営が丁寧に答える形式
-・世界観（魔界・冒険者・魔法など）に合わせた内容で
-・各Q&Aは質問40文字以内、回答60文字以内
-
-以下のJSON形式のみで返してください（前置き・説明不要）:
-[{"q":"質問文","a":"回答文"},...]`;
-
-    const text = await callGemini(prompt);
-    const parsed = JSON.parse(text);
-    qaCache[p.id] = parsed;
-    const tab = document.getElementById('qa-tab');
-    if (tab) tab.innerHTML = renderQAHTML(parsed);
-  } catch(e) {
-    const tab = document.getElementById('qa-tab');
-    if (tab) tab.innerHTML = '<div style="color:var(--silver);padding:15px;font-size:0.85rem;">🔮 Q&Aの取得に失敗しました</div>';
-  }
 }
 
 // ========== WISHLIST ==========
@@ -2071,123 +2902,8 @@ document.querySelectorAll('.modal-overlay').forEach(overlay => {
   });
 });
 
-// ========== GEMINI API 設定 ==========
-// ↓ ここにGemini APIキーを貼り付けてください
-undefined
-
-// ========== AI RECOMMEND ==========
-let cartPopupTimeout = null;
-
-function renderRecommendCards(items, containerId) {
-  const container = document.getElementById(containerId);
-  if (!container) return;
-  container.innerHTML = items.map(item => `
-    <div class="recommend-card" onclick="openDetail(${item.id}); closeCartPopup();">
-      <span class="rec-emoji">${item.emoji}</span>
-      <div class="rec-name">${item.name}</div>
-      <div class="rec-price">💰 ${item.price.toLocaleString()} G</div>
-      <div class="rec-reason">${item.reason}</div>
-    </div>
-  `).join('');
-  container.style.display = 'grid';
-}
-
-async function fetchAIRecommend(targetProduct, excludeIds, context) {
-  const productList = products
-    .filter(p => !excludeIds.includes(p.id))
-    .map(p => `ID:${p.id} 「${p.name}」 カテゴリ:${p.category} 価格:${p.price}G タグ:${p.tags.join(',')}`)
-    .join('\n');
-
-  const prompt = context === 'top'
-    ? `あなたはファンタジー世界の通販サイト「ファマゾン」のAI魔法鑑定士です。
-以下の商品リストから、冒険者向けに特におすすめの商品を4つ選んでください。
-
-商品リスト:
-${productList}
-
-以下のJSON形式のみで返答してください（説明・前置き不要）:
-[{"id":数値,"reason":"おすすめ理由(15文字以内・ファンタジー世界観で)"},{"id":数値,"reason":"..."},{"id":数値,"reason":"..."},{"id":数値,"reason":"..."}]`
-    : `あなたはファンタジー世界の通販サイト「ファマゾン」のAI魔法鑑定士です。
-対象商品:「${targetProduct.name}」(カテゴリ:${targetProduct.category})
-
-以下の商品リストから、対象商品と相性が良く一緒に購入されやすい商品を4つ選んでください。
-
-商品リスト:
-${productList}
-
-以下のJSON形式のみで返答してください（説明・前置き不要）:
-[{"id":数値,"reason":"おすすめ理由(15文字以内・ファンタジー世界観で)"},{"id":数値,"reason":"..."},{"id":数値,"reason":"..."},{"id":数値,"reason":"..."}]`;
-
-  const text = await callGemini(prompt);
-  const clean = text.replace(/```json|```/g, '').trim();
-  const parsed = JSON.parse(clean);
-  return parsed.map(item => {
-    const p = products.find(x => x.id === item.id);
-    return p ? { ...p, reason: item.reason } : null;
-  }).filter(Boolean);
-}
-
-// トップページのレコメンド
-async function loadTopRecommend() {
-  try {
-    const items = await fetchAIRecommend(null, [], 'top');
-    document.getElementById('topRecommendLoading').style.display = 'none';
-    renderRecommendCards(items, 'topRecommendCards');
-  } catch(e) {
-    document.getElementById('topRecommendLoading').innerHTML = '<span style="color:var(--silver);font-size:0.8rem;">🔮 おすすめを取得できませんでした</span>';
-  }
-}
-
-// 商品詳細のレコメンド
-let detailRecommendLoaded = {};
-async function loadDetailRecommend(productId) {
-  if (detailRecommendLoaded[productId]) return;
-  detailRecommendLoaded[productId] = true;
-  const p = products.find(x => x.id === productId);
-  try {
-    const items = await fetchAIRecommend(p, [productId], 'detail');
-    const loading = document.getElementById('detailRecommendLoading');
-    if (loading) loading.style.display = 'none';
-    renderRecommendCards(items, 'detailRecommendCards');
-  } catch(e) {
-    const loading = document.getElementById('detailRecommendLoading');
-    if (loading) loading.innerHTML = '<span style="color:var(--silver);font-size:0.8rem;">🔮 おすすめを取得できませんでした</span>';
-  }
-}
-
-// カートに追加後のポップアップレコメンド
-let cartPopupProductId = null;
-async function showCartPopupRecommend(productId) {
-  cartPopupProductId = productId;
-  const popup = document.getElementById('cartAddPopup');
-  const loading = document.getElementById('cartPopupLoading');
-  const cards = document.getElementById('cartPopupCards');
-  loading.style.display = 'block';
-  cards.style.display = 'none';
-  cards.innerHTML = '';
-  popup.classList.add('show');
-  if (cartPopupTimeout) clearTimeout(cartPopupTimeout);
-  cartPopupTimeout = setTimeout(() => closeCartPopup(), 12000);
-
-  const cartIds = cart.map(i => i.id);
-  const p = products.find(x => x.id === productId);
-  try {
-    const items = await fetchAIRecommend(p, [productId, ...cartIds], 'cart');
-    loading.style.display = 'none';
-    renderRecommendCards(items, 'cartPopupCards');
-  } catch(e) {
-    loading.innerHTML = '<span style="color:var(--silver);font-size:0.8rem;">🔮 おすすめを取得できませんでした</span>';
-  }
-}
-
-function closeCartPopup() {
-  document.getElementById('cartAddPopup').classList.remove('show');
-  if (cartPopupTimeout) clearTimeout(cartPopupTimeout);
-}
-
 // ========== INIT ==========
 renderProducts(products);
-loadTopRecommend();
 </script>
 </body>
 </html>
