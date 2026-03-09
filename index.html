@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>アマゾニア魔法商店 - ファンタジー世界最大の通販サイト</title>
+<title>ファマゾン魔法商店 - ファンタジー世界最大の通販サイト</title>
 <style>
   :root {
     --primary: #1a0a2e;
@@ -952,6 +952,89 @@
   .review-header { display: flex; justify-content: space-between; margin-bottom: 5px; }
   .review-author { font-size: 0.82rem; font-weight: bold; color: var(--glow); }
   .review-text { font-size: 0.82rem; color: var(--text); line-height: 1.5; }
+
+  /* ===== AI RECOMMEND ===== */
+  .recommend-section {
+    margin-top: 20px;
+    padding: 16px;
+    background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(13,11,64,0.4));
+    border: 1px solid rgba(167,139,250,0.3);
+    border-radius: 10px;
+  }
+  .recommend-title {
+    font-size: 0.95rem;
+    color: var(--accent);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .recommend-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 10px;
+  }
+  .recommend-card {
+    background: var(--card-bg);
+    border: 1px solid rgba(167,139,250,0.2);
+    border-radius: 8px;
+    padding: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+  .recommend-card:hover { border-color: var(--glow); transform: translateY(-2px); box-shadow: 0 4px 15px rgba(167,139,250,0.2); }
+  .recommend-card .rec-emoji { font-size: 2.2rem; display: block; margin-bottom: 5px; }
+  .recommend-card .rec-name { font-size: 0.72rem; color: var(--text); line-height: 1.3; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .recommend-card .rec-price { font-size: 0.78rem; color: var(--accent); font-weight: bold; }
+  .recommend-card .rec-reason { font-size: 0.68rem; color: var(--glow); margin-top: 3px; font-style: italic; }
+  .recommend-loading {
+    text-align: center;
+    padding: 20px;
+    color: var(--glow);
+    font-size: 0.85rem;
+    animation: pulse 1s infinite;
+  }
+  .recommend-loading .spinner { font-size: 1.5rem; display: block; margin-bottom: 6px; animation: spin 1.5s linear infinite; }
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  /* トップページ おすすめセクション */
+  .top-recommend-section {
+    max-width: 1400px;
+    margin: 0 auto 20px;
+    padding: 0 20px;
+  }
+  .top-recommend-section .recommend-section {
+    margin-top: 0;
+  }
+
+  /* カートに追加後のポップアップ */
+  .cart-add-popup {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    width: 320px;
+    background: var(--card-bg);
+    border: 1px solid var(--glow);
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(167,139,250,0.3);
+    z-index: 2500;
+    transform: translateX(400px);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  .cart-add-popup.show { transform: translateX(0); opacity: 1; }
+  .cart-add-popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 14px 8px;
+    border-bottom: 1px solid rgba(167,139,250,0.2);
+  }
+  .cart-add-popup-header span { font-size: 0.85rem; color: var(--success); font-weight: bold; }
+  .cart-add-popup-close { background: none; border: none; color: var(--silver); cursor: pointer; font-size: 1rem; }
+  .cart-add-popup-body { padding: 12px 14px; }
+  .cart-add-popup-title { font-size: 0.8rem; color: var(--glow); margin-bottom: 8px; }
 </style>
 </head>
 <body>
@@ -960,7 +1043,7 @@
 <header>
   <div class="header-top">
     <div class="logo" onclick="goHome()">
-      <div class="logo-main">⚔️ Amazonia</div>
+      <div class="logo-main">⚔️ Famazon</div>
       <div class="logo-sub">魔 法 商 店</div>
     </div>
 
@@ -1022,6 +1105,32 @@
   <h2>🌟 今だけ！魔界セール開催中 🌟</h2>
   <p>ドラゴンの卵からエルフの弓まで、ファンタジー世界のあらゆるものが揃う</p>
   <div class="hero-badge">⚡ プライム会員なら魔法陣転送で翌日お届け</div>
+</div>
+
+<!-- TOP RECOMMEND SECTION -->
+<div class="top-recommend-section" id="topRecommendSection">
+  <div class="recommend-section">
+    <div class="recommend-title">🤖✨ あなたへのおすすめ（AI魔法鑑定士より）</div>
+    <div class="recommend-loading" id="topRecommendLoading">
+      <span class="spinner">🔮</span>冒険履歴を解析中...
+    </div>
+    <div class="recommend-cards" id="topRecommendCards" style="display:none;"></div>
+  </div>
+</div>
+
+<!-- CART ADD POPUP -->
+<div class="cart-add-popup" id="cartAddPopup">
+  <div class="cart-add-popup-header">
+    <span>✅ カートに追加しました！</span>
+    <button class="cart-add-popup-close" onclick="closeCartPopup()">✕</button>
+  </div>
+  <div class="cart-add-popup-body">
+    <div class="cart-add-popup-title">🤖 一緒に買われています</div>
+    <div class="recommend-loading" id="cartPopupLoading">
+      <span class="spinner">⚗️</span>相性の良い商品を探しています...
+    </div>
+    <div class="recommend-cards" id="cartPopupCards" style="display:none;"></div>
+  </div>
 </div>
 
 <!-- MAIN -->
@@ -1106,7 +1215,7 @@
     <a href="#">🛡️ 魔物被害補償</a>
     <a href="#">🌐 他の界への配達</a>
   </div>
-  <p class="footer-copy">© 2024 アマゾニア魔法商店株式会社 | 王立商業組合認定 No.00042</p>
+  <p class="footer-copy">© 2024 ファマゾン魔法商店株式会社 | 王立商業組合認定 No.00042</p>
   <p class="footer-copy" style="margin-top:5px;">⚠️ 魔法アイテムの使用は自己責任でお願いします。死亡・異界転移等の責任は負いかねます。</p>
 </footer>
 
@@ -1512,7 +1621,7 @@ function renderProducts(data) {
           ${p.discount > 0 ? `<span class="price-original">通常 ${p.originalPrice.toLocaleString()} G</span>
           <span class="price-discount">▼ ${p.discount}% OFF</span>` : ''}
         </div>
-        ${p.prime ? '<div class="prime-badge">⚡ Amazonia Prime</div>' : ''}
+        ${p.prime ? '<div class="prime-badge">⚡ Famazon Prime</div>' : ''}
         <div style="font-size:0.75rem; color:var(--silver); margin-top:4px;">🚚 ${p.delivery}</div>
       </div>
       <div class="product-actions" onclick="event.stopPropagation()">
@@ -1585,7 +1694,7 @@ function addToCart(id) {
     cart.push({ ...product, qty: 1 });
   }
   updateCartBadge();
-  showToast(`✨ 「${product.emoji} ${product.name.substring(0,15)}...」をカートに追加しました！`);
+  showCartPopupRecommend(id);
 }
 
 function updateCartBadge() {
@@ -1667,7 +1776,7 @@ function openDetail(id) {
         <div class="stars">${renderStars(p.rating)} <span class="review-count">${p.rating} (${p.reviews.toLocaleString()}件のレビュー)</span></div>
         <div class="product-detail-price">💰 ${p.price.toLocaleString()} G</div>
         ${p.discount > 0 ? `<div style="color:var(--danger);font-size:0.85rem;">通常価格 ${p.originalPrice.toLocaleString()} G から <b>${p.discount}% OFF</b></div>` : ''}
-        ${p.prime ? '<div class="prime-badge">⚡ Amazonia Prime 対象（翌日お届け可）</div>' : ''}
+        ${p.prime ? '<div class="prime-badge">⚡ Famazon Prime 対象（翌日お届け可）</div>' : ''}
         <div class="product-detail-desc">${p.desc}</div>
         <div class="product-specs">
           <h4>📋 商品スペック</h4>
@@ -1685,12 +1794,22 @@ function openDetail(id) {
     <div class="detail-tabs">
       <button class="detail-tab active" onclick="switchTab(this, 'reviews-tab')">💬 レビュー</button>
       <button class="detail-tab" onclick="switchTab(this, 'qa-tab')">❓ Q&A</button>
+      <button class="detail-tab" onclick="switchTab(this, 'recommend-tab'); loadDetailRecommend(${p.id})">🤖 おすすめ</button>
     </div>
     <div id="reviews-tab">
       ${generateReviews(p)}
     </div>
     <div id="qa-tab" style="display:none;">
       ${generateQA(p)}
+    </div>
+    <div id="recommend-tab" style="display:none;">
+      <div class="recommend-section" style="margin-top:10px;">
+        <div class="recommend-title">🤖✨ この商品を見た人はこちらも購入しています</div>
+        <div class="recommend-loading" id="detailRecommendLoading">
+          <span class="spinner">🔮</span>AI魔法鑑定士が解析中...
+        </div>
+        <div class="recommend-cards" id="detailRecommendCards" style="display:none;"></div>
+      </div>
     </div>
   `;
   document.getElementById('productDetailModal').classList.add('active');
@@ -1703,8 +1822,10 @@ function closeDetail() {
 function switchTab(btn, tabId) {
   document.querySelectorAll('.detail-tab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById('reviews-tab').style.display = tabId === 'reviews-tab' ? 'block' : 'none';
-  document.getElementById('qa-tab').style.display = tabId === 'qa-tab' ? 'block' : 'none';
+  ['reviews-tab', 'qa-tab', 'recommend-tab'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = id === tabId ? 'block' : 'none';
+  });
 }
 
 function generateReviews(p) {
@@ -1877,8 +1998,129 @@ document.querySelectorAll('.modal-overlay').forEach(overlay => {
   });
 });
 
+// ========== AI RECOMMEND ==========
+let cartPopupTimeout = null;
+
+function renderRecommendCards(items, containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = items.map(item => `
+    <div class="recommend-card" onclick="openDetail(${item.id}); closeCartPopup();">
+      <span class="rec-emoji">${item.emoji}</span>
+      <div class="rec-name">${item.name}</div>
+      <div class="rec-price">💰 ${item.price.toLocaleString()} G</div>
+      <div class="rec-reason">${item.reason}</div>
+    </div>
+  `).join('');
+  container.style.display = 'grid';
+}
+
+async function fetchAIRecommend(targetProduct, excludeIds, context) {
+  const productList = products
+    .filter(p => !excludeIds.includes(p.id))
+    .map(p => `ID:${p.id} 「${p.name}」 カテゴリ:${p.category} 価格:${p.price}G タグ:${p.tags.join(',')}`)
+    .join('\n');
+
+  const prompt = context === 'top'
+    ? `あなたはファンタジー世界の通販サイト「ファマゾン」のAI魔法鑑定士です。
+以下の商品リストから、冒険者向けに特におすすめの商品を4つ選んでください。
+
+商品リスト:
+${productList}
+
+以下のJSON形式のみで返答してください（説明・前置き不要）:
+[{"id":数値,"reason":"おすすめ理由(15文字以内・ファンタジー世界観で)"},{"id":数値,"reason":"..."},{"id":数値,"reason":"..."},{"id":数値,"reason":"..."}]`
+    : `あなたはファンタジー世界の通販サイト「ファマゾン」のAI魔法鑑定士です。
+対象商品:「${targetProduct.name}」(カテゴリ:${targetProduct.category})
+
+以下の商品リストから、対象商品と相性が良く一緒に購入されやすい商品を4つ選んでください。
+
+商品リスト:
+${productList}
+
+以下のJSON形式のみで返答してください（説明・前置き不要）:
+[{"id":数値,"reason":"おすすめ理由(15文字以内・ファンタジー世界観で)"},{"id":数値,"reason":"..."},{"id":数値,"reason":"..."},{"id":数値,"reason":"..."}]`;
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 300,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+  const data = await res.json();
+  const text = data.content.map(c => c.text || '').join('').trim();
+  const clean = text.replace(/```json|```/g, '').trim();
+  const parsed = JSON.parse(clean);
+  return parsed.map(item => {
+    const p = products.find(x => x.id === item.id);
+    return p ? { ...p, reason: item.reason } : null;
+  }).filter(Boolean);
+}
+
+// トップページのレコメンド
+async function loadTopRecommend() {
+  try {
+    const items = await fetchAIRecommend(null, [], 'top');
+    document.getElementById('topRecommendLoading').style.display = 'none';
+    renderRecommendCards(items, 'topRecommendCards');
+  } catch(e) {
+    document.getElementById('topRecommendLoading').innerHTML = '<span style="color:var(--silver);font-size:0.8rem;">🔮 おすすめを取得できませんでした</span>';
+  }
+}
+
+// 商品詳細のレコメンド
+let detailRecommendLoaded = {};
+async function loadDetailRecommend(productId) {
+  if (detailRecommendLoaded[productId]) return;
+  detailRecommendLoaded[productId] = true;
+  const p = products.find(x => x.id === productId);
+  try {
+    const items = await fetchAIRecommend(p, [productId], 'detail');
+    const loading = document.getElementById('detailRecommendLoading');
+    if (loading) loading.style.display = 'none';
+    renderRecommendCards(items, 'detailRecommendCards');
+  } catch(e) {
+    const loading = document.getElementById('detailRecommendLoading');
+    if (loading) loading.innerHTML = '<span style="color:var(--silver);font-size:0.8rem;">🔮 おすすめを取得できませんでした</span>';
+  }
+}
+
+// カートに追加後のポップアップレコメンド
+let cartPopupProductId = null;
+async function showCartPopupRecommend(productId) {
+  cartPopupProductId = productId;
+  const popup = document.getElementById('cartAddPopup');
+  const loading = document.getElementById('cartPopupLoading');
+  const cards = document.getElementById('cartPopupCards');
+  loading.style.display = 'block';
+  cards.style.display = 'none';
+  cards.innerHTML = '';
+  popup.classList.add('show');
+  if (cartPopupTimeout) clearTimeout(cartPopupTimeout);
+  cartPopupTimeout = setTimeout(() => closeCartPopup(), 12000);
+
+  const cartIds = cart.map(i => i.id);
+  const p = products.find(x => x.id === productId);
+  try {
+    const items = await fetchAIRecommend(p, [productId, ...cartIds], 'cart');
+    loading.style.display = 'none';
+    renderRecommendCards(items, 'cartPopupCards');
+  } catch(e) {
+    loading.innerHTML = '<span style="color:var(--silver);font-size:0.8rem;">🔮 おすすめを取得できませんでした</span>';
+  }
+}
+
+function closeCartPopup() {
+  document.getElementById('cartAddPopup').classList.remove('show');
+  if (cartPopupTimeout) clearTimeout(cartPopupTimeout);
+}
+
 // ========== INIT ==========
 renderProducts(products);
+loadTopRecommend();
 </script>
 </body>
 </html>
