@@ -1,0 +1,1884 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>アマゾニア魔法商店 - ファンタジー世界最大の通販サイト</title>
+<style>
+  :root {
+    --primary: #1a0a2e;
+    --secondary: #2d1b69;
+    --accent: #f0a500;
+    --accent2: #7c3aed;
+    --glow: #a78bfa;
+    --text: #e2d9f3;
+    --text-dark: #1a0a2e;
+    --card-bg: #16213e;
+    --hover: #0f3460;
+    --danger: #ef4444;
+    --success: #10b981;
+    --gold: #fbbf24;
+    --silver: #9ca3af;
+    --nav-bg: #0d0620;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', 'Yu Gothic', sans-serif;
+    background: var(--primary);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ===== HEADER ===== */
+  header {
+    background: linear-gradient(135deg, #0d0620 0%, #1a0a2e 50%, #0d1b4b 100%);
+    border-bottom: 2px solid var(--accent);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 20px rgba(167, 139, 250, 0.3);
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    gap: 15px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .logo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    min-width: 140px;
+    cursor: pointer;
+  }
+
+  .logo-main {
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: var(--accent);
+    text-shadow: 0 0 15px rgba(240, 165, 0, 0.6);
+    letter-spacing: -1px;
+    line-height: 1;
+  }
+
+  .logo-sub {
+    font-size: 0.65rem;
+    color: var(--glow);
+    letter-spacing: 2px;
+  }
+
+  .logo-arrow {
+    color: var(--accent);
+    font-size: 1.2rem;
+  }
+
+  .location-btn {
+    display: flex;
+    flex-direction: column;
+    color: var(--text);
+    cursor: pointer;
+    padding: 5px 8px;
+    border-radius: 4px;
+    min-width: 120px;
+    border: 1px solid transparent;
+    background: none;
+  }
+
+  .location-btn:hover { border-color: var(--accent); }
+  .location-btn span:first-child { font-size: 0.7rem; color: var(--silver); }
+  .location-btn span:last-child { font-size: 0.85rem; font-weight: bold; color: var(--accent); }
+
+  .search-bar {
+    flex: 1;
+    display: flex;
+    height: 44px;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(167, 139, 250, 0.2);
+  }
+
+  .search-category {
+    padding: 0 12px;
+    background: var(--secondary);
+    border: none;
+    color: var(--text);
+    font-size: 0.8rem;
+    cursor: pointer;
+    border-right: 1px solid var(--glow);
+    min-width: 110px;
+  }
+
+  .search-category:hover { background: var(--hover); }
+
+  .search-input {
+    flex: 1;
+    border: none;
+    padding: 0 15px;
+    font-size: 1rem;
+    background: #fff;
+    color: #1a0a2e;
+    outline: none;
+  }
+
+  .search-btn {
+    background: var(--accent);
+    border: none;
+    padding: 0 18px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: background 0.2s;
+  }
+
+  .search-btn:hover { background: #d4920a; }
+
+  .header-actions {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+  }
+
+  .header-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 5px 8px;
+    background: none;
+    border: 1px solid transparent;
+    color: var(--text);
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    transition: border-color 0.2s;
+  }
+
+  .header-btn:hover { border-color: var(--accent); }
+  .header-btn .label { font-size: 0.7rem; color: var(--silver); }
+  .header-btn .value { font-weight: bold; font-size: 0.85rem; color: var(--text); }
+
+  .cart-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: none;
+    border: 1px solid transparent;
+    color: var(--text);
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 1.5rem;
+    transition: border-color 0.2s;
+  }
+
+  .cart-btn:hover { border-color: var(--accent); }
+  .cart-btn .cart-label { font-size: 0.85rem; font-weight: bold; }
+
+  .cart-badge {
+    position: absolute;
+    top: 2px;
+    right: 28px;
+    background: var(--accent);
+    color: var(--text-dark);
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: bold;
+  }
+
+  /* NAV BAR */
+  .header-nav {
+    background: var(--nav-bg);
+    padding: 6px 20px;
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    overflow-x: auto;
+    max-width: 100%;
+    border-top: 1px solid rgba(167,139,250,0.2);
+  }
+
+  .nav-item {
+    padding: 4px 10px;
+    white-space: nowrap;
+    cursor: pointer;
+    font-size: 0.85rem;
+    border-radius: 3px;
+    border: 1px solid transparent;
+    color: var(--text);
+    background: none;
+    transition: all 0.2s;
+  }
+
+  .nav-item:hover { border-color: white; background: rgba(255,255,255,0.05); }
+  .nav-item.active { background: var(--accent2); border-color: var(--glow); color: white; }
+
+  /* ===== HERO BANNER ===== */
+  .hero {
+    background: linear-gradient(135deg, #0d1b4b 0%, #1a0a2e 30%, #2d1b69 60%, #1a0a2e 100%);
+    padding: 30px 20px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 2px solid var(--accent2);
+  }
+
+  .hero::before {
+    content: '✨';
+    position: absolute;
+    font-size: 8rem;
+    opacity: 0.05;
+    top: -20px;
+    left: 5%;
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .hero::after {
+    content: '🌟';
+    position: absolute;
+    font-size: 6rem;
+    opacity: 0.05;
+    bottom: -10px;
+    right: 5%;
+    animation: float 8s ease-in-out infinite reverse;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+  }
+
+  .hero h2 { font-size: 1.8rem; color: var(--accent); text-shadow: 0 0 20px rgba(240,165,0,0.5); margin-bottom: 8px; }
+  .hero p { color: var(--glow); font-size: 1rem; }
+  .hero-badge {
+    display: inline-block;
+    background: var(--accent2);
+    color: white;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    margin-top: 10px;
+    box-shadow: 0 0 10px rgba(124,58,237,0.5);
+  }
+
+  /* ===== MAIN LAYOUT ===== */
+  .main-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 20px;
+  }
+
+  /* ===== SIDEBAR ===== */
+  .sidebar {
+    background: var(--card-bg);
+    border-radius: 10px;
+    padding: 15px;
+    border: 1px solid rgba(167,139,250,0.2);
+    height: fit-content;
+    position: sticky;
+    top: 110px;
+  }
+
+  .sidebar h3 {
+    font-size: 1rem;
+    color: var(--accent);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(167,139,250,0.2);
+  }
+
+  .filter-section { margin-bottom: 18px; }
+  .filter-section h4 { font-size: 0.85rem; color: var(--glow); margin-bottom: 8px; }
+
+  .filter-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+    cursor: pointer;
+    font-size: 0.82rem;
+    transition: color 0.2s;
+  }
+
+  .filter-option:hover { color: var(--accent); }
+
+  .filter-option input[type="checkbox"] {
+    accent-color: var(--accent2);
+    width: 14px;
+    height: 14px;
+  }
+
+  .star-filter { color: var(--gold); }
+
+  .price-range {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .price-input {
+    width: 80px;
+    padding: 4px 8px;
+    background: var(--secondary);
+    border: 1px solid rgba(167,139,250,0.3);
+    color: var(--text);
+    border-radius: 4px;
+    font-size: 0.8rem;
+  }
+
+  /* ===== PRODUCTS ===== */
+  .products-section { flex: 1; }
+
+  .sort-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--card-bg);
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    border: 1px solid rgba(167,139,250,0.2);
+  }
+
+  .sort-bar span { font-size: 0.85rem; color: var(--silver); }
+
+  .sort-select {
+    padding: 5px 10px;
+    background: var(--secondary);
+    border: 1px solid rgba(167,139,250,0.3);
+    color: var(--text);
+    border-radius: 4px;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+
+  .view-toggle { display: flex; gap: 5px; }
+  .view-btn {
+    background: var(--secondary);
+    border: 1px solid rgba(167,139,250,0.3);
+    color: var(--text);
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+  }
+  .view-btn.active { background: var(--accent2); border-color: var(--glow); }
+
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+  }
+
+  .products-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* ===== PRODUCT CARD ===== */
+  .product-card {
+    background: var(--card-bg);
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(167,139,250,0.15);
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+  }
+
+  .product-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--glow);
+    box-shadow: 0 8px 25px rgba(167,139,250,0.2);
+  }
+
+  .product-card.list-view {
+    display: grid;
+    grid-template-columns: 180px 1fr auto;
+    align-items: start;
+    gap: 15px;
+  }
+
+  .product-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: var(--danger);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    z-index: 2;
+  }
+
+  .product-badge.prime { background: var(--accent2); }
+  .product-badge.new { background: var(--success); }
+
+  .product-img {
+    width: 100%;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4.5rem;
+    background: linear-gradient(135deg, #0d1b4b, #1a0a2e);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .product-img::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(167,139,250,0.1), transparent 70%);
+  }
+
+  .product-card.list-view .product-img {
+    aspect-ratio: 1;
+    width: 180px;
+    height: 180px;
+    font-size: 5rem;
+  }
+
+  .product-info {
+    padding: 12px;
+  }
+
+  .product-name {
+    font-size: 0.88rem;
+    color: var(--text);
+    margin-bottom: 5px;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .product-card.list-view .product-name {
+    -webkit-line-clamp: 3;
+    font-size: 1rem;
+  }
+
+  .product-seller {
+    font-size: 0.75rem;
+    color: #60a5fa;
+    margin-bottom: 5px;
+  }
+
+  .stars {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 5px;
+  }
+
+  .star { color: var(--gold); font-size: 0.8rem; }
+  .star.empty { color: var(--silver); }
+  .review-count { font-size: 0.75rem; color: #60a5fa; }
+
+  .product-price {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .price-main {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--accent);
+  }
+
+  .price-original {
+    font-size: 0.75rem;
+    color: var(--silver);
+    text-decoration: line-through;
+  }
+
+  .price-discount {
+    font-size: 0.75rem;
+    color: var(--danger);
+    font-weight: bold;
+  }
+
+  .prime-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    background: linear-gradient(90deg, #6d28d9, #4c1d95);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    margin-top: 4px;
+  }
+
+  .product-actions {
+    padding: 0 12px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .product-card.list-view .product-actions {
+    padding: 12px;
+    justify-content: center;
+    min-width: 150px;
+  }
+
+  .btn-cart {
+    width: 100%;
+    padding: 8px;
+    background: var(--accent);
+    color: var(--text-dark);
+    border: none;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-cart:hover { background: #d4920a; transform: scale(1.02); }
+
+  .btn-buy {
+    width: 100%;
+    padding: 8px;
+    background: var(--accent2);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-buy:hover { background: #6d28d9; transform: scale(1.02); }
+
+  /* ===== CART MODAL ===== */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 2000;
+    backdrop-filter: blur(4px);
+  }
+
+  .modal-overlay.active { display: flex; align-items: center; justify-content: center; }
+
+  .modal {
+    background: var(--card-bg);
+    border: 1px solid var(--glow);
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 0 40px rgba(167,139,250,0.3);
+    animation: modalIn 0.3s ease;
+  }
+
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 20px;
+    border-bottom: 1px solid rgba(167,139,250,0.2);
+    position: sticky;
+    top: 0;
+    background: var(--card-bg);
+  }
+
+  .modal-header h2 { color: var(--accent); font-size: 1.2rem; }
+
+  .close-btn {
+    background: none;
+    border: none;
+    color: var(--text);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background 0.2s;
+  }
+
+  .close-btn:hover { background: rgba(255,255,255,0.1); }
+
+  .modal-body { padding: 20px; }
+
+  /* Cart Items */
+  .cart-item {
+    display: grid;
+    grid-template-columns: 60px 1fr auto;
+    gap: 12px;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(167,139,250,0.1);
+  }
+
+  .cart-item-img {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #0d1b4b, #1a0a2e);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+  }
+
+  .cart-item-name { font-size: 0.85rem; margin-bottom: 4px; }
+  .cart-item-price { font-size: 0.9rem; color: var(--accent); font-weight: bold; }
+
+  .cart-qty-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .qty-btn {
+    width: 28px;
+    height: 28px;
+    background: var(--secondary);
+    border: 1px solid rgba(167,139,250,0.3);
+    color: var(--text);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+  }
+
+  .qty-btn:hover { background: var(--hover); }
+
+  .cart-summary {
+    background: var(--secondary);
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 15px;
+  }
+
+  .cart-summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    font-size: 0.9rem;
+  }
+
+  .cart-summary-row.total {
+    border-top: 1px solid rgba(167,139,250,0.3);
+    margin-top: 8px;
+    padding-top: 12px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--accent);
+  }
+
+  .btn-checkout {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--accent), #d4920a);
+    color: var(--text-dark);
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 12px;
+    transition: all 0.2s;
+    box-shadow: 0 4px 15px rgba(240,165,0,0.3);
+  }
+
+  .btn-checkout:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(240,165,0,0.4); }
+
+  .empty-cart {
+    text-align: center;
+    padding: 40px;
+    color: var(--silver);
+    font-size: 1rem;
+  }
+
+  .empty-cart .icon { font-size: 3rem; display: block; margin-bottom: 10px; }
+
+  /* Product Detail Modal */
+  .product-detail-modal .modal { max-width: 750px; }
+
+  .product-detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .product-detail-img {
+    width: 100%;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8rem;
+    background: linear-gradient(135deg, #0d1b4b, #1a0a2e);
+    border-radius: 10px;
+    border: 1px solid rgba(167,139,250,0.2);
+  }
+
+  .product-detail-info h3 {
+    font-size: 1.2rem;
+    margin-bottom: 8px;
+    line-height: 1.4;
+  }
+
+  .product-detail-info .seller { color: #60a5fa; font-size: 0.85rem; margin-bottom: 10px; }
+
+  .product-detail-info .stars { margin-bottom: 12px; }
+
+  .product-detail-price {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--accent);
+    margin-bottom: 5px;
+  }
+
+  .product-detail-desc {
+    font-size: 0.85rem;
+    line-height: 1.7;
+    color: var(--text);
+    margin: 15px 0;
+    padding: 12px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 8px;
+    border-left: 3px solid var(--glow);
+  }
+
+  .product-specs {
+    margin: 15px 0;
+  }
+
+  .product-specs h4 { font-size: 0.9rem; color: var(--glow); margin-bottom: 8px; }
+
+  .spec-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.82rem;
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(167,139,250,0.1);
+  }
+
+  .spec-row .spec-label { color: var(--silver); }
+  .spec-row .spec-value { color: var(--text); }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: var(--success);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    z-index: 3000;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  /* Rankings */
+  .ranking-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: bold;
+    z-index: 2;
+  }
+
+  .rank-1 { background: var(--gold); color: #1a0a2e; }
+  .rank-2 { background: var(--silver); color: #1a0a2e; }
+  .rank-3 { background: #cd7f32; color: white; }
+
+  /* Footer */
+  footer {
+    background: var(--nav-bg);
+    border-top: 2px solid rgba(167,139,250,0.2);
+    padding: 40px 20px 20px;
+    margin-top: 40px;
+    text-align: center;
+  }
+
+  .footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+
+  .footer-links a {
+    color: var(--glow);
+    text-decoration: none;
+    font-size: 0.85rem;
+  }
+
+  .footer-links a:hover { color: var(--accent); }
+
+  .footer-copy { color: var(--silver); font-size: 0.8rem; }
+
+  /* Checkout Modal */
+  .checkout-step { display: none; }
+  .checkout-step.active { display: block; }
+
+  .checkout-form input, .checkout-form select {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--secondary);
+    border: 1px solid rgba(167,139,250,0.3);
+    color: var(--text);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+  }
+
+  .checkout-form label {
+    display: block;
+    font-size: 0.82rem;
+    color: var(--glow);
+    margin-bottom: 4px;
+  }
+
+  .order-complete {
+    text-align: center;
+    padding: 30px;
+  }
+
+  .order-complete .icon { font-size: 4rem; display: block; margin-bottom: 15px; animation: bounce 0.6s ease; }
+  .order-complete h3 { color: var(--success); font-size: 1.5rem; margin-bottom: 10px; }
+  .order-complete p { color: var(--silver); font-size: 0.9rem; line-height: 1.6; }
+  .order-number { background: var(--secondary); padding: 8px 15px; border-radius: 6px; color: var(--accent); font-family: monospace; margin: 10px 0; display: inline-block; }
+
+  @keyframes bounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--primary); }
+  ::-webkit-scrollbar-thumb { background: var(--secondary); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent2); }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .main-container { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .header-top { flex-wrap: wrap; }
+  }
+
+  @media (max-width: 600px) {
+    .product-detail-grid { grid-template-columns: 1fr; }
+    .products-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* Wishlist button */
+  .btn-wishlist {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(0,0,0,0.4);
+    border: none;
+    color: var(--silver);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    z-index: 3;
+  }
+
+  .btn-wishlist:hover, .btn-wishlist.active { color: var(--danger); background: rgba(239,68,68,0.2); }
+
+  /* Loading */
+  .loading { text-align: center; padding: 40px; color: var(--glow); font-size: 2rem; animation: pulse 1s infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  /* Tabs */
+  .detail-tabs { display: flex; gap: 5px; margin: 15px 0 10px; border-bottom: 1px solid rgba(167,139,250,0.2); }
+  .detail-tab { padding: 8px 14px; background: none; border: none; color: var(--silver); cursor: pointer; font-size: 0.85rem; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .detail-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* Reviews */
+  .review { padding: 10px 0; border-bottom: 1px solid rgba(167,139,250,0.1); }
+  .review-header { display: flex; justify-content: space-between; margin-bottom: 5px; }
+  .review-author { font-size: 0.82rem; font-weight: bold; color: var(--glow); }
+  .review-text { font-size: 0.82rem; color: var(--text); line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-top">
+    <div class="logo" onclick="goHome()">
+      <div class="logo-main">⚔️ Amazonia</div>
+      <div class="logo-sub">魔 法 商 店</div>
+    </div>
+
+    <button class="location-btn">
+      <span>配達先の界</span>
+      <span>📍 中央王国・王都</span>
+    </button>
+
+    <div class="search-bar">
+      <select class="search-category" id="searchCat">
+        <option>すべてのカテゴリ</option>
+        <option>武器・防具</option>
+        <option>魔法・呪文</option>
+        <option>薬草・ポーション</option>
+        <option>召喚生物</option>
+        <option>呪われたアイテム</option>
+        <option>食料・珍味</option>
+      </select>
+      <input class="search-input" type="text" id="searchInput" placeholder="商品、魔法、生物を検索..." oninput="filterProducts()">
+      <button class="search-btn">🔍</button>
+    </div>
+
+    <div class="header-actions">
+      <button class="header-btn" onclick="showLanguageModal()">
+        <span class="label">言語</span>
+        <span class="value">🌍 エルフ語</span>
+      </button>
+      <button class="header-btn">
+        <span class="label">アカウント</span>
+        <span class="value">勇者さん ▾</span>
+      </button>
+      <button class="header-btn">
+        <span class="label">魔法リスト</span>
+        <span class="value">❤️ お気に入り</span>
+      </button>
+      <button class="cart-btn" onclick="openCart()">
+        🛒
+        <span class="cart-label">カート</span>
+        <span class="cart-badge" id="cartBadge">0</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="header-nav">
+    <button class="nav-item active" onclick="filterCategory('all', this)">🏰 すべて</button>
+    <button class="nav-item" onclick="filterCategory('weapon', this)">⚔️ 武器・防具</button>
+    <button class="nav-item" onclick="filterCategory('magic', this)">✨ 魔法・呪文</button>
+    <button class="nav-item" onclick="filterCategory('potion', this)">🧪 ポーション</button>
+    <button class="nav-item" onclick="filterCategory('creature', this)">🐉 召喚生物</button>
+    <button class="nav-item" onclick="filterCategory('cursed', this)">💀 呪われた品</button>
+    <button class="nav-item" onclick="filterCategory('food', this)">🍖 食料・珍味</button>
+    <button class="nav-item" onclick="filterCategory('transport', this)">🦅 乗り物</button>
+    <button class="nav-item" onclick="filterCategory('home', this)">🏠 城・家具</button>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <h2>🌟 今だけ！魔界セール開催中 🌟</h2>
+  <p>ドラゴンの卵からエルフの弓まで、ファンタジー世界のあらゆるものが揃う</p>
+  <div class="hero-badge">⚡ プライム会員なら魔法陣転送で翌日お届け</div>
+</div>
+
+<!-- MAIN -->
+<div class="main-container">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <h3>🔮 絞り込み検索</h3>
+
+    <div class="filter-section">
+      <h4>レアリティ</h4>
+      <label class="filter-option"><input type="checkbox" checked> <span>⬜ コモン</span></label>
+      <label class="filter-option"><input type="checkbox" checked> <span>🟩 アンコモン</span></label>
+      <label class="filter-option"><input type="checkbox" checked> <span>🟦 レア</span></label>
+      <label class="filter-option"><input type="checkbox" checked> <span>🟪 エピック</span></label>
+      <label class="filter-option"><input type="checkbox" checked> <span>🟨 レジェンダリー</span></label>
+    </div>
+
+    <div class="filter-section">
+      <h4>価格帯（ゴールド）</h4>
+      <div class="price-range">
+        <input type="number" class="price-input" placeholder="最小" min="0">
+        <span>〜</span>
+        <input type="number" class="price-input" placeholder="最大" min="0">
+      </div>
+    </div>
+
+    <div class="filter-section">
+      <h4>評価</h4>
+      <label class="filter-option"><input type="checkbox"> <span class="star-filter">⭐⭐⭐⭐⭐ 以上</span></label>
+      <label class="filter-option"><input type="checkbox"> <span class="star-filter">⭐⭐⭐⭐ 以上</span></label>
+      <label class="filter-option"><input type="checkbox"> <span class="star-filter">⭐⭐⭐ 以上</span></label>
+    </div>
+
+    <div class="filter-section">
+      <h4>配達速度</h4>
+      <label class="filter-option"><input type="checkbox"> <span>🪄 呪文転送（即日）</span></label>
+      <label class="filter-option"><input type="checkbox"> <span>🦅 鷹便（翌日）</span></label>
+      <label class="filter-option"><input type="checkbox"> <span>🐎 馬車便（3日）</span></label>
+    </div>
+
+    <div class="filter-section">
+      <h4>出品者</h4>
+      <label class="filter-option"><input type="checkbox"> <span>🏰 王立商会</span></label>
+      <label class="filter-option"><input type="checkbox"> <span>🧙 魔法師ギルド</span></label>
+      <label class="filter-option"><input type="checkbox"> <span>🧝 エルフ工房</span></label>
+      <label class="filter-option"><input type="checkbox"> <span>⚒️ ドワーフ鍛冶</span></label>
+      <label class="filter-option"><input type="checkbox"> <span>💀 闇商人</span></label>
+    </div>
+  </aside>
+
+  <!-- PRODUCTS -->
+  <div class="products-section">
+    <div class="sort-bar">
+      <span id="productCount">商品 読み込み中...</span>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <select class="sort-select" id="sortSelect" onchange="sortProducts()">
+          <option value="default">おすすめ順</option>
+          <option value="price-asc">価格：安い順</option>
+          <option value="price-desc">価格：高い順</option>
+          <option value="rating">評価が高い順</option>
+          <option value="new">新着順</option>
+          <option value="discount">割引率が高い順</option>
+        </select>
+        <div class="view-toggle">
+          <button class="view-btn active" id="gridViewBtn" onclick="setView('grid')">⊞ グリッド</button>
+          <button class="view-btn" id="listViewBtn" onclick="setView('list')">☰ リスト</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="products-grid" id="productsContainer"></div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-links">
+    <a href="#">🏛️ 会社概要</a>
+    <a href="#">📜 利用規約</a>
+    <a href="#">🔒 プライバシーポリシー</a>
+    <a href="#">💌 お問い合わせ</a>
+    <a href="#">🛡️ 魔物被害補償</a>
+    <a href="#">🌐 他の界への配達</a>
+  </div>
+  <p class="footer-copy">© 2024 アマゾニア魔法商店株式会社 | 王立商業組合認定 No.00042</p>
+  <p class="footer-copy" style="margin-top:5px;">⚠️ 魔法アイテムの使用は自己責任でお願いします。死亡・異界転移等の責任は負いかねます。</p>
+</footer>
+
+<!-- CART MODAL -->
+<div class="modal-overlay" id="cartModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>🛒 魔法カート</h2>
+      <button class="close-btn" onclick="closeCart()">✕</button>
+    </div>
+    <div class="modal-body" id="cartBody"></div>
+  </div>
+</div>
+
+<!-- PRODUCT DETAIL MODAL -->
+<div class="modal-overlay product-detail-modal" id="productDetailModal">
+  <div class="modal" style="max-width:800px;">
+    <div class="modal-header">
+      <h2 id="detailTitle">商品詳細</h2>
+      <button class="close-btn" onclick="closeDetail()">✕</button>
+    </div>
+    <div class="modal-body" id="detailBody"></div>
+  </div>
+</div>
+
+<!-- CHECKOUT MODAL -->
+<div class="modal-overlay" id="checkoutModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>🏰 ご注文手続き</h2>
+      <button class="close-btn" onclick="closeCheckout()">✕</button>
+    </div>
+    <div class="modal-body" id="checkoutBody"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ========== DATA ==========
+const products = [
+  // WEAPONS
+  {
+    id: 1, category: 'weapon',
+    emoji: '⚔️', name: '伝説の剣「エクスカリバー改」- 魔力強化版',
+    seller: 'ドワーフ鍛冶マスター工房', rarity: 'legendary',
+    price: 99800, originalPrice: 150000, discount: 33,
+    rating: 4.9, reviews: 4823,
+    prime: true, isNew: false,
+    desc: '湖の乙女より改造許可を得た最強の聖剣。魔力を300%増幅し、悪を圧倒する伝説の一振り。切れ味は永遠に保証（魔界の存在には別途5%増し）。ドラゴンの鱗すら一撃で貫く。',
+    specs: [['種別', '両手剣（片手でも可・魔力消費あり）'], ['攻撃力', '+9999'], ['魔法耐性', '+500'], ['重量', '3.5kg（持ち主補正あり）'], ['対応レベル', '999以上推奨'], ['素材', 'ミスリル合金・龍の牙・光の結晶']],
+    tags: ['#聖剣', '#最強武器', '#魔王討伐'],
+    delivery: '呪文転送（即日）'
+  },
+  {
+    id: 2, category: 'weapon',
+    emoji: '🗡️', name: 'エルフ製 曲剣「月光の刃」（限定品）',
+    seller: 'シルヴァーエルフ工房', rarity: 'epic',
+    price: 45000, originalPrice: 52000, discount: 13,
+    rating: 4.7, reviews: 1209,
+    prime: true, isNew: false,
+    desc: 'エルフの職人が300年かけて仕上げた最高傑作。月光を帯びるたびに威力が増す不思議な曲剣。夜間戦闘に特化しており、闇の生物に対してダメージ2倍。',
+    specs: [['種別', '片手曲剣'], ['攻撃力', '+3200'], ['特殊効果', '月光充電・暗闇ダメージ2倍'], ['重量', '1.2kg'], ['素材', 'ムーンシルバー'], ['耐久度', '無限（月光補充が必要）']],
+    tags: ['#エルフ製', '#夜戦特化', '#レア'],
+    delivery: '鷹便（翌日）'
+  },
+  {
+    id: 3, category: 'weapon',
+    emoji: '🏹', name: '天使の弓「聖光アロー」+ 矢100本セット',
+    seller: '天空神殿公式ショップ', rarity: 'rare',
+    price: 28000, originalPrice: 35000, discount: 20,
+    rating: 4.5, reviews: 892,
+    prime: false, isNew: true,
+    desc: '天使族が使用する神聖な弓。矢に神聖魔法が付与され、アンデッド系には即死効果あり。射程は通常の3倍。付属の矢は使い終わると天に戻り、翌日再補充される。',
+    specs: [['種別', '魔法弓'], ['攻撃力', '+2800'], ['射程', '500m'], ['特殊効果', 'アンデッド即死・聖属性'], ['素材', '聖木・天使の羽根']],
+    tags: ['#聖属性', '#アンデッド特効', '#矢セット'],
+    delivery: '馬車便（3日）'
+  },
+  {
+    id: 4, category: 'weapon',
+    emoji: '🛡️', name: '竜鱗の大盾「難攻不落」（ゴールド伝説仕様）',
+    seller: 'ドラゴンスレイヤー商会', rarity: 'legendary',
+    price: 75000, originalPrice: 75000, discount: 0,
+    rating: 4.8, reviews: 2341,
+    prime: true, isNew: false,
+    desc: 'ゴールドドラゴンの鱗500枚を使用した防御最強の盾。魔法攻撃を97%反射し、物理攻撃もほぼ無効化。重すぎてドワーフでも持てないため、魔力で浮かせる機能付き。',
+    specs: [['種別', '大型魔法盾'], ['防御力', '+8000'], ['魔法反射率', '97%'], ['重量', '80kg（重力軽減付き）'], ['素材', 'ゴールドドラゴン鱗']],
+    tags: ['#最強盾', '#魔法反射', '#伝説防具'],
+    delivery: '馬車便（3日）'
+  },
+
+  // MAGIC
+  {
+    id: 5, category: 'magic',
+    emoji: '📜', name: '禁断の魔法書「ネクロノミコン 復刻版」',
+    seller: '闇の書店ヴォールデン', rarity: 'legendary',
+    price: 120000, originalPrice: 200000, discount: 40,
+    rating: 4.2, reviews: 333,
+    prime: false, isNew: false,
+    desc: '古代の闇魔法がすべて記された禁書の復刻版。アンデッド召喚・時間操作・次元転移など99種類の魔法を習得できる。読了後に一時的に狂気に陥ることがあります（仕様です）。使用は自己責任で。',
+    specs: [['種別', '魔法書（禁書指定）'], ['収録魔法数', '99種'], ['難易度', '最高（要魔法師等級10以上）'], ['ページ数', '666ページ'], ['言語', '古代悪魔語（翻訳呪文付き）'], ['副作用', '一時的狂気・悪夢']],
+    tags: ['#禁書', '#闇魔法', '#強力'],
+    delivery: '闇の使者（3日）'
+  },
+  {
+    id: 6, category: 'magic',
+    emoji: '💎', name: '魔力結晶「マナストーン」SSグレード 5個セット',
+    seller: '魔法師ギルド公式', rarity: 'epic',
+    price: 35000, originalPrice: 42000, discount: 16,
+    rating: 4.6, reviews: 5621,
+    prime: true, isNew: false,
+    desc: '魔法使いに必須のマナストーン最高品質版。1個で1000マナを蓄積できる。色が深いほど純度が高く、このSSグレードは色が透明に輝く最高品質。',
+    specs: [['グレード', 'SS（最高品質）'], ['蓄積マナ', '1000/個'], ['純度', '99.9%'], ['持続時間', '半永久（定期充電必要）'], ['産地', 'マナの泉産（世界最高地）']],
+    tags: ['#マナ', '#魔法必需品', '#高品質'],
+    delivery: '呪文転送（即日）'
+  },
+  {
+    id: 7, category: 'magic',
+    emoji: '🔮', name: '未来予知の水晶玉（精度98%・クーポン対応）',
+    seller: '予言者サラの店', rarity: 'rare',
+    price: 18800, originalPrice: 25000, discount: 25,
+    rating: 4.0, reviews: 782,
+    prime: true, isNew: false,
+    desc: '未来を98%の精度で予言できる水晶玉。残り2%は「運命の揺らぎ」により変化します（返品対象外）。使い方は簡単で、触れて念じるだけ。1日3回まで占い可能。',
+    specs: [['予知精度', '98%（± 2%）'], ['サイズ', '直径20cm'], ['1日使用回数', '3回'], ['電源', '不要（魔力自給式）'], ['素材', '古代水晶']],
+    tags: ['#占い', '#未来予知', '#便利'],
+    delivery: '鷹便（翌日）'
+  },
+  {
+    id: 8, category: 'magic',
+    emoji: '🌀', name: '転移魔法陣セット（10回分使い切り）',
+    seller: '転移魔法師組合', rarity: 'uncommon',
+    price: 8800, originalPrice: 12000, discount: 26,
+    rating: 4.3, reviews: 3401,
+    prime: true, isNew: true,
+    desc: '好きな場所に瞬時に転移できる魔法陣シート。1枚で1回、10枚セット。座標を書き込んで踏むだけで転移完了。魔界・異界への転移は追加料金1000ゴールド必要。',
+    specs: [['使用回数', '10回分（10枚セット）'], ['転移距離', '最大10000km'], ['精度', '±5m（近距離はより正確）'], ['サイズ', 'A4サイズ（折りたたみ可）'], ['有効期限', '購入後1年']],
+    tags: ['#転移', '#便利グッズ', '#コスパ最強'],
+    delivery: '呪文転送（即日）'
+  },
+
+  // POTIONS
+  {
+    id: 9, category: 'potion',
+    emoji: '🧪', name: '最高級 HP回復ポーション「不死の命水」1本',
+    seller: '錬金術師協会公認ショップ', rarity: 'epic',
+    price: 12000, originalPrice: 15000, discount: 20,
+    rating: 4.8, reviews: 8923,
+    prime: true, isNew: false,
+    desc: '即座にHP全回復＋最大HP20%増加効果。伝説の薬草「イモータルハーブ」を使用。飲んだ瞬間に光り輝き、傷が見る見るうちに閉じていきます。1本で致命傷から復活可能。',
+    specs: [['HP回復量', '全回復 + MAX HP +20%'], ['効果時間', '即時'], ['容量', '100ml'], ['原材料', 'イモータルハーブ・龍の血・光の水'], ['賞味期限', '50年'], ['副作用', 'なし（体質による）']],
+    tags: ['#HP回復', '#必需品', '#冒険者必携'],
+    delivery: '呪文転送（即日）'
+  },
+  {
+    id: 10, category: 'potion',
+    emoji: '💜', name: 'MP完全回復薬「賢者の水」特別版',
+    seller: '魔法師ギルド公式', rarity: 'rare',
+    price: 9500, originalPrice: 9500, discount: 0,
+    rating: 4.6, reviews: 4201,
+    prime: true, isNew: false,
+    desc: '魔法師に必須のMP全回復薬。特別版はさらにMP最大値も500増加する特典付き。無色透明で無味無臭。戦闘中でも1秒で効果が発動するほど即効性が高い。',
+    specs: [['MP回復量', '全回復 + MAX MP +500'], ['効果時間', '即時（1秒）'], ['容量', '50ml'], ['持続ボーナス', '24時間MP消費25%減'], ['賞味期限', '30年']],
+    tags: ['#MP回復', '#魔法師必携', '#即効性'],
+    delivery: '呪文転送（即日）'
+  },
+  {
+    id: 11, category: 'potion',
+    emoji: '🌿', name: '変身ポーション「千の顔」セット（5種×2本）',
+    seller: '謎の錬金術師 ミスター X', rarity: 'rare',
+    price: 22000, originalPrice: 30000, discount: 26,
+    rating: 3.9, reviews: 521,
+    prime: false, isNew: true,
+    desc: '5種類の変身が楽しめるポーションセット。オーク・エルフ・ドワーフ・ドラゴン人・天使に変身できる。効果時間は各2時間。変身中は声も変わります。',
+    specs: [['種類', '5種×2本 計10本'], ['変身可能種族', 'オーク/エルフ/ドワーフ/ドラゴン人/天使'], ['効果時間', '各2時間'], ['解除方法', '水に浸かる or 専用解除薬'], ['副作用', 'まれに変身が解けなくなる（1/10000の確率）']],
+    tags: ['#変身', '#変装', '#面白ポーション'],
+    delivery: '鷹便（翌日）'
+  },
+  {
+    id: 12, category: 'potion',
+    emoji: '❤️‍🔥', name: '恋愛ポーション「運命の赤糸」（効果72時間）',
+    seller: '愛の魔女 ロザリア', rarity: 'uncommon',
+    price: 5800, originalPrice: 8000, discount: 27,
+    rating: 3.2, reviews: 10234,
+    prime: false, isNew: false,
+    desc: '飲んだ後に最初に目が合った相手に恋をしてしまうポーション。効果時間は72時間。注意：効果中は理性的判断が低下します。使用は相手の同意を得てからどうぞ（倫理憲章第3条）。',
+    specs: [['効果時間', '72時間'], ['対象', '異性・同性・種族問わず対応'], ['副作用', '理性低下・食欲増進'], ['解除方法', '解毒ポーション or 自然消滅待ち'], ['推奨年齢', '18歳以上']],
+    tags: ['#恋愛', '#ロマンス', '#要注意'],
+    delivery: '馬車便（3日）'
+  },
+
+  // CREATURES
+  {
+    id: 13, category: 'creature',
+    emoji: '🐉', name: 'レッドドラゴン幼体（雌・飼育証明書付き）',
+    seller: 'ドラゴンブリーダー王国公認', rarity: 'legendary',
+    price: 5000000, originalPrice: 8000000, discount: 37,
+    rating: 4.9, reviews: 88,
+    prime: false, isNew: false,
+    desc: '希少なレッドドラゴンの幼体を限定販売。飼育証明書・王立許可証付き。炎のブレスは生後6ヶ月から使用可能。最大成長時には人語を話します。餌代は別途かかります（推奨：牛20頭/月）。',
+    specs: [['現在のサイズ', '約1.5m'], ['成長後のサイズ', '約50m'], ['ブレス属性', '炎（温度3000℃）'], ['寿命', '5000年'], ['餌', '牛・羊（生）/月20頭'], ['必要な住居', '最低2000㎡の岩窟']],
+    tags: ['#ドラゴン', '#ペット', '#最強召喚獣'],
+    delivery: '特別大型便（7日）'
+  },
+  {
+    id: 14, category: 'creature',
+    emoji: '🦄', name: 'ユニコーン（虹色鬣・癒し効果付き）',
+    seller: '聖なる生き物保護協会', rarity: 'epic',
+    price: 800000, originalPrice: 1200000, discount: 33,
+    rating: 5.0, reviews: 412,
+    prime: false, isNew: false,
+    desc: '純白の体に虹色の鬣を持つ幸運の象徴・ユニコーン。乗馬すると自動的に幸運値が+100上昇。角の光で傷を癒す聖なる能力あり。穏やかで従順な性格。',
+    specs: [['体長', '約2m'], ['最大速度', '時速300km（飛行時500km）'], ['特殊能力', '幸運付与・聖なる光による癒し'], ['性格', '穏やか・従順'], ['平均寿命', '1000年'], ['好物', '虹色の草・泉の水']],
+    tags: ['#ユニコーン', '#幸運', '#聖なる生き物'],
+    delivery: '特別護送（5日）'
+  },
+  {
+    id: 15, category: 'creature',
+    emoji: '🦅', name: '巨大フェニックス（転生機能付き・一回分）',
+    seller: '不死鳥繁殖組合', rarity: 'legendary',
+    price: 2800000, originalPrice: 4000000, discount: 30,
+    rating: 4.7, reviews: 62,
+    prime: false, isNew: false,
+    desc: '伝説の不死鳥フェニックス。死んでも炎から蘇生する能力を持つ。主人が一度だけ死亡した際に命を分けることも可能（主人蘇生1回限定機能付き）。全身が炎に包まれているが攻撃には使用不可（飾り仕様）。',
+    specs: [['翼開長', '30m'], ['炎の温度', '5000℃（無害化処理済み）'], ['転生回数', '無限（主人への命分け：1回）'], ['飛行速度', '時速1000km'], ['寿命', '無限'], ['必要な飼育環境', '温泉付き岩山']],
+    tags: ['#フェニックス', '#不死', '#最強召喚獣'],
+    delivery: '特別大型便（10日）'
+  },
+  {
+    id: 16, category: 'creature',
+    emoji: '🧚', name: '家庭用妖精「フェアリーメイド」（家事サポート型）',
+    seller: '妖精工房 ティンカー', rarity: 'uncommon',
+    price: 45000, originalPrice: 60000, discount: 25,
+    rating: 4.4, reviews: 6701,
+    prime: true, isNew: false,
+    desc: '家事全般をこなす便利な妖精。掃除・洗濯・料理が得意で、主人に忠実。体長15cmとコンパクト。魔法で家の隅々まで清潔に保ちます。語学：エルフ語・人語・ドワーフ語対応。',
+    specs: [['体長', '約15cm'], ['専門', '掃除・洗濯・料理'], ['言語', 'エルフ語/人語/ドワーフ語'], ['稼働時間', '18時間/日'], ['主食', '砂糖・蜂蜜（少量）'], ['性格', '陽気・勤勉']],
+    tags: ['#家事', '#妖精', '#家庭向け'],
+    delivery: '呪文転送（即日）'
+  },
+
+  // CURSED
+  {
+    id: 17, category: 'cursed',
+    emoji: '💀', name: '呪われた指輪「終焉の一環」（解呪チケット付き）',
+    seller: '闇商人ダーク・ヴォールド', rarity: 'legendary',
+    price: 150000, originalPrice: 150000, discount: 0,
+    rating: 3.5, reviews: 98,
+    prime: false, isNew: false,
+    desc: '装備すると絶大な力を得られる代わりに毎日1のHPが永続的に消えていく指輪。解呪チケット（1枚）付属。強大な力が欲しい方には最高の品。1万人の勇者が使用し、生還率は3割。',
+    specs: [['攻撃力補正', '+99999（全能力）'], ['呪い効果', 'HP-1/日（永続）'], ['解呪難易度', 'A+（神官レベル100必要）'], ['素材', '呪われたミスリル・死者の魂'], ['解呪チケット', '1枚付属（市場価格80000G相当）']],
+    tags: ['#呪い', '#強力', '#危険'],
+    delivery: '闇の使者（3日）'
+  },
+  {
+    id: 18, category: 'cursed',
+    emoji: '🪄', name: '無限ループ杖「永遠の魔法陣」（バグ品・激安）',
+    seller: '訳あり品商店 B級市場', rarity: 'rare',
+    price: 2980, originalPrice: 50000, discount: 94,
+    rating: 2.8, reviews: 1823,
+    prime: false, isNew: false,
+    desc: 'バグにより魔法が永遠に発動し続ける壊れた杖。止め方は不明。購入者の半数が魔法を止めることができずに困っています。「止まらない魔法が欲しい」方には最高の品です。返品不可。',
+    specs: [['魔法発動回数', '無限（止まりません）'], ['魔法種類', 'ランダム'], ['MP消費', '0（なぜか）'], ['バグ原因', '不明'], ['修理可否', '修理不可能'], ['返品', '返品不可（仕様のため）']],
+    tags: ['#バグ品', '#激安', '#要注意'],
+    delivery: '馬車便（3日）'
+  },
+
+  // FOOD
+  {
+    id: 19, category: 'food',
+    emoji: '🍖', name: 'ドラゴン肉の特製ステーキ（1ポンド・冷凍）',
+    seller: 'ドラゴン料理専門店 竜の厨', rarity: 'rare',
+    price: 38000, originalPrice: 50000, discount: 24,
+    rating: 4.8, reviews: 2012,
+    prime: true, isNew: false,
+    desc: '絶滅危惧種除外のファームドラゴン100%使用。調理するだけで異常なほど旨味が広がる幻の肉。食べると24時間だけ炎への耐性が+100上昇。付属の特製スパイスで焼くのがおすすめ。',
+    specs: [['重量', '1ポンド（約450g）'], ['産地', 'ファームドラゴン（養殖）'], ['調理法', 'グリル・炙り推奨'], ['食後効果', '炎耐性+100（24時間）'], ['保存方法', '冷凍保存（賞味期限1年）']],
+    tags: ['#グルメ', '#ドラゴン料理', '#食後効果あり'],
+    delivery: '冷凍便（2日）'
+  },
+  {
+    id: 20, category: 'food',
+    emoji: '🍄', name: '神秘のキノコ「世界樹の実」（知力+200効果）',
+    seller: 'エルフ農園 ガラドリエル', rarity: 'epic',
+    price: 15000, originalPrice: 20000, discount: 25,
+    rating: 4.5, reviews: 891,
+    prime: false, isNew: true,
+    desc: '世界樹の根元でのみ採れる幻のキノコ。食べると30日間知力が200上昇し、学習速度が3倍になる。魔法の習得も格段に早くなる。1個で高額ですが、その価値は十分あります。',
+    specs: [['効果', '知力+200（30日間）'], ['サイズ', '直径10cm'], ['産地', '世界樹の根元（年産20個のみ）'], ['賞味期限', '6ヶ月（生）'], ['調理法', 'そのまま食べる or 煎じる']],
+    tags: ['#知力UP', '#世界樹', '#希少食材'],
+    delivery: '鷹便（翌日）'
+  },
+  {
+    id: 21, category: 'food',
+    emoji: '🍷', name: '1000年熟成 エルフワイン「永遠の雫」（1本）',
+    seller: 'エルフの里 醸造所', rarity: 'legendary',
+    price: 500000, originalPrice: 500000, discount: 0,
+    rating: 5.0, reviews: 17,
+    prime: false, isNew: false,
+    desc: '1000年熟成させたエルフ族秘蔵のワイン。飲むだけで10年若返り、魔法の親和性が永続的に+50増加。年間3本のみ市場に出回る超希少品。空き瓶でも高値がつく伝説の一本。',
+    specs: [['熟成期間', '1000年'], ['若返り効果', '10年（永続）'], ['魔法親和性', '永続+50'], ['アルコール度数', '12%'], ['産地', 'エルフ聖域 天然ブドウ'], ['年間生産', '3本のみ']],
+    tags: ['#伝説', '#若返り', '#超希少'],
+    delivery: '特別護送（5日）'
+  },
+
+  // TRANSPORT
+  {
+    id: 22, category: 'transport',
+    emoji: '🦅', name: 'グリフォン「空の王者」（乗用・調教済み）',
+    seller: 'グリフォン牧場 ヒポ', rarity: 'epic',
+    price: 650000, originalPrice: 900000, discount: 27,
+    rating: 4.6, reviews: 234,
+    prime: false, isNew: false,
+    desc: '空陸両用のグリフォン。完全に調教済みで初心者でも扱いやすい。最高時速600kmで大陸間移動もラクラク。荷物は100kgまで積載可能。名前「アクィラ」（変更可）。',
+    specs: [['飛行速度', '最高時速600km'], ['積載量', '100kg'], ['航続距離', '2000km（連続飛行）'], ['性格', '従順（調教済み）'], ['獰猛度', '低（ペット向け）'], ['名前', 'アクィラ（変更可）']],
+    tags: ['#乗り物', '#空飛ぶ', '#グリフォン'],
+    delivery: '特別大型便（7日）'
+  },
+  {
+    id: 23, category: 'transport',
+    emoji: '🧙', name: '自動操縦 魔法ほうき「スカイマスター X1」',
+    seller: '空飛ぶ道具工房', rarity: 'rare',
+    price: 88000, originalPrice: 120000, discount: 26,
+    rating: 4.3, reviews: 3210,
+    prime: true, isNew: true,
+    desc: '最新型の魔法ほうき。自動操縦モード搭載で目的地を言うだけで連れて行ってくれる。最高時速300km。嵐の中でも安定して飛行できる嵐耐性機能付き。定期メンテ不要。',
+    specs: [['飛行速度', '最高時速300km'], ['自動操縦', '搭載（音声認識）'], ['悪天候耐性', '嵐・吹雪・砂嵐対応'], ['積載量', '2名+荷物30kg'], ['動力', '魔力自給式（補充不要）'], ['色', '漆黒（他5色対応）']],
+    tags: ['#ほうき', '#自動操縦', '#快適'],
+    delivery: '呪文転送（即日）'
+  },
+
+  // HOME
+  {
+    id: 24, category: 'home',
+    emoji: '🏰', name: '移動城「ハウルの動く城タイプ」（コンパクト版）',
+    seller: '城建築師ハウル工房', rarity: 'legendary',
+    price: 99000000, originalPrice: 150000000, discount: 34,
+    rating: 4.7, reviews: 8,
+    prime: false, isNew: false,
+    desc: '歩いて移動できる城。コンパクト版でも内部は広大な空間（外観4m×内部100m×多次元空間拡張可）。魔法部屋・錬金術室・温泉・ダンジョン（訓練用）付き。年間維持費：石炭1000トン分の魔力。',
+    specs: [['外観サイズ', '4m × 4m × 6m'], ['内部広さ', '100m × 多次元拡張可'], ['移動速度', '時速30km'], ['付帯設備', '温泉・錬金術室・魔法部屋・訓練ダンジョン'], ['維持費', '魔力（石炭1000t相当/年）'], ['重量', '800t（反重力装置付き）']],
+    tags: ['#城', '#移動城', '#豪邸'],
+    delivery: '特別搬入（30日）'
+  },
+  {
+    id: 25, category: 'home',
+    emoji: '🛏️', name: '雲製ベッド「夢幻の寝床」（天使推奨品）',
+    seller: '天空工芸品 ネブラ', rarity: 'epic',
+    price: 320000, originalPrice: 400000, discount: 20,
+    rating: 4.9, reviews: 1203,
+    prime: true, isNew: false,
+    desc: '本物の雲を圧縮して作ったベッド。寝るだけで良い夢を見ることができる魔法付き。疲労回復効率3倍。悪夢を見ないように悪夢封じの術式が織り込まれている。定員2名。',
+    specs: [['素材', '第7天国産 積乱雲（圧縮）'], ['疲労回復', '効率3倍'], ['夢の質', '至高（悪夢封じ術式込み）'], ['定員', '2名'], ['浮力', '有（天井付近で浮遊）'], ['サイズ', '200cm × 180cm']],
+    tags: ['#寝具', '#夢', '#疲労回復'],
+    delivery: '鷹便（翌日）'
+  },
+];
+
+// ========== STATE ==========
+let cart = [];
+let currentView = 'grid';
+let currentCategory = 'all';
+let wishlist = new Set();
+
+// ========== RENDER PRODUCTS ==========
+function renderProducts(data) {
+  const container = document.getElementById('productsContainer');
+  container.className = currentView === 'grid' ? 'products-grid' : 'products-list';
+
+  if (data.length === 0) {
+    container.innerHTML = '<div class="loading">🔍 商品が見つかりませんでした</div>';
+    return;
+  }
+
+  document.getElementById('productCount').textContent = `${data.length}件の商品`;
+
+  container.innerHTML = data.map((p, index) => {
+    const stars = renderStars(p.rating);
+    const rankBadge = index < 3 ? `<div class="ranking-badge rank-${index+1}">${['🥇','🥈','🥉'][index]}</div>` : '';
+    const saleBadge = p.discount > 0 ? `<div class="product-badge">-${p.discount}%</div>` : '';
+    const primeBadge = p.prime ? `<div class="product-badge prime">⚡PRIME</div>` : '';
+    const newBadge = p.isNew ? `<div class="product-badge new">NEW</div>` : '';
+    const firstBadge = saleBadge || primeBadge || newBadge;
+
+    const wishActive = wishlist.has(p.id) ? 'active' : '';
+
+    return `
+    <div class="product-card ${currentView === 'list' ? 'list-view' : ''}" onclick="openDetail(${p.id})">
+      ${firstBadge}
+      ${rankBadge}
+      <button class="btn-wishlist ${wishActive}" onclick="toggleWishlist(event, ${p.id})">♥</button>
+      <div class="product-img">${p.emoji}</div>
+      <div class="product-info">
+        <div class="product-name">${p.name}</div>
+        <div class="product-seller">出品：${p.seller}</div>
+        <div class="stars">
+          ${stars}
+          <span class="review-count">(${p.reviews.toLocaleString()})</span>
+        </div>
+        <div class="product-price">
+          <span class="price-main">💰 ${p.price.toLocaleString()} G</span>
+          ${p.discount > 0 ? `<span class="price-original">通常 ${p.originalPrice.toLocaleString()} G</span>
+          <span class="price-discount">▼ ${p.discount}% OFF</span>` : ''}
+        </div>
+        ${p.prime ? '<div class="prime-badge">⚡ Amazonia Prime</div>' : ''}
+        <div style="font-size:0.75rem; color:var(--silver); margin-top:4px;">🚚 ${p.delivery}</div>
+      </div>
+      <div class="product-actions" onclick="event.stopPropagation()">
+        <button class="btn-cart" onclick="addToCart(${p.id})">🛒 カートに追加</button>
+        <button class="btn-buy" onclick="openDetail(${p.id})">詳細を見る</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderStars(rating) {
+  let html = '';
+  for (let i = 1; i <= 5; i++) {
+    html += `<span class="star ${i <= Math.floor(rating) ? '' : i - 0.5 <= rating ? '' : 'empty'}">★</span>`;
+  }
+  return html;
+}
+
+// ========== FILTER / SORT ==========
+function filterCategory(cat, btn) {
+  currentCategory = cat;
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+
+function filterProducts() {
+  applyFilters();
+}
+
+function sortProducts() {
+  applyFilters();
+}
+
+function applyFilters() {
+  const query = document.getElementById('searchInput').value.toLowerCase();
+  const sort = document.getElementById('sortSelect').value;
+
+  let filtered = products.filter(p => {
+    const catMatch = currentCategory === 'all' || p.category === currentCategory;
+    const queryMatch = !query || p.name.toLowerCase().includes(query) || p.desc.toLowerCase().includes(query) || p.tags.some(t => t.toLowerCase().includes(query));
+    return catMatch && queryMatch;
+  });
+
+  switch(sort) {
+    case 'price-asc': filtered.sort((a,b) => a.price - b.price); break;
+    case 'price-desc': filtered.sort((a,b) => b.price - a.price); break;
+    case 'rating': filtered.sort((a,b) => b.rating - a.rating); break;
+    case 'new': filtered.sort((a,b) => b.isNew - a.isNew); break;
+    case 'discount': filtered.sort((a,b) => b.discount - a.discount); break;
+  }
+
+  renderProducts(filtered);
+}
+
+function setView(view) {
+  currentView = view;
+  document.getElementById('gridViewBtn').classList.toggle('active', view === 'grid');
+  document.getElementById('listViewBtn').classList.toggle('active', view === 'list');
+  applyFilters();
+}
+
+// ========== CART ==========
+function addToCart(id) {
+  const product = products.find(p => p.id === id);
+  const existing = cart.find(i => i.id === id);
+  if (existing) {
+    existing.qty++;
+  } else {
+    cart.push({ ...product, qty: 1 });
+  }
+  updateCartBadge();
+  showToast(`✨ 「${product.emoji} ${product.name.substring(0,15)}...」をカートに追加しました！`);
+}
+
+function updateCartBadge() {
+  const total = cart.reduce((s, i) => s + i.qty, 0);
+  document.getElementById('cartBadge').textContent = total;
+}
+
+function openCart() {
+  renderCart();
+  document.getElementById('cartModal').classList.add('active');
+}
+
+function closeCart() {
+  document.getElementById('cartModal').classList.remove('active');
+}
+
+function renderCart() {
+  const body = document.getElementById('cartBody');
+  if (cart.length === 0) {
+    body.innerHTML = `<div class="empty-cart"><span class="icon">🛒</span>カートは空です<br><small>素晴らしい商品を探してみましょう！</small></div>`;
+    return;
+  }
+
+  const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  const shipping = cart.some(i => i.prime) ? 0 : 500;
+  const tax = Math.floor(subtotal * 0.1);
+
+  body.innerHTML = `
+    <div>
+      ${cart.map(item => `
+        <div class="cart-item">
+          <div class="cart-item-img">${item.emoji}</div>
+          <div>
+            <div class="cart-item-name">${item.name.substring(0,30)}...</div>
+            <div class="cart-item-price">💰 ${(item.price * item.qty).toLocaleString()} G</div>
+            <div style="font-size:0.75rem;color:var(--silver);">単価: ${item.price.toLocaleString()} G</div>
+          </div>
+          <div class="cart-qty-controls">
+            <button class="qty-btn" onclick="changeQty(${item.id}, -1)">－</button>
+            <span>${item.qty}</span>
+            <button class="qty-btn" onclick="changeQty(${item.id}, 1)">＋</button>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+    <div class="cart-summary">
+      <div class="cart-summary-row"><span>小計</span><span>${subtotal.toLocaleString()} G</span></div>
+      <div class="cart-summary-row"><span>税（10%）</span><span>${tax.toLocaleString()} G</span></div>
+      <div class="cart-summary-row"><span>魔法陣転送料</span><span>${shipping === 0 ? '🆓 無料（Prime）' : shipping.toLocaleString() + ' G'}</span></div>
+      <div class="cart-summary-row total"><span>合計</span><span>💰 ${(subtotal + tax + shipping).toLocaleString()} G</span></div>
+    </div>
+    <button class="btn-checkout" onclick="openCheckout()">🏰 注文手続きへ進む</button>`;
+}
+
+function changeQty(id, delta) {
+  const item = cart.find(i => i.id === id);
+  if (!item) return;
+  item.qty += delta;
+  if (item.qty <= 0) cart = cart.filter(i => i.id !== id);
+  updateCartBadge();
+  renderCart();
+}
+
+// ========== PRODUCT DETAIL ==========
+function openDetail(id) {
+  const p = products.find(x => x.id === id);
+  document.getElementById('detailTitle').textContent = `${p.emoji} ${p.name}`;
+  document.getElementById('detailBody').innerHTML = `
+    <div class="product-detail-grid">
+      <div>
+        <div class="product-detail-img">${p.emoji}</div>
+        <div style="margin-top:10px;">
+          ${p.tags.map(t => `<span style="background:var(--secondary);padding:3px 8px;border-radius:20px;font-size:0.75rem;margin:2px;display:inline-block;color:var(--glow);">${t}</span>`).join('')}
+        </div>
+      </div>
+      <div class="product-detail-info">
+        <h3>${p.name}</h3>
+        <div class="seller">出品者：${p.seller}</div>
+        <div class="stars">${renderStars(p.rating)} <span class="review-count">${p.rating} (${p.reviews.toLocaleString()}件のレビュー)</span></div>
+        <div class="product-detail-price">💰 ${p.price.toLocaleString()} G</div>
+        ${p.discount > 0 ? `<div style="color:var(--danger);font-size:0.85rem;">通常価格 ${p.originalPrice.toLocaleString()} G から <b>${p.discount}% OFF</b></div>` : ''}
+        ${p.prime ? '<div class="prime-badge">⚡ Amazonia Prime 対象（翌日お届け可）</div>' : ''}
+        <div class="product-detail-desc">${p.desc}</div>
+        <div class="product-specs">
+          <h4>📋 商品スペック</h4>
+          ${p.specs.map(([k,v]) => `
+            <div class="spec-row"><span class="spec-label">${k}</span><span class="spec-value">${v}</span></div>
+          `).join('')}
+        </div>
+        <div style="font-size:0.82rem;color:var(--silver);margin-top:8px;">🚚 配達方法：${p.delivery}</div>
+        <div style="margin-top:12px;display:flex;gap:8px;">
+          <button class="btn-cart" style="flex:1;padding:12px;" onclick="addToCart(${p.id}); closeDetail();">🛒 カートに追加</button>
+          <button class="btn-buy" style="flex:1;padding:12px;" onclick="addToCart(${p.id}); closeDetail(); openCart();">⚡ 今すぐ購入</button>
+        </div>
+      </div>
+    </div>
+    <div class="detail-tabs">
+      <button class="detail-tab active" onclick="switchTab(this, 'reviews-tab')">💬 レビュー</button>
+      <button class="detail-tab" onclick="switchTab(this, 'qa-tab')">❓ Q&A</button>
+    </div>
+    <div id="reviews-tab">
+      ${generateReviews(p)}
+    </div>
+    <div id="qa-tab" style="display:none;">
+      ${generateQA(p)}
+    </div>
+  `;
+  document.getElementById('productDetailModal').classList.add('active');
+}
+
+function closeDetail() {
+  document.getElementById('productDetailModal').classList.remove('active');
+}
+
+function switchTab(btn, tabId) {
+  document.querySelectorAll('.detail-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('reviews-tab').style.display = tabId === 'reviews-tab' ? 'block' : 'none';
+  document.getElementById('qa-tab').style.display = tabId === 'qa-tab' ? 'block' : 'none';
+}
+
+function generateReviews(p) {
+  const reviewData = [
+    { author: '勇者アーサー', rating: 5, text: '最高の商品でした！冒険で何度も命を救ってもらいました。プライム配送も早くて感動。また買います！' },
+    { author: '魔法使い・メルラン', rating: 4, text: '品質はさすが。ただ取扱説明書がエルフ語のみなので読むのが大変でした。翻訳呪文を忘れずに。' },
+    { author: '女戦士カリン', rating: 5, text: '期待以上！魔王討伐でも大活躍してくれました。絶対おすすめです。' },
+    { author: 'ドワーフのボルドー', rating: 3, text: '悪くはないが、ドワーフの手には少し小さかった。次は大きいサイズも出してほしい。' },
+  ];
+
+  return reviewData.map(r => `
+    <div class="review">
+      <div class="review-header">
+        <span class="review-author">👤 ${r.author}</span>
+        <div>${renderStars(r.rating)}</div>
+      </div>
+      <div class="review-text">${r.text}</div>
+    </div>
+  `).join('');
+}
+
+function generateQA(p) {
+  const qaData = [
+    { q: 'この商品は魔界でも使えますか？', a: 'はい、魔界・異界でも使用可能です。ただし一部の効果が20%減少する場合があります。' },
+    { q: '返品・返金は可能ですか？', a: '未使用品に限り7日以内であれば返品可能です。ただし呪いがかかった商品・生き物の返品はお断りしております。' },
+    { q: 'レベル1でも使えますか？', a: '推奨レベルがございます。低レベルでの使用は危険な場合もありますので、スペックをご確認ください。' },
+  ];
+
+  return qaData.map(qa => `
+    <div class="review">
+      <div class="review-author">❓ Q: ${qa.q}</div>
+      <div class="review-text">💬 A: ${qa.a}</div>
+    </div>
+  `).join('');
+}
+
+// ========== WISHLIST ==========
+function toggleWishlist(event, id) {
+  event.stopPropagation();
+  const btn = event.currentTarget;
+  if (wishlist.has(id)) {
+    wishlist.delete(id);
+    btn.classList.remove('active');
+    showToast('💔 お気に入りから削除しました', '#ef4444');
+  } else {
+    wishlist.add(id);
+    btn.classList.add('active');
+    showToast('❤️ お気に入りに追加しました！');
+  }
+}
+
+// ========== CHECKOUT ==========
+function openCheckout() {
+  closeCart();
+  const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  const shipping = cart.some(i => i.prime) ? 0 : 500;
+  const tax = Math.floor(subtotal * 0.1);
+  const total = subtotal + tax + shipping;
+
+  document.getElementById('checkoutBody').innerHTML = `
+    <div class="checkout-step active" id="step1">
+      <h3 style="color:var(--glow);margin-bottom:15px;">📍 ステップ 1/3: お届け先</h3>
+      <div class="checkout-form">
+        <label>お名前・勇者名</label>
+        <input type="text" placeholder="例：伝説の勇者 アーサー" id="name">
+        <label>配達先の界・国</label>
+        <select>
+          <option>中央王国・王都</option>
+          <option>エルフの里</option>
+          <option>ドワーフ山岳都市</option>
+          <option>魔界（第一層）</option>
+          <option>天空都市クラウディア</option>
+          <option>ダンジョン最深部（追加料金あり）</option>
+        </select>
+        <label>詳細な住所</label>
+        <input type="text" placeholder="例：王城通り 英雄の塔 3階">
+        <label>受け取り方法</label>
+        <select>
+          <option>呪文転送（Prime会員・無料）</option>
+          <option>鷹便（翌日・500G）</option>
+          <option>馬車便（3日・100G）</option>
+          <option>指定場所でピックアップ</option>
+        </select>
+      </div>
+      <button class="btn-checkout" onclick="goStep(2)">次へ → 支払い方法</button>
+    </div>
+
+    <div class="checkout-step" id="step2">
+      <h3 style="color:var(--glow);margin-bottom:15px;">💰 ステップ 2/3: お支払い</h3>
+      <div class="checkout-form">
+        <label>支払い方法</label>
+        <select id="payMethod">
+          <option>ゴールドコイン（直接転送）</option>
+          <option>魔法銀行カード</option>
+          <option>ドラゴンダイヤ（換算）</option>
+          <option>冒険者ギルドポイント払い</option>
+          <option>魔法アイテムでの物々交換（要審査）</option>
+        </select>
+        <label>ゴールドコイン送金先（または魔法銀行カード番号）</label>
+        <input type="text" placeholder="例：0000-MAGE-1234-GOLD">
+        <label>魔法認証コード（パスワード）</label>
+        <input type="password" placeholder="••••••••">
+      </div>
+      <div class="cart-summary">
+        <div class="cart-summary-row"><span>小計</span><span>${subtotal.toLocaleString()} G</span></div>
+        <div class="cart-summary-row"><span>転送料</span><span>${shipping === 0 ? '無料' : shipping + ' G'}</span></div>
+        <div class="cart-summary-row"><span>魔法税（10%）</span><span>${tax.toLocaleString()} G</span></div>
+        <div class="cart-summary-row total"><span>ご請求額</span><span>${total.toLocaleString()} G</span></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <button class="btn-cart" style="flex:0.5;" onclick="goStep(1)">← 戻る</button>
+        <button class="btn-checkout" style="flex:1;" onclick="goStep(3)">注文を確定する</button>
+      </div>
+    </div>
+
+    <div class="checkout-step" id="step3">
+      <div class="order-complete">
+        <span class="icon">🎉</span>
+        <h3>ご注文ありがとうございます！</h3>
+        <p>ご注文番号</p>
+        <div class="order-number">AMZ-${Math.random().toString(36).substr(2,8).toUpperCase()}-FANTASY</div>
+        <p style="margin-top:12px;">ご注文いただいた商品は魔法陣転送にて<br>お届けいたします。<br><br>🪄 呪文陣確認メールをお使いの魔法水晶に送りました。<br>配達状況は「勇者マイページ」でご確認いただけます。<br><br>⚔️ 良い冒険を！</p>
+        <button class="btn-checkout" style="margin-top:15px;width:auto;padding:10px 25px;" onclick="completeOrder()">🏠 ショッピングを続ける</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('checkoutModal').classList.add('active');
+}
+
+function goStep(n) {
+  document.querySelectorAll('.checkout-step').forEach((el, i) => {
+    el.classList.toggle('active', i+1 === n);
+  });
+}
+
+function closeCheckout() {
+  document.getElementById('checkoutModal').classList.remove('active');
+}
+
+function completeOrder() {
+  cart = [];
+  updateCartBadge();
+  closeCheckout();
+  showToast('🎉 ご注文が完了しました！素晴らしい冒険を！');
+}
+
+// ========== TOAST ==========
+function showToast(msg, bg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.style.background = bg || 'var(--success)';
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+// ========== MISC ==========
+function goHome() {
+  currentCategory = 'all';
+  document.querySelectorAll('.nav-item').forEach((b,i) => b.classList.toggle('active', i===0));
+  document.getElementById('searchInput').value = '';
+  applyFilters();
+}
+
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) {
+      overlay.classList.remove('active');
+    }
+  });
+});
+
+// ========== INIT ==========
+renderProducts(products);
+</script>
+</body>
+</html>
