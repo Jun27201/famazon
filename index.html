@@ -1828,14 +1828,11 @@ function switchTab(btn, tabId) {
   });
 }
 
-function generateReviews(p) {
-  const reviewData = [
-    { author: '勇者アーサー', rating: 5, text: '最高の商品でした！冒険で何度も命を救ってもらいました。プライム配送も早くて感動。また買います！' },
-    { author: '魔法使い・メルラン', rating: 4, text: '品質はさすが。ただ取扱説明書がエルフ語のみなので読むのが大変でした。翻訳呪文を忘れずに。' },
-    { author: '女戦士カリン', rating: 5, text: '期待以上！魔王討伐でも大活躍してくれました。絶対おすすめです。' },
-    { author: 'ドワーフのボルドー', rating: 3, text: '悪くはないが、ドワーフの手には少し小さかった。次は大きいサイズも出してほしい。' },
-  ];
+// キャッシュ
+const reviewCache = {};
+const qaCache = {};
 
+function renderReviewsHTML(reviewData) {
   return reviewData.map(r => `
     <div class="review">
       <div class="review-header">
@@ -1847,19 +1844,115 @@ function generateReviews(p) {
   `).join('');
 }
 
-function generateQA(p) {
-  const qaData = [
-    { q: 'この商品は魔界でも使えますか？', a: 'はい、魔界・異界でも使用可能です。ただし一部の効果が20%減少する場合があります。' },
-    { q: '返品・返金は可能ですか？', a: '未使用品に限り7日以内であれば返品可能です。ただし呪いがかかった商品・生き物の返品はお断りしております。' },
-    { q: 'レベル1でも使えますか？', a: '推奨レベルがございます。低レベルでの使用は危険な場合もありますので、スペックをご確認ください。' },
-  ];
-
+function renderQAHTML(qaData) {
   return qaData.map(qa => `
     <div class="review">
       <div class="review-author">❓ Q: ${qa.q}</div>
       <div class="review-text">💬 A: ${qa.a}</div>
     </div>
   `).join('');
+}
+
+function loadingPlaceholder(icon, msg) {
+  return `<div class="recommend-loading"><span class="spinner">${icon}</span>${msg}</div>`;
+}
+
+function generateReviews(p) {
+  if (reviewCache[p.id]) return renderReviewsHTML(reviewCache[p.id]);
+
+  // ローディング表示しつつ非同期で生成
+  setTimeout(() => fetchAndRenderReviews(p), 0);
+  return loadingPlaceholder('📜', 'レビューを魔法水晶から召喚中...');
+}
+
+function generateQA(p) {
+  if (qaCache[p.id]) return renderQAHTML(qaCache[p.id]);
+
+  setTimeout(() => fetchAndRenderQA(p), 0);
+  return loadingPlaceholder('🔮', 'Q&Aを賢者の書から取得中...');
+}
+
+async function fetchAndRenderReviews(p) {
+  const el = document.getElementById('reviews-tab');
+  if (!el) return;
+  try {
+    const prompt = `あなたはファンタジー世界の通販サイト「ファマゾン」のシステムです。
+以下の商品のリアルなユーザーレビューを4件生成してください。
+
+商品名: ${p.name}
+説明: ${p.desc}
+カテゴリ: ${p.category}
+平均評価: ${p.rating}
+価格: ${p.price}G
+
+・レビュアーはファンタジー世界の住人（勇者・魔法使い・騎士・エルフ・ドワーフ・商人など多様に）
+・評価は${p.rating}前後でばらつかせる（5段階整数）
+・各レビューは商品の特徴・スペックを踏まえた具体的な内容（50〜80文字）
+・世界観に合った自然な口コミ文体で
+
+以下のJSON形式のみで返してください（前置き・説明不要）:
+[{"author":"名前","rating":数値,"text":"レビュー文"},...]`;
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 800,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content.map(c => c.text || '').join('').trim().replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(text);
+    reviewCache[p.id] = parsed;
+    const tab = document.getElementById('reviews-tab');
+    if (tab) tab.innerHTML = renderReviewsHTML(parsed);
+  } catch(e) {
+    const tab = document.getElementById('reviews-tab');
+    if (tab) tab.innerHTML = '<div style="color:var(--silver);padding:15px;font-size:0.85rem;">📜 レビューの取得に失敗しました</div>';
+  }
+}
+
+async function fetchAndRenderQA(p) {
+  const el = document.getElementById('qa-tab');
+  if (!el) return;
+  try {
+    const prompt = `あなたはファンタジー世界の通販サイト「ファマゾン」のシステムです。
+以下の商品に関するよくある質問と回答を3件生成してください。
+
+商品名: ${p.name}
+説明: ${p.desc}
+カテゴリ: ${p.category}
+スペック: ${p.specs.map(([k,v]) => k+':'+v).join('、')}
+
+・質問はファンタジー世界のユーザー視点で商品の実用的な疑問
+・回答は出品者または運営が丁寧に答える形式
+・世界観（魔界・冒険者・魔法など）に合わせた内容で
+・各Q&Aは質問40文字以内、回答60文字以内
+
+以下のJSON形式のみで返してください（前置き・説明不要）:
+[{"q":"質問文","a":"回答文"},...]`;
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 600,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content.map(c => c.text || '').join('').trim().replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(text);
+    qaCache[p.id] = parsed;
+    const tab = document.getElementById('qa-tab');
+    if (tab) tab.innerHTML = renderQAHTML(parsed);
+  } catch(e) {
+    const tab = document.getElementById('qa-tab');
+    if (tab) tab.innerHTML = '<div style="color:var(--silver);padding:15px;font-size:0.85rem;">🔮 Q&Aの取得に失敗しました</div>';
+  }
 }
 
 // ========== WISHLIST ==========
