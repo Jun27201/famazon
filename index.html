@@ -1893,17 +1893,7 @@ async function fetchAndRenderReviews(p) {
 以下のJSON形式のみで返してください（前置き・説明不要）:
 [{"author":"名前","rating":数値,"text":"レビュー文"},...]`;
 
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 800,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-    const data = await res.json();
-    const text = data.content.map(c => c.text || '').join('').trim().replace(/```json|```/g, '').trim();
+    const text = await callGemini(prompt);
     const parsed = JSON.parse(text);
     reviewCache[p.id] = parsed;
     const tab = document.getElementById('reviews-tab');
@@ -1934,17 +1924,7 @@ async function fetchAndRenderQA(p) {
 以下のJSON形式のみで返してください（前置き・説明不要）:
 [{"q":"質問文","a":"回答文"},...]`;
 
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 600,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-    const data = await res.json();
-    const text = data.content.map(c => c.text || '').join('').trim().replace(/```json|```/g, '').trim();
+    const text = await callGemini(prompt);
     const parsed = JSON.parse(text);
     qaCache[p.id] = parsed;
     const tab = document.getElementById('qa-tab');
@@ -2091,6 +2071,24 @@ document.querySelectorAll('.modal-overlay').forEach(overlay => {
   });
 });
 
+// ========== GEMINI API 設定 ==========
+// ↓ ここにGemini APIキーを貼り付けてください
+const WORKER_URL = 'https://famazon-api.twinkle-crusaders-pss27.workers.dev/';
+
+async function callGemini(prompt) {
+  const res = await fetch(WORKER_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.8 }
+    })
+  });
+  const data = await res.json();
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  return text.replace(/```json|```/g, '').trim();
+}
+
 // ========== AI RECOMMEND ==========
 let cartPopupTimeout = null;
 
@@ -2134,17 +2132,7 @@ ${productList}
 以下のJSON形式のみで返答してください（説明・前置き不要）:
 [{"id":数値,"reason":"おすすめ理由(15文字以内・ファンタジー世界観で)"},{"id":数値,"reason":"..."},{"id":数値,"reason":"..."},{"id":数値,"reason":"..."}]`;
 
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 300,
-      messages: [{ role: 'user', content: prompt }]
-    })
-  });
-  const data = await res.json();
-  const text = data.content.map(c => c.text || '').join('').trim();
+  const text = await callGemini(prompt);
   const clean = text.replace(/```json|```/g, '').trim();
   const parsed = JSON.parse(clean);
   return parsed.map(item => {
