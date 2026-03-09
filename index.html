@@ -399,6 +399,8 @@
     cursor: pointer;
     transition: all 0.3s;
     position: relative;
+    display: flex;
+    flex-direction: column;
   }
 
   .product-card:hover {
@@ -410,7 +412,7 @@
   .product-card.list-view {
     display: grid;
     grid-template-columns: 180px 1fr auto;
-    align-items: start;
+    align-items: center;
     gap: 15px;
   }
 
@@ -458,6 +460,7 @@
 
   .product-info {
     padding: 12px;
+    flex: 1;
   }
 
   .product-name {
@@ -535,12 +538,15 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
+    margin-top: auto;
   }
 
   .product-card.list-view .product-actions {
     padding: 12px;
     justify-content: center;
-    min-width: 150px;
+    align-items: stretch;
+    min-width: 160px;
+    margin-top: 0;
   }
 
   .btn-cart {
