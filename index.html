@@ -2073,21 +2073,7 @@ document.querySelectorAll('.modal-overlay').forEach(overlay => {
 
 // ========== GEMINI API 設定 ==========
 // ↓ ここにGemini APIキーを貼り付けてください
-const WORKER_URL = 'https://famazon-api.twinkle-crusaders-pss27.workers.dev/';
-
-async function callGemini(prompt) {
-  const res = await fetch(WORKER_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { temperature: 0.8 }
-    })
-  });
-  const data = await res.json();
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-  return text.replace(/```json|```/g, '').trim();
-}
+undefined
 
 // ========== AI RECOMMEND ==========
 let cartPopupTimeout = null;
