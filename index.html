@@ -1068,52 +1068,124 @@
 <div class="main-container">
   <!-- SIDEBAR -->
   <aside class="sidebar">
-    <h3>🔮 絞り込み検索</h3>
+  <h3>🔮 絞り込み検索</h3>
 
-    <div class="filter-section">
-      <h4>レアリティ</h4>
-      <label class="filter-option"><input type="checkbox" checked> <span>⬜ コモン</span></label>
-      <label class="filter-option"><input type="checkbox" checked> <span>🟩 アンコモン</span></label>
-      <label class="filter-option"><input type="checkbox" checked> <span>🟦 レア</span></label>
-      <label class="filter-option"><input type="checkbox" checked> <span>🟪 エピック</span></label>
-      <label class="filter-option"><input type="checkbox" checked> <span>🟨 レジェンダリー</span></label>
-    </div>
+  <div class="filter-section">
+    <h4>レアリティ</h4>
+    <label class="filter-option">
+      <input type="checkbox" checked value="common" class="filter-rarity" onchange="applyFilters()">
+      <span>⬜ コモン</span>
+    </label>
+    <label class="filter-option">
+      <input type="checkbox" checked value="uncommon" class="filter-rarity" onchange="applyFilters()">
+      <span>🟩 アンコモン</span>
+    </label>
+    <label class="filter-option">
+      <input type="checkbox" checked value="rare" class="filter-rarity" onchange="applyFilters()">
+      <span>🟦 レア</span>
+    </label>
+    <label class="filter-option">
+      <input type="checkbox" checked value="epic" class="filter-rarity" onchange="applyFilters()">
+      <span>🟪 エピック</span>
+    </label>
+    <label class="filter-option">
+      <input type="checkbox" checked value="legendary" class="filter-rarity" onchange="applyFilters()">
+      <span>🟨 レジェンダリー</span>
+    </label>
+  </div>
 
-    <div class="filter-section">
-      <h4>価格帯（ゴールド）</h4>
-      <div class="price-range">
-        <input type="number" class="price-input" placeholder="最小" min="0">
-        <span>〜</span>
-        <input type="number" class="price-input" placeholder="最大" min="0">
-      </div>
+  <div class="filter-section">
+    <h4>価格帯（ゴールド）</h4>
+    <div class="price-range">
+      <input type="number" class="price-input" id="priceMin" placeholder="最小" min="0" oninput="applyFilters()">
+      <span>〜</span>
+      <input type="number" class="price-input" id="priceMax" placeholder="最大" min="0" oninput="applyFilters()">
     </div>
+  </div>
 
-    <div class="filter-section">
-      <h4>評価</h4>
-      <label class="filter-option"><input type="checkbox"> <span class="star-filter">⭐⭐⭐⭐⭐ 以上</span></label>
-      <label class="filter-option"><input type="checkbox"> <span class="star-filter">⭐⭐⭐⭐ 以上</span></label>
-      <label class="filter-option"><input type="checkbox"> <span class="star-filter">⭐⭐⭐ 以上</span></label>
-    </div>
+  <div class="filter-section">
+    <h4>評価</h4>
+    <label class="filter-option">
+      <input type="radio" name="filter-rating" value="5" class="filter-rating-radio" onchange="applyFilters()">
+      <span class="star-filter">⭐⭐⭐⭐⭐ 以上</span>
+    </label>
+    <label class="filter-option">
+      <input type="radio" name="filter-rating" value="4" class="filter-rating-radio" onchange="applyFilters()">
+      <span class="star-filter">⭐⭐⭐⭐ 以上</span>
+    </label>
+    <label class="filter-option">
+      <input type="radio" name="filter-rating" value="3" class="filter-rating-radio" onchange="applyFilters()">
+      <span class="star-filter">⭐⭐⭐ 以上</span>
+    </label>
+    <label class="filter-option">
+      <input type="radio" name="filter-rating" value="0" class="filter-rating-radio" onchange="applyFilters()" checked>
+      <span style="font-size:0.82rem; color: var(--silver);">すべて表示</span>
+    </label>
+  </div>
 
-    <div class="filter-section">
-      <h4>配達速度</h4>
-      <label class="filter-option"><input type="checkbox"> <span>🪄 呪文転送（即日）</span></label>
-      <label class="filter-option"><input type="checkbox"> <span>🦅 鷹便（翌日）</span></label>
-      <label class="filter-option"><input type="checkbox"> <span>🐎 馬車便（3日）</span></label>
-    </div>
+  <div class="filter-section">
+    <h4>配達速度</h4>
+    <label class="filter-option">
+      <input type="checkbox" value="呪文" class="filter-delivery" onchange="applyFilters()">
+      <span>🪄 呪文転送（即日）</span>
+    </label>
+    <label class="filter-option">
+      <input type="checkbox" value="鷹便" class="filter-delivery" onchange="applyFilters()">
+      <span>🦅 鷹便（翌日）</span>
+    </label>
+    <label class="filter-option">
+      <input type="checkbox" value="馬車" class="filter-delivery" onchange="applyFilters()">
+      <span>🐎 馬車便（3日）</span>
+    </label>
+  </div>
 
-    <div class="filter-section">
-      <h4>出品者</h4>
-      <label class="filter-option"><input type="checkbox"> <span>🏰 王立商会</span></label>
-      <label class="filter-option"><input type="checkbox"> <span>🧙 魔法師ギルド</span></label>
-      <label class="filter-option"><input type="checkbox"> <span>🧝 エルフ工房</span></label>
-      <label class="filter-option"><input type="checkbox"> <span>⚒️ ドワーフ鍛冶</span></label>
-      <label class="filter-option"><input type="checkbox"> <span>💀 闇商人</span></label>
-      <label class="filter-option"><input type="checkbox"> <span>✨ 天界商会</span></label>
-      <label class="filter-option"><input type="checkbox"> <span>🌊 深海商会</span></label>
-      <label class="filter-option"><input type="checkbox"> <span>🏆 冒険者ギルド</span></label>
-    </div>
-  </aside>
+  <div class="filter-section">
+    <h4>出品者</h4>
+    <label class="filter-option">
+      <input type="checkbox" value="王立商会" class="filter-seller" onchange="applyFilters()">
+      <span>🏰 王立商会</span>
+    </label>
+    <label class="filter-option">
+      <input type="checkbox" value="魔法師ギルド" class="filter-seller" onchange="applyFilters()">
+      <span>🧙 魔法師ギルド</span>
+    </label>
+    <label class="filter-option">
+      <input type="checkbox" value="エルフ" class="filter-seller" onchange="applyFilters()">
+      <span>🧝 エルフ工房</span>
+    </label>
+    <label class="filter-option">
+      <input type="checkbox" value="ドワーフ" class="filter-seller" onchange="applyFilters()">
+      <span>⚒️ ドワーフ鍛冶</span>
+    </label>
+    <label class="filter-option">
+      <input type="checkbox" value="闇商人" class="filter-seller" onchange="applyFilters()">
+      <span>💀 闇商人</span>
+    </label>
+    <label class="filter-option">
+      <input type="checkbox" value="天界" class="filter-seller" onchange="applyFilters()">
+      <span>✨ 天界商会</span>
+    </label>
+    <label class="filter-option">
+      <input type="checkbox" value="深海" class="filter-seller" onchange="applyFilters()">
+      <span>🌊 深海商会</span>
+    </label>
+    <label class="filter-option">
+      <input type="checkbox" value="冒険者ギルド" class="filter-seller" onchange="applyFilters()">
+      <span>🏆 冒険者ギルド</span>
+    </label>
+  </div>
+
+  <button onclick="resetFilters()" style="
+    width:100%; padding:8px; margin-top:5px;
+    background:var(--secondary); border:1px solid rgba(167,139,250,0.3);
+    color:var(--text); border-radius:6px; cursor:pointer; font-size:0.85rem;
+    transition: background 0.2s;
+  " onmouseover="this.style.background='var(--hover)'"
+     onmouseout="this.style.background='var(--secondary)'">
+    🔄 フィルターをリセット
+  </button>
+</aside>
+
 
   <!-- PRODUCTS -->
   <div class="products-section">
@@ -3616,24 +3688,103 @@ function sortProducts() {
 
 function applyFilters() {
   const query = document.getElementById('searchInput').value.toLowerCase();
-  const sort = document.getElementById('sortSelect').value;
+  const sort  = document.getElementById('sortSelect').value;
 
+  // ── レアリティ ──────────────────────────
+  const checkedRarities = [...document.querySelectorAll('.filter-rarity:checked')]
+    .map(el => el.value);
+
+  // ── 価格帯 ──────────────────────────────
+  const priceMinEl = document.getElementById('priceMin');
+  const priceMaxEl = document.getElementById('priceMax');
+  const priceMin = priceMinEl && priceMinEl.value !== '' ? Number(priceMinEl.value) : null;
+  const priceMax = priceMaxEl && priceMaxEl.value !== '' ? Number(priceMaxEl.value) : null;
+
+  // ── 評価（ラジオ） ───────────────────────
+  const ratingRadio = document.querySelector('.filter-rating-radio:checked');
+  const minRating = ratingRadio ? Number(ratingRadio.value) : 0;
+
+  // ── 配達速度 ─────────────────────────────
+  const checkedDeliveries = [...document.querySelectorAll('.filter-delivery:checked')]
+    .map(el => el.value);
+
+  // ── 出品者 ───────────────────────────────
+  const checkedSellers = [...document.querySelectorAll('.filter-seller:checked')]
+    .map(el => el.value);
+
+  // ── フィルター適用 ────────────────────────
   let filtered = products.filter(p => {
-    const catMatch = currentCategory === 'all' || p.category === currentCategory;
-    const queryMatch = !query || p.name.toLowerCase().includes(query) || p.desc.toLowerCase().includes(query) || p.tags.some(t => t.toLowerCase().includes(query));
-    return catMatch && queryMatch;
+    // カテゴリ
+    if (currentCategory !== 'all' && p.category !== currentCategory) return false;
+
+    // キーワード検索
+    if (query) {
+      const hit = p.name.toLowerCase().includes(query)
+        || p.desc.toLowerCase().includes(query)
+        || p.tags.some(t => t.toLowerCase().includes(query))
+        || p.seller.toLowerCase().includes(query);
+      if (!hit) return false;
+    }
+
+    // レアリティ（1つもチェックされていなければ全表示）
+    if (checkedRarities.length > 0 && !checkedRarities.includes(p.rarity)) return false;
+
+    // 価格帯
+    if (priceMin !== null && p.price < priceMin) return false;
+    if (priceMax !== null && p.price > priceMax) return false;
+
+    // 評価
+    if (minRating > 0 && p.rating < minRating) return false;
+
+    // 配達速度（1つでもチェックされていれば対象キーワードを含む商品のみ）
+    if (checkedDeliveries.length > 0) {
+      const deliveryMatch = checkedDeliveries.some(kw => p.delivery.includes(kw));
+      if (!deliveryMatch) return false;
+    }
+
+    // 出品者（1つでもチェックされていれば対象キーワードを含む商品のみ）
+    if (checkedSellers.length > 0) {
+      const sellerMatch = checkedSellers.some(kw => p.seller.includes(kw));
+      if (!sellerMatch) return false;
+    }
+
+    return true;
   });
 
-  switch(sort) {
-    case 'price-asc': filtered.sort((a,b) => a.price - b.price); break;
-    case 'price-desc': filtered.sort((a,b) => b.price - a.price); break;
-    case 'rating': filtered.sort((a,b) => b.rating - a.rating); break;
-    case 'new': filtered.sort((a,b) => b.isNew - a.isNew); break;
-    case 'discount': filtered.sort((a,b) => b.discount - a.discount); break;
+  // ── ソート ───────────────────────────────
+  switch (sort) {
+    case 'price-asc':   filtered.sort((a, b) => a.price   - b.price);   break;
+    case 'price-desc':  filtered.sort((a, b) => b.price   - a.price);   break;
+    case 'rating':      filtered.sort((a, b) => b.rating  - a.rating);  break;
+    case 'new':         filtered.sort((a, b) => b.isNew   - a.isNew);   break;
+    case 'discount':    filtered.sort((a, b) => b.discount - a.discount); break;
   }
 
   renderProducts(filtered);
 }
+
+function resetFilters() {
+  // レアリティを全チェック
+  document.querySelectorAll('.filter-rarity').forEach(el => el.checked = true);
+
+  // 価格帯をクリア
+  const minEl = document.getElementById('priceMin');
+  const maxEl = document.getElementById('priceMax');
+  if (minEl) minEl.value = '';
+  if (maxEl) maxEl.value = '';
+
+  // 評価を「すべて」に戻す
+  const allRatingRadio = document.querySelector('.filter-rating-radio[value="0"]');
+  if (allRatingRadio) allRatingRadio.checked = true;
+
+  // 配達速度・出品者チェックをすべて外す
+  document.querySelectorAll('.filter-delivery').forEach(el => el.checked = false);
+  document.querySelectorAll('.filter-seller').forEach(el => el.checked = false);
+
+  applyFilters();
+}
+
+
 
 function setView(view) {
   currentView = view;
