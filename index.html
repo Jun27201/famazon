@@ -1159,6 +1159,49 @@ function completeOrder() {
   showOrderCompleteModal(orderData);
 }
 
+// ========== ステップ切り替え関数（追加） ==========
+function goStep(n) {
+  // すべてのステップを確実に非表示
+  document.querySelectorAll('.checkout-step').forEach(el => {
+    el.style.display = 'none';
+    el.classList.remove('active');
+  });
+
+  // 指定されたステップのみを表示
+  const targetStep = document.getElementById('step' + n);
+  if (targetStep) {
+    targetStep.style.display = 'block';
+    targetStep.classList.add('active');
+  }
+
+  // プログレスバーの更新
+  document.querySelectorAll('.progress-step').forEach((el, i) => {
+    el.classList.remove('active', 'completed');
+    if (i + 1 < n) {
+      el.classList.add('completed');
+    } else if (i + 1 === n) {
+      el.classList.add('active');
+    }
+  });
+
+  // ステップ2では送料を再計算
+  if (n === 2) {
+    setTimeout(() => updateShippingCost(), 50);
+  }
+
+  // モーダルを上部にスクロール
+  const modalBody = document.getElementById('checkoutBody');
+  if (modalBody) {
+    modalBody.scrollTop = 0;
+  }
+}
+
+// ========== チェックアウトモーダルを閉じる関数（追加） ==========
+function closeCheckout() {
+  document.getElementById('checkoutModal').classList.remove('active');
+}
+
+
 
 
 
