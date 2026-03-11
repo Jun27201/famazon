@@ -930,105 +930,150 @@ function updateCheckoutLocationDisplay() {
   }
 }
 
+// ========== チェックアウト機能（完全修正版） ==========
+
 function openCheckout() {
   closeCart();
+  
+  if (cart.length === 0) {
+    showToast('🛒 カートが空のため注文できません', '#f59e0b');
+    return;
+  }
+
   const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
   const tax = Math.floor(subtotal * 0.1);
   const hasPrime = cart.some(i => i.prime);
 
   document.getElementById('checkoutBody').innerHTML = `
-    <div class="checkout-step active" id="step1">
-      <h3 style="color:var(--glow);margin-bottom:15px;">📍 ステップ 1/2: お届け先</h3>
-      <div class="checkout-form">
-        <label>お名前・勇者名</label>
-        <input type="text" placeholder="例：伝説の勇者 アーサー" id="customerName">
-        
-        <label>配達先の界・国</label>
-        <div id="checkoutLocationDisplay" style="
-          padding: 16px;
-          background: var(--bg);
-          border: 2px solid rgba(167, 139, 250, 0.2);
-          border-radius: 12px;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 12px;
-          transition: all 0.3s ease;
-        ">
-          ${getCheckoutLocationHTML()}
-        </div>
-        
-        <button type="button" onclick="showLocationModal()" style="
-          width: 100%;
-          padding: 12px;
-          background: var(--secondary);
-          border: 1px solid var(--glow);
-          border-radius: 8px;
-          color: var(--text);
-          cursor: pointer;
-          transition: all 0.2s;
-          font-weight: 600;
-          margin-bottom: 16px;
-        " onmouseover="this.style.background='var(--hover)'; this.style.transform='translateY(-1px)';"
-           onmouseout="this.style.background='var(--secondary)'; this.style.transform='translateY(0)';">
-          📍 配達先を変更する
-        </button>
-        
-        <label>詳細な住所</label>
-        <input type="text" placeholder="例：王城通り 英雄の塔 3階" id="customerAddress">
-        
-        <label>受け取り方法</label>
-        <select id="deliveryMethod" onchange="updateShippingCost()">
-          ${hasPrime ? 
-            '<option value="spell" data-cost="0">🪄 呪文転送（Prime会員・無料）</option>' : 
-            '<option value="spell" data-cost="800">🪄 呪文転送（800G）</option>'
-          }
-          <option value="hawk" data-cost="500">🦅 鷹便（翌日・500G）</option>
-          <option value="carriage" data-cost="100">🐎 馬車便（3日・100G）</option>
-          <option value="pickup" data-cost="0">🏪 指定場所でピックアップ（無料）</option>
-        </select>
+    <!-- プログレスインジケーター -->
+    <div class="checkout-progress">
+      <div class="progress-step active" id="progressStep1">
+        <div class="progress-number">1</div>
+        <div class="progress-label">お届け先</div>
       </div>
-      <button class="btn-checkout" onclick="goStep(2)">次へ → 支払い方法</button>
+      <div class="progress-line"></div>
+      <div class="progress-step" id="progressStep2">
+        <div class="progress-number">2</div>
+        <div class="progress-label">お支払い</div>
+      </div>
     </div>
 
-    <div class="checkout-step" id="step2">
-      <h3 style="color:var(--glow);margin-bottom:15px;">💰 ステップ 2/2: お支払い</h3>
+    <!-- ステップ1: お届け先 -->
+    <div class="checkout-step active" id="step1">
+      <h3 class="checkout-step-title">📍 お届け先情報の入力</h3>
+      
       <div class="checkout-form">
-        <label>支払い方法</label>
-        <select id="paymentMethod">
-          <option>ゴールドコイン（直接転送）</option>
-          <option>魔法銀行カード</option>
-          <option>ドラゴンダイヤ（換算）</option>
-          <option>冒険者ギルドポイント払い</option>
-        </select>
-        <label>ゴールドコイン送金先（または魔法銀行カード番号）</label>
-        <input type="text" placeholder="例：0000-MAGE-1234-GOLD" id="paymentInfo">
-        <label>魔法認証コード（パスワード）</label>
-        <input type="password" placeholder="••••••••" id="authCode">
+        <div class="form-group">
+          <label class="form-label">お名前・勇者名 <span class="required">必須</span></label>
+          <input type="text" class="form-input" placeholder="例：伝説の勇者 アーサー" id="customerName">
+          <small class="form-hint">配達時の確認に使用します</small>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">配達先の界・国 <span class="required">必須</span></label>
+          <div class="location-display" id="checkoutLocationDisplay" onclick="showLocationModal()">
+            ${getCheckoutLocationHTML()}
+          </div>
+          <button type="button" class="btn-change-location" onclick="showLocationModal()">
+            📍 配達先を変更する
+          </button>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">詳細な住所 <span class="required">必須</span></label>
+          <input type="text" class="form-input" placeholder="例：王城通り 英雄の塔 3階" id="customerAddress">
+          <small class="form-hint">建物名・部屋番号まで正確にご記入ください</small>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">受け取り方法 <span class="required">必須</span></label>
+          <select class="form-select" id="deliveryMethod" onchange="updateShippingCost()">
+            ${hasPrime ? 
+              '<option value="spell" data-cost="0">🪄 呪文転送（Prime会員・無料）- 即日配達</option>' : 
+              '<option value="spell" data-cost="800">🪄 呪文転送（800G）- 即日配達</option>'
+            }
+            <option value="hawk" data-cost="500">🦅 鷹便（500G）- 翌日配達</option>
+            <option value="carriage" data-cost="100">🐎 馬車便（100G）- 3日以内配達</option>
+            <option value="pickup" data-cost="0">🏪 指定場所でピックアップ（無料）- 翌日から受取可</option>
+          </select>
+        </div>
       </div>
+
+      <div class="checkout-actions">
+        <button class="btn-checkout-next" onclick="validateAndGoToStep2()">
+          次へ：お支払い方法 →
+        </button>
+      </div>
+    </div>
+
+    <!-- ステップ2: お支払い -->
+    <div class="checkout-step" id="step2">
+      <h3 class="checkout-step-title">💰 お支払い情報の入力</h3>
       
-      <div class="cart-summary">
-        <div class="cart-summary-row">
-          <span>小計</span>
-          <span id="displaySubtotal">${subtotal.toLocaleString()} G</span>
+      <div class="checkout-form">
+        <div class="form-group">
+          <label class="form-label">支払い方法 <span class="required">必須</span></label>
+          <select class="form-select" id="paymentMethod">
+            <option value="gold">💰 ゴールドコイン（直接転送）</option>
+            <option value="card">💳 魔法銀行カード</option>
+            <option value="diamond">💎 ドラゴンダイヤ（換算）</option>
+            <option value="points">🏆 冒険者ギルドポイント払い</option>
+          </select>
         </div>
-        <div class="cart-summary-row">
-          <span>転送料・手数料</span>
-          <span id="displayShipping" style="text-align: right;">計算中...</span>
+
+        <div class="form-group">
+          <label class="form-label">送金先 / カード番号 <span class="required">必須</span></label>
+          <input type="text" class="form-input" placeholder="例：0000-MAGE-1234-GOLD" id="paymentInfo">
+          <small class="form-hint">ハイフン（-）を含めて正確に入力してください</small>
         </div>
-        <div class="cart-summary-row">
-          <span>魔法税（10%）</span>
-          <span id="displayTax">${tax.toLocaleString()} G</span>
-        </div>
-        <div class="cart-summary-row total">
-          <span>ご請求額</span>
-          <span id="displayTotal">計算中...</span>
+
+        <div class="form-group">
+          <label class="form-label">魔法認証コード <span class="required">必須</span></label>
+          <input type="password" class="form-input" placeholder="••••••••" id="authCode">
+          <small class="form-hint">6文字以上の認証コードを入力してください</small>
         </div>
       </div>
-      
-      <div style="display:flex;gap:8px;margin-top:10px;">
-        <button class="btn-cart" style="flex:0.5;" onclick="goStep(1)">← 戻る</button>
-        <button class="btn-checkout" style="flex:1;" onclick="completeOrder()">注文を確定する</button>
+
+      <!-- 注文サマリー -->
+      <div class="order-summary">
+        <h4 class="summary-title">📋 ご注文内容の確認</h4>
+        <div class="summary-items">
+          ${cart.map(item => `
+            <div class="summary-item">
+              <span class="summary-item-name">${item.emoji} ${item.name.substring(0, 25)}...</span>
+              <span class="summary-item-qty">×${item.qty}</span>
+              <span class="summary-item-price">${(item.price * item.qty).toLocaleString()} G</span>
+            </div>
+          `).join('')}
+        </div>
+        
+        <div class="summary-breakdown">
+          <div class="summary-row">
+            <span>商品小計</span>
+            <span id="displaySubtotal">${subtotal.toLocaleString()} G</span>
+          </div>
+          <div class="summary-row">
+            <span>配送料・手数料</span>
+            <span id="displayShipping">計算中...</span>
+          </div>
+          <div class="summary-row">
+            <span>魔法税（10%）</span>
+            <span id="displayTax">${tax.toLocaleString()} G</span>
+          </div>
+          <div class="summary-row total">
+            <span>ご請求額</span>
+            <span id="displayTotal">計算中...</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="checkout-actions">
+        <button class="btn-checkout-back" onclick="goStep(1)">
+          ← お届け先に戻る
+        </button>
+        <button class="btn-checkout-complete" onclick="completeOrder()">
+          🎉 注文を確定する
+        </button>
       </div>
     </div>
   `;
@@ -1037,15 +1082,73 @@ function openCheckout() {
   setTimeout(() => updateShippingCost(), 100);
 }
 
+function validateAndGoToStep2() {
+  const name = document.getElementById('customerName').value.trim();
+  const address = document.getElementById('customerAddress').value.trim();
+  
+  if (!name) {
+    showToast('⚠️ お名前を入力してください', '#f59e0b');
+    document.getElementById('customerName').focus();
+    return;
+  }
+  
+  if (name.length < 2) {
+    showToast('⚠️ お名前は2文字以上で入力してください', '#f59e0b');
+    document.getElementById('customerName').focus();
+    return;
+  }
+  
+  if (!address) {
+    showToast('⚠️ 詳細な住所を入力してください', '#f59e0b');
+    document.getElementById('customerAddress').focus();
+    return;
+  }
+  
+  if (address.length < 5) {
+    showToast('⚠️ 住所をより詳しく入力してください', '#f59e0b');
+    document.getElementById('customerAddress').focus();
+    return;
+  }
+  
+  goStep(2);
+}
+
 function goStep(n) {
+  // 全てのステップを確実に非表示にする
   document.querySelectorAll('.checkout-step').forEach((el, i) => {
-    el.classList.toggle('active', i+1 === n);
+    el.classList.remove('active');
+    el.style.display = 'none'; // 念のため直接スタイルも操作
   });
   
+  // 指定されたステップのみを表示
+  const targetStep = document.getElementById('step' + n);
+  if (targetStep) {
+    targetStep.classList.add('active');
+    targetStep.style.display = 'block';
+  }
+  
+  // プログレスインジケーターの更新
+  document.querySelectorAll('.progress-step').forEach((el, i) => {
+    el.classList.remove('active', 'completed');
+    if (i + 1 < n) {
+      el.classList.add('completed');
+    } else if (i + 1 === n) {
+      el.classList.add('active');
+    }
+  });
+  
+  // ステップ2では送料を再計算
   if (n === 2) {
     setTimeout(() => updateShippingCost(), 50);
   }
+  
+  // モーダルを上部にスクロール
+  const modalBody = document.getElementById('checkoutBody');
+  if (modalBody) {
+    modalBody.scrollTop = 0;
+  }
 }
+
 
 function closeCheckout() {
   document.getElementById('checkoutModal').classList.remove('active');
