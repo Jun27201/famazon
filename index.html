@@ -1746,6 +1746,7 @@ function generateQA(p) {
 
 // ========== WISHLIST ==========
 // 初期化時にローカルストレージからお気に入りを読み込み
+// グローバル変数として確実にSetで初期化
 let wishlist = new Set();
 
 // ページ読み込み時にお気に入りデータを復元
@@ -1754,44 +1755,60 @@ function loadWishlist() {
     const saved = localStorage.getItem('famazon_wishlist');
     if (saved) {
       const savedArray = JSON.parse(saved);
-      // IDを文字列として統一して保存
-      wishlist = new Set(savedArray.map(id => String(id)));
-      console.log(`💖 お気に入り ${wishlist.size}件を復元しました`);
+      // 配列かどうかチェックしてからSetに変換
+      if (Array.isArray(savedArray)) {
+        wishlist = new Set(savedArray.map(id => String(id)));
+        console.log(`💖 お気に入り ${wishlist.size}件を復元しました`);
+      } else {
+        console.warn('お気に入りデータの形式が不正です。リセットします。');
+        wishlist = new Set();
+        localStorage.removeItem('famazon_wishlist');
+      }
+    } else {
+      console.log('💖 お気に入りデータなし（初回起動）');
     }
   } catch (error) {
     console.error('お気に入り復元エラー:', error);
+    // エラーが起きても空のSetでリセットして止まらないようにする
     wishlist = new Set();
+    localStorage.removeItem('famazon_wishlist'); // 壊れたデータを削除
   }
 }
 
 // お気に入りをローカルストレージに保存
 function saveWishlist() {
   try {
-    localStorage.setItem('famazon_wishlist', JSON.stringify([...wishlist]));
+    // Setを配列に変換して保存
+    const arrayToSave = Array.from(wishlist);
+    localStorage.setItem('famazon_wishlist', JSON.stringify(arrayToSave));
+    console.log(`💾 お気に入り ${arrayToSave.length}件を保存しました`);
   } catch (error) {
     console.error('お気に入り保存エラー:', error);
+    showToast('⚠️ お気に入りの保存に失敗しました', '#ef4444');
   }
 }
 
 function toggleWishlist(event, id) {
   event.stopPropagation();
   const btn = event.currentTarget;
-  
-  // IDを文字列として統一（重要：型の一貫性を保つ）
   const stringId = String(id);
   
+  // 安全対策：wishlistが万が一Setでない場合は再生成
+  if (!(wishlist instanceof Set)) {
+    console.warn('wishlistが破損していました。再生成します。');
+    wishlist = new Set();
+  }
+  
   if (wishlist.has(stringId)) {
-    // お気に入りから削除
     wishlist.delete(stringId);
     btn.classList.remove('active');
     showToast('💔 お気に入りから削除しました', '#ef4444');
   } else {
-    // お気に入りに追加
     wishlist.add(stringId);
     btn.classList.add('active');
     
     // 商品名を取得して表示
-    const product = products.find(p => p.id == id);
+    const product = products.find(p => String(p.id) === stringId);
     if (product) {
       showToast(`❤️ 「${product.name.substring(0, 20)}...」をお気に入りに追加！`);
     } else {
@@ -1799,8 +1816,8 @@ function toggleWishlist(event, id) {
     }
   }
   
-  // ローカルストレージに保存
-  saveWishlist()
+  saveWishlist();
+}
 
 // ========== CHECKOUT ==========
 function openCheckout() {
