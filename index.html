@@ -3020,6 +3020,66 @@ function closeWishlistModal() {
   }
 }
 
+// ========== お気に入り全解除機能 ==========
+
+// すべてのお気に入りを解除
+function clearAllWishlist() {
+  // お気に入りが空かどうかチェック
+  if (!(wishlist instanceof Set) || wishlist.size === 0) {
+    showToast('💔 お気に入りリストは既に空です', '#6b7280');
+    return;
+  }
+  
+  const wishlistCount = wishlist.size;
+  
+  // 確認ダイアログ（誤操作防止）
+  const confirmMessage = `⚠️ すべてのお気に入り（${wishlistCount}件）を解除しますか？\n\nこの操作は取り消せません。`;
+  
+  if (!confirm(confirmMessage)) {
+    return; // キャンセルされた場合は何もしない
+  }
+  
+  try {
+    // お気に入りをクリア
+    wishlist.clear();
+    saveWishlist(); // ローカルストレージに保存
+    
+    // モーダルを閉じる
+    closeWishlistModal();
+    
+    // 商品一覧のハートボタンを更新（リアルタイム反映）
+    updateAllWishlistButtons();
+    
+    // 成功メッセージ
+    showToast(`🗑️ ${wishlistCount}件のお気に入りをすべて解除しました`, '#f59e0b');
+    
+    // ヘッダーのお気に入り表示も更新
+    updateWishlistHeaderDisplay();
+    
+  } catch (error) {
+    console.error('お気に入り全解除エラー:', error);
+    showToast('❌ 解除処理中にエラーが発生しました', '#ef4444');
+  }
+}
+
+// 商品一覧のすべてのハートボタンを更新
+function updateAllWishlistButtons() {
+  document.querySelectorAll('.btn-wishlist.active').forEach(btn => {
+    btn.classList.remove('active');
+  });
+}
+
+// ヘッダーのお気に入り表示を更新
+function updateWishlistHeaderDisplay() {
+  const wishBtn = document.querySelector('.header-btn[onclick="showWishlistModal()"]');
+  if (wishBtn) {
+    const valueSpan = wishBtn.querySelector('.value');
+    if (valueSpan) {
+      valueSpan.textContent = '❤️ お気に入り';
+    }
+  }
+}
+
 function addToCartFromWishlist(id) {
   const product = products.find(p => p.id === id);
   const existing = cart.find(i => i.id === id);
