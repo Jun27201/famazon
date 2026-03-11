@@ -270,6 +270,8 @@
 
 <script>
 // ========== 設定とグローバル変数 ==========
+let checkoutSubtotal = 0; // チェックアウト画面用の小計を固定保存
+
 const SHEET_API_URL = 'https://script.google.com/macros/s/AKfycbwQH9QFLM_WEOQ862nQlXodrwKikmee5tImh0O9cORmDkInV3eQZrIrX4sWvGHzu5Kv-Q/exec';
 
 // 配達先管理システム
@@ -933,88 +935,22 @@ function updateCheckoutLocationDisplay() {
 // ========== チェックアウト機能（完全版・ジョークサイト仕様） ==========
 // ========== 配送料計算システム（修正版） ==========
 
-function getShippingCost() {
-  try {
-    const methodElement = document.getElementById('deliveryMethod');
-    let baseCost = 0;
-    
-    if (methodElement && methodElement.selectedIndex >= 0) {
-      const selectedOption = methodElement.options[methodElement.selectedIndex];
-      baseCost = parseInt(selectedOption.getAttribute('data-cost')) || 0;
-    }
-    
-    const locationCost = selectedLocation ? selectedLocation.cost : 0;
-    return baseCost + locationCost;
-  } catch (error) {
-    console.error('送料計算エラー:', error);
-    return 0; // エラー時は0を返して処理を継続
-  }
-}
 
-function updateShippingCost() {
-  try {
-    const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
-    const totalShipping = getShippingCost();
-    const tax = Math.floor(subtotal * 0.1);
-    const total = subtotal + tax + totalShipping;
-    
-    // 画面表示を更新
-    const shippingDisplay = document.getElementById('displayShipping');
-    const totalDisplay = document.getElementById('displayTotal');
-    const taxDisplay = document.getElementById('displayTax');
-    
-    if (shippingDisplay) {
-      if (totalShipping === 0) {
-        shippingDisplay.innerHTML = '<span style="color: var(--success); font-weight: 600;">無料 🎉</span>';
-      } else {
-        shippingDisplay.innerHTML = `<span style="color: var(--accent); font-weight: 600;">${totalShipping.toLocaleString()} G</span>`;
-      }
-    }
-    
-    if (taxDisplay) {
-      taxDisplay.textContent = `${tax.toLocaleString()} G`;
-    }
-    
-    if (totalDisplay) {
-      totalDisplay.innerHTML = `<span style="color: var(--glow); font-weight: 700; font-size: 1.3rem;">💰 ${total.toLocaleString()} G</span>`;
-    }
-    
-    console.log('✅ 配送料計算完了:', { totalShipping, total });
-    
-  } catch (error) {
-    console.error('❌ 配送料計算エラー:', error);
-    
-    // エラー時のフォールバック表示
-    const shippingDisplay = document.getElementById('displayShipping');
-    const totalDisplay = document.getElementById('displayTotal');
-    
-    if (shippingDisplay) {
-      shippingDisplay.innerHTML = '<span style="color: var(--silver);">500 G</span>';
-    }
-    
-    if (totalDisplay) {
-      const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
-      const tax = Math.floor(subtotal * 0.1);
-      const fallbackTotal = subtotal + tax + 500;
-      totalDisplay.innerHTML = `<span style="color: var(--glow); font-weight: 700;">💰 ${fallbackTotal.toLocaleString()} G</span>`;
-    }
-  }
-}
 
 function openCheckout() {
   closeCart();
-  
+
   if (cart.length === 0) {
     showToast('🛒 カートが空のため注文できません', '#f59e0b');
     return;
   }
 
-  const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
-  const tax = Math.floor(subtotal * 0.1);
+  // ★重要: チェックアウト用の小計をここで固定（再計算エラーを防ぐ）
+  checkoutSubtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  const tax = Math.floor(checkoutSubtotal * 0.1);
   const hasPrime = cart.some(i => i.prime);
 
   document.getElementById('checkoutBody').innerHTML = `
-    <!-- プログレスバー -->
     <div class="checkout-progress">
       <div class="progress-step active" id="progressStep1">
         <div class="progress-number">1</div>
@@ -1027,16 +963,14 @@ function openCheckout() {
       </div>
     </div>
 
-    <!-- ステップ1: お届け先 -->
+    <!-- ステップ1 -->
     <div class="checkout-step active" id="step1">
-      <h3 class="checkout-step-title">📍 お届け先情報（適当でOK！）</h3>
-      
+      <h3 class="checkout-step-title">📍 お届け先情報（適当でOK）</h3>
       <div class="checkout-form">
         <div class="form-group">
-          <label class="form-label">お名前・勇者名 <small style="color:var(--silver);">（空欄なら自動生成）</small></label>
-          <input type="text" class="form-input" placeholder="例：伝説の勇者 アーサー" id="customerName">
+          <label class="form-label">お名前・勇者名</label>
+          <input type="text" class="form-input" id="customerName" placeholder="例：伝説の勇者 アーサー">
         </div>
-
         <div class="form-group">
           <label class="form-label">配達先の界・国</label>
           <div class="location-display" onclick="showLocationModal()">
@@ -1046,76 +980,67 @@ function openCheckout() {
             📍 配達先を変更する
           </button>
         </div>
-
         <div class="form-group">
-          <label class="form-label">詳細な住所 <small style="color:var(--silver);">（面倒なら空欄でもOK）</small></label>
-          <input type="text" class="form-input" placeholder="例：王城通り 英雄の塔 3階" id="customerAddress">
+          <label class="form-label">詳細な住所</label>
+          <input type="text" class="form-input" id="customerAddress" placeholder="例：王城通り 英雄の塔 3階">
         </div>
-
         <div class="form-group">
           <label class="form-label">受け取り方法</label>
           <select class="form-select" id="deliveryMethod" onchange="updateShippingCost()">
             ${hasPrime ? 
-              '<option value="spell" data-cost="0">🪄 呪文転送（Prime無料）- 即日</option>' : 
-              '<option value="spell" data-cost="800">🪄 呪文転送（800G）- 即日</option>'
+              '<option value="spell" data-cost="0">🪄 呪文転送（Prime無料）</option>' : 
+              '<option value="spell" data-cost="800">🪄 呪文転送（800G）</option>'
             }
-            <option value="hawk" data-cost="500">🦅 鷹便（500G）- 翌日</option>
-            <option value="carriage" data-cost="100">🐎 馬車便（100G）- 3日</option>
+            <option value="hawk" data-cost="500">🦅 鷹便（500G）</option>
+            <option value="carriage" data-cost="100" selected>🐎 馬車便（100G）</option>
             <option value="pickup" data-cost="0">🏪 ピックアップ（無料）</option>
           </select>
         </div>
       </div>
-
       <div class="checkout-actions">
-        <button class="btn-checkout-next" onclick="validateAndGoToStep2()">
-          次へ：お支払い方法 → <small>（未入力でも進めます）</small>
+        <button class="btn-checkout-next" onclick="quickGoToStep2()">
+          次へ：お支払い方法 →
         </button>
       </div>
     </div>
 
-    <!-- ステップ2: お支払い -->
-    <div class="checkout-step" id="step2" style="display: none;">
-      <h3 class="checkout-step-title">💰 お支払い情報（魔法で解決！）</h3>
-      
+    <!-- ステップ2 -->
+    <div class="checkout-step" id="step2" style="display:none;">
+      <h3 class="checkout-step-title">💰 お支払い情報</h3>
       <div class="checkout-form">
         <div class="form-group">
           <label class="form-label">支払い方法</label>
           <select class="form-select" id="paymentMethod">
             <option value="gold">💰 ゴールドコイン（直接転送）</option>
             <option value="card">💳 魔法銀行カード</option>
-            <option value="diamond">💎 ドラゴンダイヤ（換算）</option>
             <option value="magic">✨ 魔法の力でなんとかする</option>
           </select>
         </div>
-
         <div class="form-group">
-          <label class="form-label">送金先情報 <small style="color:var(--silver);">（適当でOK）</small></label>
-          <input type="text" class="form-input" placeholder="魔法でなんとかなります" id="paymentInfo">
+          <label class="form-label">送金先情報</label>
+          <input type="text" class="form-input" id="paymentInfo" placeholder="魔法でなんとかなります">
         </div>
-
         <div class="form-group">
-          <label class="form-label">魔法認証コード <small style="color:var(--silver);">（なんでもOK）</small></label>
-          <input type="password" class="form-input" placeholder="••••••••" id="authCode">
+          <label class="form-label">魔法認証コード</label>
+          <input type="password" class="form-input" id="authCode" placeholder="••••••••">
         </div>
       </div>
 
-      <!-- 注文サマリー -->
       <div class="order-summary">
         <h4 class="summary-title">📋 ご注文内容の確認</h4>
         <div class="summary-items">
           ${cart.map(item => `
             <div class="summary-item">
-              <span class="summary-item-name">${item.emoji} ${item.name.substring(0, 25)}...</span>
+              <span class="summary-item-name">${item.emoji} ${item.name.substring(0,25)}...</span>
               <span class="summary-item-qty">×${item.qty}</span>
               <span class="summary-item-price">${(item.price * item.qty).toLocaleString()} G</span>
             </div>
           `).join('')}
         </div>
-        
         <div class="summary-breakdown">
           <div class="summary-row">
             <span>商品小計</span>
-            <span id="displaySubtotal">${subtotal.toLocaleString()} G</span>
+            <span id="displaySubtotal">${checkoutSubtotal.toLocaleString()} G</span>
           </div>
           <div class="summary-row">
             <span>配送料・手数料</span>
@@ -1133,213 +1058,107 @@ function openCheckout() {
       </div>
 
       <div class="checkout-actions">
-        <button class="btn-checkout-back" onclick="goStep(1)">
-          ← お届け先に戻る
-        </button>
-        <button class="btn-checkout-complete" onclick="completeOrder()">
-          🎉 注文を確定する（魔法で配送！）
-        </button>
+        <button class="btn-checkout-back" onclick="goStep(1)">← お届け先に戻る</button>
+        <button class="btn-checkout-complete" onclick="completeOrder()">🎉 注文を確定する</button>
       </div>
     </div>
   `;
-  
+
   document.getElementById('checkoutModal').classList.add('active');
-  
-  // 初期表示時に配送料を計算（重要！）
-  setTimeout(() => {
-    updateShippingCost();
-    console.log('📦 チェックアウト画面を開き、配送料を計算しました');
-  }, 150);
+  setTimeout(updateShippingCost, 100);
 }
 
-// 【重要】ステップ切り替え関数（これが抜けていました！）
-function goStep(n) {
-  // すべてのステップを確実に非表示
-  document.querySelectorAll('.checkout-step').forEach(el => {
-    el.style.display = 'none';
-    el.classList.remove('active');
-  });
 
-  // 指定されたステップのみを表示
-  const targetStep = document.getElementById('step' + n);
-  if (targetStep) {
-    targetStep.style.display = 'block';
-    targetStep.classList.add('active');
+// 配送料取得（エラー防止版）
+function getShippingCost() {
+  const methodElement = document.getElementById('deliveryMethod');
+  if (!methodElement) return 100; // デフォルト値
+
+  const selectedOption = methodElement.options[methodElement.selectedIndex];
+  const baseCost = parseInt(selectedOption.getAttribute('data-cost')) || 100;
+  const locationCost = selectedLocation ? selectedLocation.cost || 0 : 0;
+
+  return baseCost + locationCost;
+}
+
+// 画面更新（固定された小計を使用）
+function updateShippingCost() {
+  const shipping = getShippingCost();
+  const tax = Math.floor(checkoutSubtotal * 0.1); // ★cartではなくcheckoutSubtotalを使用
+  const total = checkoutSubtotal + tax + shipping;
+
+  const shippingDisplay = document.getElementById('displayShipping');
+  const taxDisplay = document.getElementById('displayTax');
+  const totalDisplay = document.getElementById('displayTotal');
+
+  if (shippingDisplay) {
+    shippingDisplay.innerHTML = shipping === 0 
+      ? '<span style="color: var(--success);">無料 🎉</span>'
+      : `<span style="color: var(--accent);">${shipping.toLocaleString()} G</span>`;
   }
 
-  // プログレスバーの更新
-  document.querySelectorAll('.progress-step').forEach((el, i) => {
-    el.classList.remove('active', 'completed');
-    if (i + 1 < n) {
-      el.classList.add('completed');
-    } else if (i + 1 === n) {
-      el.classList.add('active');
-    }
-  });
-
-  // ステップ2では送料を再計算
-   if (n === 2) {
-    setTimeout(() => {
-      updateShippingCost();
-      console.log('💰 ステップ2: 配送料を再計算しました');
-    }, 100);
+  if (taxDisplay) {
+    taxDisplay.textContent = `${tax.toLocaleString()} G`;
   }
 
-  // モーダルを上部にスクロール
-  const modalBody = document.getElementById('checkoutBody');
-  if (modalBody) {
-    modalBody.scrollTop = 0;
+  if (totalDisplay) {
+    totalDisplay.innerHTML = `<span style="color: var(--glow); font-weight: 700;">${total.toLocaleString()} G</span>`;
   }
 }
 
-// ジョークサイト仕様：楽しい自動入力付きでステップ2へ
-function validateAndGoToStep2() {
+// ジョークサイト仕様のステップ移動
+function quickGoToStep2() {
   const nameInput = document.getElementById('customerName');
   const addressInput = document.getElementById('customerAddress');
 
-  // 名前が空なら楽しい名前を自動生成
-  if (nameInput && !nameInput.value.trim()) {
-    const funnyNames = [
-      "名無しの冒険者", "通りすがりの勇者", "村人A", 
-      "匿名希望の魔導師", "お腹ペコペコ戦士", "迷子の賢者",
-      "謎の仮面勇者", "伝説の怠け者", "寝坊した英雄"
-    ];
-    nameInput.value = funnyNames[Math.floor(Math.random() * funnyNames.length)];
+  if (!nameInput.value.trim()) {
+    nameInput.value = "名無しの勇者";
     showToast('🔮 透視魔法で勇者名を自動生成！', '#a78bfa');
   }
 
-  // 住所が空なら面白い住所を自動生成
-  if (addressInput && !addressInput.value.trim()) {
-    const funnyAddresses = [
-      "次元の狭間 404番地", "始まりの町 広場前ベンチ", 
-      "ダンジョン地下100階", "雲の上の秘密基地",
-      "魔王城の裏口", "世界樹のてっぺん",
-      "時の神殿 迷子コーナー", "竜の巣 居候部屋"
-    ];
-    addressInput.value = funnyAddresses[Math.floor(Math.random() * funnyAddresses.length)];
+  if (!addressInput.value.trim()) {
+    addressInput.value = "異世界のどこか";
     showToast('🗺️ 占い魔法で住所を推測！', '#10b981');
   }
 
-  // 演出のため少し待ってからステップ2へ
-  setTimeout(() => goStep(2), 400);
+  goStep(2);
 }
 
-// 配送先表示HTML生成
-function getCheckoutLocationHTML() {
-  const isDanger = selectedLocation.type === 'danger';
-  const isStandard = selectedLocation.type === 'standard';
-  
-  let badgeStyle, costDisplay;
-  
-  if (isDanger) {
-    badgeStyle = 'background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);';
-    costDisplay = `⚠️ +${selectedLocation.cost.toLocaleString()} G`;
-  } else if (isStandard) {
-    badgeStyle = 'background: rgba(167, 139, 250, 0.1); color: var(--glow); border: 1px solid rgba(167, 139, 250, 0.3);';
-    costDisplay = `+${selectedLocation.cost.toLocaleString()} G`;
-  } else {
-    badgeStyle = 'background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3);';
-    costDisplay = '標準エリア';
-  }
-
-  return `
-    <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
-      <span style="font-size: 1.8rem;">${selectedLocation.icon}</span>
-      <div style="flex: 1;">
-        <div style="font-weight: 700; color: var(--text); font-size: 1.1rem;">
-          ${selectedLocation.name}
-        </div>
-        <div style="font-size: 0.8rem; color: var(--silver);">
-          ${selectedLocation.detail}
-        </div>
-      </div>
-    </div>
-    <div style="text-align: right;">
-      <span style="
-        display: inline-block;
-        padding: 8px 14px;
-        border-radius: 20px;
-        font-weight: 700;
-        font-size: 0.95rem;
-        ${badgeStyle}
-      ">
-        ${costDisplay}
-      </span>
-    </div>
-  `;
-}
-
-// 注文完了処理（ジョークサイト仕様）
+// 注文完了（エラー防止版）
 function completeOrder() {
   if (cart.length === 0) {
-    closeCheckout();
-    showToast('🛒 カートが空のため注文できません', '#f59e0b');
+    showToast('🛒 カートが空です', '#f59e0b');
     return;
   }
 
-  try {
-    const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
-    const shipping = getShippingCost();
-    const tax = Math.floor(subtotal * 0.1);
-    const total = subtotal + tax + shipping;
-    
-    const orderId = `AMZ-${Math.random().toString(36).substr(2, 8).toUpperCase()}-FANTASY`;
-    
-    const customerName = document.getElementById('customerName')?.value || '神秘の注文者';
-    const customerAddress = document.getElementById('customerAddress')?.value || '異世界のどこか';
-    
-    const deliveryMethodElement = document.getElementById('deliveryMethod');
-    const deliveryMethodText = deliveryMethodElement ? 
-      deliveryMethodElement.options[deliveryMethodElement.selectedIndex].text : 
-      '馬車便（3日・100G）';
-    
-    const orderData = {
-      id: orderId,
-      date: new Date().toISOString(),
-      timestamp: Date.now(),
-      customerName: customerName,
-      customerAddress: customerAddress,
-      items: cart.map(item => ({
-        id: item.id,
-        name: item.name,
-        emoji: item.emoji,
-        price: item.price,
-        qty: item.qty,
-        image: item.image || null,
-        seller: item.seller || '',
-        category: item.category || ''
-      })),
-      subtotal: subtotal,
-      shipping: shipping,
-      tax: tax,
-      total: total,
-      status: 'preparing',
-      deliveryMethod: deliveryMethodText,
-      location: selectedLocation.name
-    };
+  const shipping = getShippingCost();
+  const tax = Math.floor(checkoutSubtotal * 0.1);
+  const total = checkoutSubtotal + tax + shipping;
 
-    saveOrderToHistory(orderData);
-    cart = [];
-    updateCartBadge();
-    closeCheckout();
-    
-    // ジョークサイトらしい楽しい完了メッセージ
-    const funnyMessages = [
-      '🎉 ご注文完了！魔法陣で配送準備中...',
-      '✨ 注文受付！ドラゴン便で爆速配送！',
-      '🔮 賢者が梱包中...お楽しみに！',
-      '⚡ 異世界配送システム起動中！'
-    ];
-    const randomMessage = funnyMessages[Math.floor(Math.random() * funnyMessages.length)];
-    showToast(randomMessage, '#10b981');
-    
-    showOrderCompleteModal(orderData);
-    
-  } catch (error) {
-    console.error('注文処理エラー:', error);
-    showToast('❌ 魔法陣に干渉が発生しました', '#ef4444');
-  }
+  const orderId = `AMZ-${Math.random().toString(36).substr(2, 8).toUpperCase()}-FANTASY`;
+
+  const orderData = {
+    id: orderId,
+    date: new Date().toISOString(),
+    timestamp: Date.now(),
+    items: cart.map(item => ({ ...item })),
+    subtotal: checkoutSubtotal,
+    shipping: shipping,
+    tax: tax,
+    total: total,
+    status: 'preparing',
+    location: selectedLocation.name
+  };
+
+  saveOrderToHistory(orderData);
+  cart = [];
+  updateCartBadge();
+  closeCheckout();
+
+  showToast('🎉 ご注文完了！ドラゴン便で爆速配送！', '#10b981');
+  showOrderCompleteModal(orderData);
 }
+
 
 
 
