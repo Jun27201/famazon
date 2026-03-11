@@ -1948,40 +1948,232 @@ function showWishlistModal() {
   }
   
   const modalHTML = `
-    <div class="modal-overlay" id="wishlistModal" style="display:flex;">
-      <div class="modal" style="max-width:800px;">
-        <div class="modal-header">
-          <h2>❤️ お気に入りリスト（${wishlistProducts.length}件）</h2>
-          <button class="close-btn" onclick="closeWishlistModal()">✕</button>
+    <div class="modal-overlay" id="wishlistModal" style="
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(5px);
+      z-index: 2000;
+    ">
+      <div class="modal" style="
+        width: 90%;
+        max-width: 850px;
+        max-height: 85vh;
+        display: flex;
+        flex-direction: column;
+        background: var(--secondary);
+        border: 2px solid var(--glow);
+        border-radius: 16px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      ">
+        <!-- ヘッダー部分 -->
+        <div class="modal-header" style="
+          padding: 20px 24px;
+          border-bottom: 1px solid rgba(167, 139, 250, 0.2);
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-shrink: 0;
+        ">
+          <h2 style="margin: 0; color: var(--glow); font-size: 1.4rem;">
+            ❤️ お気に入りリスト（${wishlistProducts.length}件）
+          </h2>
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <button onclick="goToCartFromWishlist()" style="
+              background: linear-gradient(135deg, var(--glow) 0%, #a78bfa 100%);
+              color: var(--bg);
+              border: none;
+              padding: 8px 16px;
+              border-radius: 8px;
+              cursor: pointer;
+              font-weight: 600;
+              font-size: 0.9rem;
+              display: flex;
+              align-items: center;
+              gap: 6px;
+              transition: transform 0.2s;
+            " onmouseover="this.style.transform='scale(1.05)'"
+               onmouseout="this.style.transform='scale(1)'">
+              <span>🛒</span>
+              <span>カートを見る</span>
+              <span style="
+                background: rgba(255, 255, 255, 0.3);
+                padding: 2px 6px;
+                border-radius: 10px;
+                font-size: 0.75rem;
+              " id="wishlistCartCount">${cart.length > 0 ? cart.reduce((s, i) => s + i.qty, 0) : 0}</span>
+            </button>
+            <button class="close-btn" onclick="closeWishlistModal()" style="
+              background: transparent;
+              border: none;
+              color: var(--text);
+              font-size: 1.5rem;
+              cursor: pointer;
+              padding: 4px;
+              border-radius: 4px;
+              transition: color 0.2s;
+            " onmouseover="this.style.color='var(--glow)'"
+               onmouseout="this.style.color='var(--text)'">✕</button>
+          </div>
         </div>
-        <div class="modal-body" style="max-height:70vh;overflow-y:auto;">
-          <div class="products-grid" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));">
+        
+        <!-- 商品リスト部分 -->
+        <div class="modal-body" style="
+          overflow-y: auto;
+          padding: 20px;
+          flex: 1;
+        ">
+          <div class="products-grid" style="
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 16px;
+          ">
             ${wishlistProducts.map(p => {
               const optimizedImage = p.image ? 
                 p.image.replace('/upload/', '/upload/f_auto,q_auto,w_300,c_limit/') : null;
               
               return `
-                <div class="product-card" onclick="openDetail(${p.id}); closeWishlistModal();" style="cursor:pointer;">
-                  <button class="btn-wishlist active" onclick="toggleWishlist(event, ${p.id})">♥</button>
-                  <div class="product-img" style="overflow:hidden;border-radius:8px;height:150px;">
+                <div class="product-card" onclick="openDetail(${p.id}); closeWishlistModal();" style="
+                  cursor: pointer;
+                  background: var(--bg);
+                  border: 1px solid rgba(167, 139, 250, 0.2);
+                  border-radius: 10px;
+                  padding: 12px;
+                  transition: transform 0.2s, box-shadow 0.2s;
+                  position: relative;
+                  display: flex;
+                  flex-direction: column;
+                " onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 16px rgba(167, 139, 250, 0.3)'"
+                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                  
+                  <!-- お気に入り削除ボタン -->
+                  <button class="btn-wishlist active" onclick="
+                    event.stopPropagation(); 
+                    toggleWishlist(event, ${p.id}); 
+                    setTimeout(() => { 
+                      if (!wishlist.has(String(${p.id}))) { 
+                        closeWishlistModal(); 
+                        showWishlistModal(); 
+                      } 
+                    }, 100);
+                  " style="
+                    position: absolute;
+                    top: 8px;
+                    right: 8px;
+                    background: #ef4444;
+                    border: none;
+                    color: white;
+                    font-size: 1rem;
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 50%;
+                    cursor: pointer;
+                    z-index: 10;
+                    transition: transform 0.2s;
+                  " onmouseover="this.style.transform='scale(1.1)'"
+                     onmouseout="this.style.transform='scale(1)'">♥</button>
+                  
+                  <!-- 商品画像 -->
+                  <div class="product-img" style="
+                    overflow: hidden;
+                    border-radius: 8px;
+                    height: 150px;
+                    background: var(--secondary);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin-bottom: 10px;
+                  ">
                     ${p.image ? 
                       `<img src="${optimizedImage}" alt="${p.name}" 
-                        style="width:100%;height:100%;object-fit:cover;" loading="lazy">` 
-                      : `<span style="font-size:2rem;">${p.emoji}</span>`}
+                        style="width: 100%; height: 100%; object-fit: cover;" loading="lazy">` 
+                      : `<span style="font-size: 2.5rem;">${p.emoji}</span>`}
                   </div>
-                  <div class="product-info">
-                    <div class="product-name" style="font-size:0.85rem;margin:8px 0;">${p.name}</div>
+                  
+                  <!-- 商品情報 -->
+                  <div class="product-info" style="flex: 1;">
+                    <div class="product-name" style="
+                      font-size: 0.85rem;
+                      margin: 8px 0;
+                      color: var(--text);
+                      min-height: 34px;
+                      display: -webkit-box;
+                      -webkit-line-clamp: 2;
+                      -webkit-box-orient: vertical;
+                      overflow: hidden;
+                    ">${p.name}</div>
                     <div class="product-price">
-                      <span class="price-main" style="font-size:0.9rem;">💰 ${p.price.toLocaleString()} G</span>
+                      <span class="price-main" style="
+                        font-size: 0.9rem;
+                        color: var(--glow);
+                        font-weight: 600;
+                      ">💰 ${p.price.toLocaleString()} G</span>
                     </div>
                   </div>
-                  <div class="product-actions" onclick="event.stopPropagation()">
-                    <button class="btn-cart" style="padding:6px 12px;font-size:0.8rem;" onclick="addToCart(${p.id})">🛒 カートへ</button>
+                  
+                  <!-- アクションボタン -->
+                  <div class="product-actions" onclick="event.stopPropagation()" style="
+                    margin-top: 12px;
+                    display: flex;
+                    gap: 8px;
+                  ">
+                    <button class="btn-add-only" style="
+                      flex: 1;
+                      padding: 8px 6px;
+                      font-size: 0.8rem;
+                      background: var(--secondary);
+                      border: 1px solid var(--glow);
+                      color: var(--text);
+                      border-radius: 6px;
+                      cursor: pointer;
+                      font-weight: 600;
+                      transition: all 0.2s;
+                    " onclick="addToCartFromWishlist(${p.id})"
+                       onmouseover="this.style.background='var(--hover)'"
+                       onmouseout="this.style.background='var(--secondary)'">
+                      🛒 追加
+                    </button>
+                    
+                    <button class="btn-buy-now" style="
+                      flex: 1.2;
+                      padding: 8px 6px;
+                      font-size: 0.8rem;
+                      background: var(--glow);
+                      color: var(--bg);
+                      border: none;
+                      border-radius: 6px;
+                      cursor: pointer;
+                      font-weight: 600;
+                      transition: all 0.2s;
+                    " onclick="buyNowFromWishlist(${p.id})"
+                       onmouseover="this.style.background='#a78bfa'"
+                       onmouseout="this.style.background='var(--glow)'">
+                      🚀 カートへ
+                    </button>
                   </div>
                 </div>
               `;
             }).join('')}
           </div>
+        </div>
+        
+        <!-- フッター（使用説明） -->
+        <div style="
+          padding: 12px 24px;
+          border-top: 1px solid rgba(167, 139, 250, 0.2);
+          background: rgba(167, 139, 250, 0.05);
+          border-radius: 0 0 14px 14px;
+          text-align: center;
+          color: var(--silver);
+          font-size: 0.8rem;
+        ">
+          💡 「🛒 追加」でカートに入れて買い物継続 | 「🚀 カートへ」で追加してすぐ注文手続き
         </div>
       </div>
     </div>
@@ -1989,12 +2181,22 @@ function showWishlistModal() {
   
   document.body.insertAdjacentHTML('beforeend', modalHTML);
   
-  // オーバーレイクリックで閉じる
-  document.getElementById('wishlistModal').addEventListener('click', (e) => {
+  // イベントリスナー設定
+  const modal = document.getElementById('wishlistModal');
+  modal.addEventListener('click', (e) => {
     if (e.target.id === 'wishlistModal') {
       closeWishlistModal();
     }
   });
+  
+  // ESCキーで閉じる
+  const handleEscape = (e) => {
+    if (e.key === 'Escape') {
+      closeWishlistModal();
+      document.removeEventListener('keydown', handleEscape);
+    }
+  };
+  document.addEventListener('keydown', handleEscape);
 }
 
 function closeWishlistModal() {
@@ -2002,6 +2204,65 @@ function closeWishlistModal() {
   if (modal) {
     modal.remove();
   }
+}
+
+function addToCartFromWishlist(id) {
+  const product = products.find(p => p.id === id);
+  const existing = cart.find(i => i.id === id);
+  
+  if (existing) {
+    existing.qty++;
+  } else {
+    cart.push({ ...product, qty: 1 });
+  }
+  
+  updateCartBadge();
+  
+  // お気に入りリスト内のカート数も更新
+  const cartCountElement = document.getElementById('wishlistCartCount');
+  if (cartCountElement) {
+    const total = cart.reduce((s, i) => s + i.qty, 0);
+    cartCountElement.textContent = total;
+    
+    // 数字拡大アニメーション
+    cartCountElement.style.transform = 'scale(1.4)';
+    cartCountElement.style.background = 'rgba(16, 185, 129, 0.8)';
+    setTimeout(() => {
+      cartCountElement.style.transform = 'scale(1)';
+      cartCountElement.style.background = 'rgba(255, 255, 255, 0.3)';
+    }, 300);
+  }
+  
+  showToast(`✨ 「${product.emoji} ${product.name.substring(0, 15)}...」をカートに追加！`);
+}
+
+// お気に入りリストから今すぐ購入（カートに追加してカート画面へ）
+function buyNowFromWishlist(id) {
+  const product = products.find(p => p.id === id);
+  const existing = cart.find(i => i.id === id);
+  
+  if (existing) {
+    existing.qty++;
+  } else {
+    cart.push({ ...product, qty: 1 });
+  }
+  
+  updateCartBadge();
+  closeWishlistModal();
+  openCart();
+  
+  showToast(`🚀 「${product.name.substring(0, 15)}...」を今すぐ購入！`);
+}
+
+// お気に入りリストからカート画面へ移動
+function goToCartFromWishlist() {
+  if (cart.length === 0) {
+    showToast('🛒 カートが空です。商品を追加してください', '#f59e0b');
+    return;
+  }
+  
+  closeWishlistModal();
+  openCart();
 }
 
 // ヘッダーのお気に入りボタンにクリック機能を追加
