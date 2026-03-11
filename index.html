@@ -1933,14 +1933,17 @@ function addReloadButtonToHeader() {
 }
 // ========== 🚑 モーダル統一管理システム（緊急修正） ==========
 
-// 1. シンプルなお気に入りモーダル閉鎖関数
+// 1. シンプルなお気に入りモーダル閉鎖// 1. シンプルなお気に入りモーダル閉鎖関数（修正版）
 function closeWishlistModal() {
   const modal = document.getElementById('wishlistModal');
   if (modal) {
     modal.classList.remove('active');
+    modal.style.display = 'none';  // ← この1行を追加
     console.log('✅ お気に入りモーダルを閉じました');
   }
 }
+
+
 
 // 2. グローバルクリック監視システム
 // すべてのクリックを監視し、モーダル関連なら統一的に処理
