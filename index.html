@@ -5,6 +5,106 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ファマゾン魔法商店 - ファンタジー世界最大の通販サイト</title>
 <link rel="stylesheet" href="style.css">
+<style>
+/* 配達先選択用の追加スタイル */
+.location-option {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: var(--bg);
+  border: 2px solid rgba(167, 139, 250, 0.2);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.location-option:hover {
+  background: var(--hover);
+  border-color: var(--glow);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(167, 139, 250, 0.3);
+}
+
+.location-option.selected {
+  background: rgba(139, 92, 246, 0.15);
+  border-color: var(--glow);
+  box-shadow: 0 4px 15px rgba(167, 139, 250, 0.2);
+}
+
+.location-option.danger {
+  border-color: rgba(239, 68, 68, 0.4);
+  background: linear-gradient(135deg, var(--bg) 0%, rgba(239, 68, 68, 0.05) 100%);
+}
+
+.location-option.danger:hover {
+  border-color: #ef4444;
+  box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+}
+
+.location-option.danger::before {
+  content: '⚠️';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+.location-icon {
+  font-size: 2.2rem;
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+.location-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.location-name {
+  font-weight: 700;
+  color: var(--text);
+  font-size: 1.1rem;
+  margin-bottom: 4px;
+}
+
+.location-detail {
+  font-size: 0.8rem;
+  color: var(--silver);
+  line-height: 1.3;
+}
+
+.location-fee {
+  font-weight: 700;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border-radius: 20px;
+  text-align: center;
+  min-width: 80px;
+}
+
+.location-fee.free {
+  color: var(--success);
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.location-fee.standard {
+  color: var(--glow);
+  background: rgba(139, 92, 246, 0.1);
+}
+
+.location-fee.danger {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+  font-weight: 800;
+}
+</style>
 </head>
 <body>
 
@@ -16,11 +116,10 @@
       <div class="logo-sub">魔 法 商 店</div>
     </div>
 
-  <button class="location-btn" onclick="showLocationModal()">
-  <span>配達先の界</span>
-  <span>🏰 中央王国・王都</span>
-  </button>
-
+    <button class="location-btn" onclick="showLocationModal()">
+      <span>配達先の界</span>
+      <span>🏰 中央王国・王都</span>
+    </button>
 
     <div class="search-bar">
       <select class="search-category" id="searchCat">
@@ -46,8 +145,8 @@
         <span class="value">勇者さん ▾</span>
       </button>
       <button class="header-btn" onclick="showOrderHistoryModal()">
-      <span class="label">冒険の記録</span>
-      <span class="value">📦 注文履歴</span>
+        <span class="label">冒険の記録</span>
+        <span class="value">📦 注文履歴</span>
       </button>
       <button class="header-btn" onclick="showWishlistModal()">
         <span class="label">魔法リスト</span>
@@ -91,124 +190,123 @@
 <div class="main-container">
   <!-- SIDEBAR -->
   <aside class="sidebar">
-  <h3>🔮 絞り込み検索</h3>
+    <h3>🔮 絞り込み検索</h3>
 
-  <div class="filter-section">
-    <h4>レアリティ</h4>
-    <label class="filter-option">
-      <input type="checkbox" checked value="common" class="filter-rarity" onchange="applyFilters()">
-      <span>⬜ コモン</span>
-    </label>
-    <label class="filter-option">
-      <input type="checkbox" checked value="uncommon" class="filter-rarity" onchange="applyFilters()">
-      <span>🟩 アンコモン</span>
-    </label>
-    <label class="filter-option">
-      <input type="checkbox" checked value="rare" class="filter-rarity" onchange="applyFilters()">
-      <span>🟦 レア</span>
-    </label>
-    <label class="filter-option">
-      <input type="checkbox" checked value="epic" class="filter-rarity" onchange="applyFilters()">
-      <span>🟪 エピック</span>
-    </label>
-    <label class="filter-option">
-      <input type="checkbox" checked value="legendary" class="filter-rarity" onchange="applyFilters()">
-      <span>🟨 レジェンダリー</span>
-    </label>
-  </div>
-
-  <div class="filter-section">
-    <h4>価格帯（ゴールド）</h4>
-    <div class="price-range">
-      <input type="number" class="price-input" id="priceMin" placeholder="最小" min="0" oninput="applyFilters()">
-      <span>〜</span>
-      <input type="number" class="price-input" id="priceMax" placeholder="最大" min="0" oninput="applyFilters()">
+    <div class="filter-section">
+      <h4>レアリティ</h4>
+      <label class="filter-option">
+        <input type="checkbox" checked value="common" class="filter-rarity" onchange="applyFilters()">
+        <span>⬜ コモン</span>
+      </label>
+      <label class="filter-option">
+        <input type="checkbox" checked value="uncommon" class="filter-rarity" onchange="applyFilters()">
+        <span>🟩 アンコモン</span>
+      </label>
+      <label class="filter-option">
+        <input type="checkbox" checked value="rare" class="filter-rarity" onchange="applyFilters()">
+        <span>🟦 レア</span>
+      </label>
+      <label class="filter-option">
+        <input type="checkbox" checked value="epic" class="filter-rarity" onchange="applyFilters()">
+        <span>🟪 エピック</span>
+      </label>
+      <label class="filter-option">
+        <input type="checkbox" checked value="legendary" class="filter-rarity" onchange="applyFilters()">
+        <span>🟨 レジェンダリー</span>
+      </label>
     </div>
-  </div>
 
-  <div class="filter-section">
-    <h4>評価</h4>
-    <label class="filter-option">
-      <input type="radio" name="filter-rating" value="5" class="filter-rating-radio" onchange="applyFilters()">
-      <span class="star-filter">⭐⭐⭐⭐⭐ 以上</span>
-    </label>
-    <label class="filter-option">
-      <input type="radio" name="filter-rating" value="4" class="filter-rating-radio" onchange="applyFilters()">
-      <span class="star-filter">⭐⭐⭐⭐ 以上</span>
-    </label>
-    <label class="filter-option">
-      <input type="radio" name="filter-rating" value="3" class="filter-rating-radio" onchange="applyFilters()">
-      <span class="star-filter">⭐⭐⭐ 以上</span>
-    </label>
-    <label class="filter-option">
-      <input type="radio" name="filter-rating" value="0" class="filter-rating-radio" onchange="applyFilters()" checked>
-      <span style="font-size:0.82rem; color: var(--silver);">すべて表示</span>
-    </label>
-  </div>
+    <div class="filter-section">
+      <h4>価格帯（ゴールド）</h4>
+      <div class="price-range">
+        <input type="number" class="price-input" id="priceMin" placeholder="最小" min="0" oninput="applyFilters()">
+        <span>〜</span>
+        <input type="number" class="price-input" id="priceMax" placeholder="最大" min="0" oninput="applyFilters()">
+      </div>
+    </div>
 
-  <div class="filter-section">
-    <h4>配達速度</h4>
-    <label class="filter-option">
-      <input type="checkbox" value="呪文" class="filter-delivery" onchange="applyFilters()">
-      <span>🪄 呪文転送（即日）</span>
-    </label>
-    <label class="filter-option">
-      <input type="checkbox" value="鷹便" class="filter-delivery" onchange="applyFilters()">
-      <span>🦅 鷹便（翌日）</span>
-    </label>
-    <label class="filter-option">
-      <input type="checkbox" value="馬車" class="filter-delivery" onchange="applyFilters()">
-      <span>🐎 馬車便（3日）</span>
-    </label>
-  </div>
+    <div class="filter-section">
+      <h4>評価</h4>
+      <label class="filter-option">
+        <input type="radio" name="filter-rating" value="5" class="filter-rating-radio" onchange="applyFilters()">
+        <span class="star-filter">⭐⭐⭐⭐⭐ 以上</span>
+      </label>
+      <label class="filter-option">
+        <input type="radio" name="filter-rating" value="4" class="filter-rating-radio" onchange="applyFilters()">
+        <span class="star-filter">⭐⭐⭐⭐ 以上</span>
+      </label>
+      <label class="filter-option">
+        <input type="radio" name="filter-rating" value="3" class="filter-rating-radio" onchange="applyFilters()">
+        <span class="star-filter">⭐⭐⭐ 以上</span>
+      </label>
+      <label class="filter-option">
+        <input type="radio" name="filter-rating" value="0" class="filter-rating-radio" onchange="applyFilters()" checked>
+        <span style="font-size:0.82rem; color: var(--silver);">すべて表示</span>
+      </label>
+    </div>
 
-  <div class="filter-section">
-    <h4>出品者</h4>
-    <label class="filter-option">
-      <input type="checkbox" value="王立商会" class="filter-seller" onchange="applyFilters()">
-      <span>🏰 王立商会</span>
-    </label>
-    <label class="filter-option">
-      <input type="checkbox" value="魔法師ギルド" class="filter-seller" onchange="applyFilters()">
-      <span>🧙 魔法師ギルド</span>
-    </label>
-    <label class="filter-option">
-      <input type="checkbox" value="エルフ" class="filter-seller" onchange="applyFilters()">
-      <span>🧝 エルフ工房</span>
-    </label>
-    <label class="filter-option">
-      <input type="checkbox" value="ドワーフ" class="filter-seller" onchange="applyFilters()">
-      <span>⚒️ ドワーフ鍛冶</span>
-    </label>
-    <label class="filter-option">
-      <input type="checkbox" value="闇商人" class="filter-seller" onchange="applyFilters()">
-      <span>💀 闇商人</span>
-    </label>
-    <label class="filter-option">
-      <input type="checkbox" value="天界" class="filter-seller" onchange="applyFilters()">
-      <span>✨ 天界商会</span>
-    </label>
-    <label class="filter-option">
-      <input type="checkbox" value="深海" class="filter-seller" onchange="applyFilters()">
-      <span>🌊 深海商会</span>
-    </label>
-    <label class="filter-option">
-      <input type="checkbox" value="冒険者ギルド" class="filter-seller" onchange="applyFilters()">
-      <span>🏆 冒険者ギルド</span>
-    </label>
-  </div>
+    <div class="filter-section">
+      <h4>配達速度</h4>
+      <label class="filter-option">
+        <input type="checkbox" value="呪文" class="filter-delivery" onchange="applyFilters()">
+        <span>🪄 呪文転送（即日）</span>
+      </label>
+      <label class="filter-option">
+        <input type="checkbox" value="鷹便" class="filter-delivery" onchange="applyFilters()">
+        <span>🦅 鷹便（翌日）</span>
+      </label>
+      <label class="filter-option">
+        <input type="checkbox" value="馬車" class="filter-delivery" onchange="applyFilters()">
+        <span>🐎 馬車便（3日）</span>
+      </label>
+    </div>
 
-  <button onclick="resetFilters()" style="
-    width:100%; padding:8px; margin-top:5px;
-    background:var(--secondary); border:1px solid rgba(167,139,250,0.3);
-    color:var(--text); border-radius:6px; cursor:pointer; font-size:0.85rem;
-    transition: background 0.2s;
-  " onmouseover="this.style.background='var(--hover)'"
-     onmouseout="this.style.background='var(--secondary)'">
-    🔄 フィルターをリセット
-  </button>
-</aside>
+    <div class="filter-section">
+      <h4>出品者</h4>
+      <label class="filter-option">
+        <input type="checkbox" value="王立商会" class="filter-seller" onchange="applyFilters()">
+        <span>🏰 王立商会</span>
+      </label>
+      <label class="filter-option">
+        <input type="checkbox" value="魔法師ギルド" class="filter-seller" onchange="applyFilters()">
+        <span>🧙 魔法師ギルド</span>
+      </label>
+      <label class="filter-option">
+        <input type="checkbox" value="エルフ" class="filter-seller" onchange="applyFilters()">
+        <span>🧝 エルフ工房</span>
+      </label>
+      <label class="filter-option">
+        <input type="checkbox" value="ドワーフ" class="filter-seller" onchange="applyFilters()">
+        <span>⚒️ ドワーフ鍛冶</span>
+      </label>
+      <label class="filter-option">
+        <input type="checkbox" value="闇商人" class="filter-seller" onchange="applyFilters()">
+        <span>💀 闇商人</span>
+      </label>
+      <label class="filter-option">
+        <input type="checkbox" value="天界" class="filter-seller" onchange="applyFilters()">
+        <span>✨ 天界商会</span>
+      </label>
+      <label class="filter-option">
+        <input type="checkbox" value="深海" class="filter-seller" onchange="applyFilters()">
+        <span>🌊 深海商会</span>
+      </label>
+      <label class="filter-option">
+        <input type="checkbox" value="冒険者ギルド" class="filter-seller" onchange="applyFilters()">
+        <span>🏆 冒険者ギルド</span>
+      </label>
+    </div>
 
+    <button onclick="resetFilters()" style="
+      width:100%; padding:8px; margin-top:5px;
+      background:var(--secondary); border:1px solid rgba(167,139,250,0.3);
+      color:var(--text); border-radius:6px; cursor:pointer; font-size:0.85rem;
+      transition: background 0.2s;
+    " onmouseover="this.style.background='var(--hover)'"
+       onmouseout="this.style.background='var(--secondary)'">
+      🔄 フィルターをリセット
+    </button>
+  </aside>
 
   <!-- PRODUCTS -->
   <div class="products-section">
@@ -248,6 +346,8 @@
   <p class="footer-copy" style="margin-top:5px;">⚠️ 魔法アイテムの使用は自己責任でお願いします。死亡・異界転移等の責任は負いかねます。</p>
 </footer>
 
+<!-- MODALS -->
+
 <!-- CART MODAL -->
 <div class="modal-overlay" id="cartModal">
   <div class="modal">
@@ -280,6 +380,7 @@
     <div class="modal-body" id="checkoutBody"></div>
   </div>
 </div>
+
 <!-- ORDER HISTORY MODAL -->
 <div class="modal-overlay" id="orderHistoryModal">
   <div class="modal" style="max-width:950px;">
@@ -290,6 +391,7 @@
     <div class="modal-body" id="orderHistoryBody"></div>
   </div>
 </div>
+
 <!-- LOCATION MODAL -->
 <div class="modal-overlay" id="locationModal">
   <div class="modal" style="max-width:600px;">
@@ -308,6 +410,7 @@
     </div>
   </div>
 </div>
+
 <!-- WISHLIST MODAL -->
 <div class="modal-overlay" id="wishlistModal">
   <div class="modal" style="max-width:900px;">
@@ -320,7 +423,6 @@
     </div>
   </div>
 </div>
-
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
@@ -397,19 +499,17 @@ const LOCATIONS = [
   }
 ];
 
-let selectedLocation = LOCATIONS[0]; // デフォルトは中央王国
+let selectedLocation = LOCATIONS[0];
 const LOCATION_STORAGE_KEY = 'famazon_selected_location';
 
-
-  
 // キャッシュ設定（30分）
 const CACHE_CONFIG = {
   PRODUCTS_KEY: 'famazon_products_cache_v2',
   TIMESTAMP_KEY: 'famazon_cache_timestamp_v2',
-  EXPIRY_TIME: 30 * 60 * 1000, // 30分
+  EXPIRY_TIME: 30 * 60 * 1000,
 };
 
-// グローバル状態管理（1回だけ宣言）
+// グローバル状態管理
 let products = [];
 let productReviews = {};
 let productQA = {};
@@ -503,7 +603,6 @@ async function loadProductsFromSheet(forceReload = false) {
   try {
     const container = document.getElementById('productsContainer');
     
-    // キャッシュから読み込み
     if (!forceReload) {
       const cachedData = CacheManager.load();
       if (cachedData) {
@@ -514,7 +613,6 @@ async function loadProductsFromSheet(forceReload = false) {
       }
     }
     
-    // APIから新しいデータを取得
     container.innerHTML = '<div class="loading">🔮 魔法陣から商品を召喚中...</div>';
     
     const response = await fetch(SHEET_API_URL, { 
@@ -751,6 +849,7 @@ function openDetail(id) {
   `;
   
   document.getElementById('productDetailModal').classList.add('active');
+  ensureModalHandlers();
   setTimeout(() => loadReviewsLazy(p.id), 200);
 }
 
@@ -947,6 +1046,7 @@ function updateCartBadge() {
 function openCart() {
   renderCart();
   document.getElementById('cartModal').classList.add('active');
+  ensureModalHandlers();
 }
 
 function closeCart() {
@@ -1009,10 +1109,7 @@ function preloadDetailImage(id) {
   }
 }
 
-// ========== お気に入り機能 ==========
 // ========== お気に入り機能（完全統合版） ==========
-
-// 1. データの読み込み（既存機能・保持）
 function loadWishlist() {
   try {
     const saved = localStorage.getItem('famazon_wishlist');
@@ -1032,7 +1129,6 @@ function loadWishlist() {
   }
 }
 
-// 2. データの保存（既存機能・保持）
 function saveWishlist() {
   try {
     const arrayToSave = Array.from(wishlist);
@@ -1043,7 +1139,6 @@ function saveWishlist() {
   }
 }
 
-// 3. 商品カードでのハート切り替え（既存機能・保持）
 function toggleWishlist(event, id) {
   event.stopPropagation();
   const btn = event.currentTarget;
@@ -1070,18 +1165,37 @@ function toggleWishlist(event, id) {
   saveWishlist();
 }
 
-// 4. お気に入りモーダル表示（新規追加）
 function showWishlistModal() {
+  const modal = document.getElementById('wishlistModal');
   renderWishlist();
-  document.getElementById('wishlistModal').classList.add('active');
+  
+  if (modal) {
+    modal.style.display = 'flex';
+    modal.classList.add('active');
+    
+    const closeBtn = modal.querySelector('.close-btn');
+    if (closeBtn) {
+      closeBtn.onclick = closeWishlistModal;
+    }
+    
+    ensureModalHandlers();
+  } else {
+    console.error('❌ wishlistModal要素が見つかりません');
+  }
 }
 
-// 5. モーダルを閉じる（新規追加）
 function closeWishlistModal() {
-  document.getElementById('wishlistModal').classList.remove('active');
+  const modal = document.getElementById('wishlistModal');
+  if (modal) {
+    modal.classList.remove('active');
+    modal.style.display = 'none';
+    
+    setTimeout(() => {
+      modal.style.display = '';
+    }, 300);
+  }
 }
 
-// 6. お気に入り一覧の描画（新規追加）
 function renderWishlist() {
   const body = document.getElementById('wishlistBody');
   
@@ -1183,7 +1297,6 @@ function renderWishlist() {
   `;
 }
 
-// 7. モーダル内からの削除処理（新規追加）
 function removeFromWishlistAndUpdate(id) {
   const stringId = String(id);
   const product = products.find(p => p.id === id);
@@ -1192,10 +1305,8 @@ function removeFromWishlistAndUpdate(id) {
     wishlist.delete(stringId);
     saveWishlist();
     
-    // お気に入りモーダルを即座に再描画
     renderWishlist();
     
-    // メイン画面のハートボタンも同期更新
     document.querySelectorAll('.btn-wishlist').forEach(btn => {
       const onclick = btn.getAttribute('onclick') || '';
       if (onclick.includes(`toggleWishlist(event, ${id})`)) {
@@ -1209,11 +1320,11 @@ function removeFromWishlistAndUpdate(id) {
   }
 }
 
-
 // ========== 配達先選択機能 ==========
 function showLocationModal() {
   renderLocationOptions();
   document.getElementById('locationModal').classList.add('active');
+  ensureModalHandlers();
 }
 
 function closeLocationModal() {
@@ -1248,18 +1359,11 @@ function selectLocation(locationId) {
   
   selectedLocation = location;
   
-  // ヘッダーの表示を更新
   updateHeaderLocation();
-  
-  // 設定を保存
   saveLocationSetting();
-  
-  // モーダル内の選択状態を更新
   renderLocationOptions();
-  
   closeLocationModal();
   
-  // 通知表示
   if (location.cost > 0) {
     const message = location.type === 'danger' ? 
       `⚠️ 危険地帯「${location.name}」に設定（危険手当: +${location.cost.toLocaleString()} G）` :
@@ -1269,13 +1373,11 @@ function selectLocation(locationId) {
     showToast(`📍 配達先を「${location.name}」に設定しました`, '#10b981');
   }
   
-  // ★重要：チェックアウト画面が開いている場合は即座に更新
   const checkoutModal = document.getElementById('checkoutModal');
   if (checkoutModal && checkoutModal.classList.contains('active')) {
-    updateCheckoutLocationDisplay(); // 見た目の更新
-    updateShippingCost();            // 金額の再計算
+    updateCheckoutLocationDisplay();
+    updateShippingCost();
     
-    // 視覚的フィードバック効果
     setTimeout(() => {
       const shippingDisplay = document.getElementById('displayShipping');
       if (shippingDisplay) {
@@ -1292,7 +1394,6 @@ function selectLocation(locationId) {
     }, 200);
   }
 }
-
 
 function updateHeaderLocation() {
   const locationBtn = document.querySelector('.location-btn');
@@ -1328,9 +1429,7 @@ function loadLocationSetting() {
   }
 }
 
-
 // ========== チェックアウト機能 ==========
-// ========== チェックアウト画面更新機能 ==========
 function getCheckoutLocationHTML() {
   const isDanger = selectedLocation.type === 'danger';
   const isStandard = selectedLocation.type === 'standard';
@@ -1384,7 +1483,6 @@ function updateCheckoutLocationDisplay() {
   if (locationDisplay) {
     locationDisplay.innerHTML = getCheckoutLocationHTML();
     
-    // スムーズなアニメーション効果
     locationDisplay.style.transform = 'scale(0.98)';
     locationDisplay.style.transition = 'transform 0.2s ease';
     setTimeout(() => {
@@ -1392,8 +1490,6 @@ function updateCheckoutLocationDisplay() {
     }, 100);
   }
 }
-
-
 
 function openCheckout() {
   closeCart();
@@ -1408,7 +1504,7 @@ function openCheckout() {
         <label>お名前・勇者名</label>
         <input type="text" placeholder="例：伝説の勇者 アーサー" id="customerName">
         
-                <label>配達先の界・国</label>
+        <label>配達先の界・国</label>
         <div id="checkoutLocationDisplay" style="
           padding: 16px;
           background: var(--bg);
@@ -1438,7 +1534,6 @@ function openCheckout() {
            onmouseout="this.style.background='var(--secondary)'; this.style.transform='translateY(0)';">
           📍 配達先を変更する
         </button>
-
         
         <label>詳細な住所</label>
         <input type="text" placeholder="例：王城通り 英雄の塔 3階" id="customerAddress">
@@ -1500,24 +1595,19 @@ function openCheckout() {
   `;
   
   document.getElementById('checkoutModal').classList.add('active');
-  
-  // 初期表示時に送料を計算（DOM生成を待つため遅延実行）
+  ensureModalHandlers();
   setTimeout(() => updateShippingCost(), 100);
 }
-
-
 
 function goStep(n) {
   document.querySelectorAll('.checkout-step').forEach((el, i) => {
     el.classList.toggle('active', i+1 === n);
   });
   
-  // ステップ2に進んだ時に送料を再計算
   if (n === 2) {
     setTimeout(() => updateShippingCost(), 50);
   }
 }
-
 
 function closeCheckout() {
   document.getElementById('checkoutModal').classList.remove('active');
@@ -1532,12 +1622,10 @@ function getShippingCost(deliveryMethod) {
     baseCost = parseInt(selectedOption.getAttribute('data-cost')) || 0;
   }
   
-  // 配達先の追加料金を加算
   const locationCost = selectedLocation ? selectedLocation.cost : 0;
   
   return baseCost + locationCost;
 }
-
 
 function updateShippingCost() {
   try {
@@ -1550,7 +1638,6 @@ function updateShippingCost() {
     const tax = Math.floor(subtotal * 0.1);
     const total = subtotal + tax + totalShipping;
     
-    // 表示を更新
     const shippingDisplay = document.getElementById('displayShipping');
     const totalDisplay = document.getElementById('displayTotal');
     
@@ -1581,8 +1668,6 @@ function updateShippingCost() {
   }
 }
 
-
-
 function completeOrder() {
   if (cart.length === 0) {
     closeCheckout();
@@ -1592,13 +1677,12 @@ function completeOrder() {
 
   try {
     const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
-    const shipping = getShippingCost(); // 選択された配送方法の送料を取得
+    const shipping = getShippingCost();
     const tax = Math.floor(subtotal * 0.1);
     const total = subtotal + tax + shipping;
     
     const orderId = `AMZ-${Math.random().toString(36).substr(2, 8).toUpperCase()}-FANTASY`;
     
-    // 配送方法名を取得
     const deliveryMethodElement = document.getElementById('deliveryMethod');
     const deliveryMethodText = deliveryMethodElement ? 
       deliveryMethodElement.options[deliveryMethodElement.selectedIndex].text : 
@@ -1623,7 +1707,8 @@ function completeOrder() {
       tax: tax,
       total: total,
       status: 'preparing',
-      deliveryMethod: deliveryMethodText
+      deliveryMethod: deliveryMethodText,
+      location: selectedLocation.name
     };
 
     saveOrderToHistory(orderData);
@@ -1638,8 +1723,7 @@ function completeOrder() {
     console.error('注文処理エラー:', error);
     showToast('❌ 注文処理中にエラーが発生しました', '#ef4444');
   }
-} 
-
+}
 
 // ========== 注文履歴 ==========
 function saveOrderToHistory(orderData) {
@@ -1767,10 +1851,51 @@ function showOrderHistoryModal() {
   
   document.getElementById('orderHistoryBody').innerHTML = bodyHTML;
   document.getElementById('orderHistoryModal').classList.add('active');
+  ensureModalHandlers();
 }
 
 function closeOrderHistory() {
   document.getElementById('orderHistoryModal').classList.remove('active');
+}
+
+// ========== モーダル管理システム ==========
+function setupModalCloseHandlers() {
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    const newOverlay = overlay.cloneNode(true);
+    overlay.parentNode.replaceChild(newOverlay, overlay);
+    
+    newOverlay.addEventListener('click', (e) => {
+      if (e.target === newOverlay) {
+        const modalId = newOverlay.id;
+        switch(modalId) {
+          case 'wishlistModal':
+            closeWishlistModal();
+            break;
+          case 'cartModal':
+            closeCart();
+            break;
+          case 'productDetailModal':
+            closeDetail();
+            break;
+          case 'checkoutModal':
+            closeCheckout();
+            break;
+          case 'orderHistoryModal':
+            closeOrderHistory();
+            break;
+          case 'locationModal':
+            closeLocationModal();
+            break;
+          default:
+            newOverlay.classList.remove('active');
+        }
+      }
+    });
+  });
+}
+
+function ensureModalHandlers() {
+  setupModalCloseHandlers();
 }
 
 // ========== ユーティリティ ==========
@@ -1788,14 +1913,6 @@ function goHome() {
   document.getElementById('searchInput').value = '';
   applyFilters();
 }
-
-document.querySelectorAll('.modal-overlay').forEach(overlay => {
-  overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) {
-      overlay.classList.remove('active');
-    }
-  });
-});
 
 function addReloadButtonToHeader() {
   const headerActions = document.querySelector('.header-actions');
@@ -1820,7 +1937,6 @@ async function initFamazon() {
   try {
     console.log('🚀 ファマゾン魔法商店 初期化開始');
     
-    // 配達先設定を復元
     loadLocationSetting();
     console.log('✅ 配達先設定復元完了');
     
@@ -1832,6 +1948,8 @@ async function initFamazon() {
     
     addReloadButtonToHeader();
     CacheManager.logCacheInfo();
+    
+    ensureModalHandlers();
     
     console.log('🎉 ファマゾン魔法商店 初期化完了');
     
@@ -1849,6 +1967,23 @@ async function initFamazon() {
     }
   }
 }
+
+// 緊急時の強制修正（保険用）
+setTimeout(() => {
+  const wishlistModal = document.getElementById('wishlistModal');
+  if (wishlistModal) {
+    const closeBtn = wishlistModal.querySelector('.close-btn');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', closeWishlistModal);
+    }
+    
+    wishlistModal.addEventListener('click', (e) => {
+      if (e.target === wishlistModal) {
+        closeWishlistModal();
+      }
+    });
+  }
+}, 1000);
 
 initFamazon();
 </script>
