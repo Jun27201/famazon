@@ -16,10 +16,11 @@
       <div class="logo-sub">魔 法 商 店</div>
     </div>
 
-    <button class="location-btn">
-      <span>配達先の界</span>
-      <span>📍 中央王国・王都</span>
-    </button>
+  <button class="location-btn" onclick="showLocationModal()">
+  <span>配達先の界</span>
+  <span>🏰 中央王国・王都</span>
+  </button>
+
 
     <div class="search-bar">
       <select class="search-category" id="searchCat">
@@ -289,6 +290,25 @@
     <div class="modal-body" id="orderHistoryBody"></div>
   </div>
 </div>
+<!-- LOCATION MODAL -->
+<div class="modal-overlay" id="locationModal">
+  <div class="modal" style="max-width:600px;">
+    <div class="modal-header">
+      <h2>🌍 配達先の界を選択</h2>
+      <button class="close-btn" onclick="closeLocationModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="color:var(--silver); margin-bottom:20px; font-size:0.9rem;">
+        配送先の次元・地域を選択してください。危険地帯や遠隔地への配送には
+        <span style="color:var(--danger); font-weight:600;">特別危険手当</span>が発生します。
+      </p>
+      <div id="locationGrid" style="display:grid; gap:12px;">
+        <!-- JavaScriptで動的生成 -->
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
@@ -297,6 +317,79 @@
 // ========== 設定とグローバル変数 ==========
 const SHEET_API_URL = 'https://script.google.com/macros/s/AKfycbwQH9QFLM_WEOQ862nQlXodrwKikmee5tImh0O9cORmDkInV3eQZrIrX4sWvGHzu5Kv-Q/exec';
 
+// ========== 配達先管理システム ==========
+const LOCATIONS = [
+  { 
+    id: 'kingdom', 
+    name: '中央王国・王都', 
+    icon: '🏰', 
+    cost: 0, 
+    detail: '標準配送エリア・追加料金なし',
+    type: 'free'
+  },
+  { 
+    id: 'elf', 
+    name: 'エルフの里', 
+    icon: '🌳', 
+    cost: 0, 
+    detail: '森林地帯・自然配送ルート',
+    type: 'free'
+  },
+  { 
+    id: 'dwarf', 
+    name: 'ドワーフ山岳都市', 
+    icon: '⛰️', 
+    cost: 300, 
+    detail: '山岳地帯・険しい道のり',
+    type: 'standard'
+  },
+  { 
+    id: 'demon', 
+    name: '魔界（第一層）', 
+    icon: '🔥', 
+    cost: 500, 
+    detail: '異界配送・魔力障壁突破料金',
+    type: 'standard'
+  },
+  { 
+    id: 'sky', 
+    name: '天空都市クラウディア', 
+    icon: '☁️', 
+    cost: 600, 
+    detail: '高高度配送・飛行魔法使用',
+    type: 'standard'
+  },
+  { 
+    id: 'ocean', 
+    name: '深海王国アトランティス', 
+    icon: '🌊', 
+    cost: 700, 
+    detail: '水中配送・防水処理費用',
+    type: 'standard'
+  },
+  { 
+    id: 'dungeon', 
+    name: 'ダンジョン最深部', 
+    icon: '💀', 
+    cost: 1500, 
+    detail: '⚠️ 極度危険地帯・配達員生命保険料込み',
+    type: 'danger'
+  },
+  { 
+    id: 'village', 
+    name: '辺境の村', 
+    icon: '🏡', 
+    cost: 200, 
+    detail: '遠隔地・配送時間延長',
+    type: 'standard'
+  }
+];
+
+let selectedLocation = LOCATIONS[0]; // デフォルトは中央王国
+const LOCATION_STORAGE_KEY = 'famazon_selected_location';
+
+
+  
 // キャッシュ設定（30分）
 const CACHE_CONFIG = {
   PRODUCTS_KEY: 'famazon_products_cache_v2',
@@ -960,6 +1053,103 @@ function toggleWishlist(event, id) {
   saveWishlist();
 }
 
+// ========== 配達先選択機能 ==========
+function showLocationModal() {
+  renderLocationOptions();
+  document.getElementById('locationModal').classList.add('active');
+}
+
+function closeLocationModal() {
+  document.getElementById('locationModal').classList.remove('active');
+}
+
+function renderLocationOptions() {
+  const container = document.getElementById('locationGrid');
+  
+  container.innerHTML = LOCATIONS.map((location) => {
+    const isSelected = location.id === selectedLocation.id;
+    const feeDisplay = location.cost === 0 ? '無料' : `+${location.cost.toLocaleString()} G`;
+    const feeClass = location.type;
+    
+    return `
+      <button class="location-option ${location.type} ${isSelected ? 'selected' : ''}" 
+              onclick="selectLocation('${location.id}')">
+        <span class="location-icon">${location.icon}</span>
+        <div class="location-info">
+          <div class="location-name">${location.name}</div>
+          <div class="location-detail">${location.detail}</div>
+        </div>
+        <div class="location-fee ${feeClass}">${feeDisplay}</div>
+      </button>
+    `;
+  }).join('');
+}
+
+function selectLocation(locationId) {
+  const location = LOCATIONS.find(loc => loc.id === locationId);
+  if (!location) return;
+  
+  selectedLocation = location;
+  
+  // ヘッダーの表示を更新
+  updateHeaderLocation();
+  
+  // 設定を保存
+  saveLocationSetting();
+  
+  closeLocationModal();
+  
+  // 通知表示
+  if (location.cost > 0) {
+    showToast(
+      `📍 配達先を「${location.name}」に設定（追加料金: +${location.cost.toLocaleString()} G）`, 
+      location.type === 'danger' ? '#ef4444' : '#f59e0b'
+    );
+  } else {
+    showToast(`📍 配達先を「${location.name}」に設定しました`, '#10b981');
+  }
+  
+  // チェックアウト画面が開いている場合は送料を再計算
+  if (document.getElementById('checkoutModal').classList.contains('active')) {
+    updateShippingCost();
+  }
+}
+
+function updateHeaderLocation() {
+  const locationBtn = document.querySelector('.location-btn');
+  if (locationBtn) {
+    locationBtn.innerHTML = `
+      <span>配達先の界</span>
+      <span>${selectedLocation.icon} ${selectedLocation.name}</span>
+    `;
+  }
+}
+
+function saveLocationSetting() {
+  try {
+    localStorage.setItem(LOCATION_STORAGE_KEY, JSON.stringify(selectedLocation));
+  } catch (error) {
+    console.warn('配達先設定の保存に失敗:', error);
+  }
+}
+
+function loadLocationSetting() {
+  try {
+    const saved = localStorage.getItem(LOCATION_STORAGE_KEY);
+    if (saved) {
+      const savedLocation = JSON.parse(saved);
+      const location = LOCATIONS.find(loc => loc.id === savedLocation.id);
+      if (location) {
+        selectedLocation = location;
+        updateHeaderLocation();
+      }
+    }
+  } catch (error) {
+    console.warn('配達先設定の復元に失敗:', error);
+  }
+}
+
+
 // ========== チェックアウト機能 ==========
 function openCheckout() {
   closeCart();
@@ -973,23 +1163,81 @@ function openCheckout() {
       <div class="checkout-form">
         <label>お名前・勇者名</label>
         <input type="text" placeholder="例：伝説の勇者 アーサー" id="customerName">
+        
         <label>配達先の界・国</label>
-        <select id="deliveryLocation">
-          <option>中央王国・王都</option>
-          <option>エルフの里</option>
-          <option>ドワーフ山岳都市</option>
-          <option>魔界（第一層）</option>
-          <option>天空都市クラウディア</option>
-          <option>ダンジョン最深部（追加料金あり）</option>
-        </select>
+        <div style="
+          padding: 16px;
+          background: var(--bg);
+          border: 2px solid rgba(167, 139, 250, 0.2);
+          border-radius: 12px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 12px;
+        ">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="font-size: 1.8rem;">${selectedLocation.icon}</span>
+            <div>
+              <div style="font-weight: 700; color: var(--text); font-size: 1.1rem;">${selectedLocation.name}</div>
+              <div style="font-size: 0.8rem; color: var(--silver); margin-top: 2px;">${selectedLocation.detail}</div>
+            </div>
+          </div>
+          <div style="text-align: right;">
+            ${selectedLocation.cost > 0 ? 
+              `<span style="
+                display: inline-block;
+                padding: 6px 12px;
+                background: ${selectedLocation.type === 'danger' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(167, 139, 250, 0.1)'};
+                border-radius: 20px;
+                color: ${selectedLocation.type === 'danger' ? '#ef4444' : 'var(--glow)'};
+                font-weight: 700;
+                font-size: 0.95rem;
+              ">
+                +${selectedLocation.cost.toLocaleString()} G
+              </span>` : 
+              `<span style="
+                display: inline-block;
+                padding: 6px 12px;
+                background: rgba(16, 185, 129, 0.1);
+                border-radius: 20px;
+                color: var(--success);
+                font-weight: 700;
+                font-size: 0.95rem;
+              ">
+                標準エリア
+              </span>`
+            }
+          </div>
+        </div>
+        
+        <button type="button" onclick="showLocationModal()" style="
+          width: 100%;
+          padding: 12px;
+          background: var(--secondary);
+          border: 1px solid var(--glow);
+          border-radius: 8px;
+          color: var(--text);
+          cursor: pointer;
+          transition: all 0.2s;
+          font-weight: 600;
+          margin-bottom: 16px;
+        " onmouseover="this.style.background='var(--hover)'"
+           onmouseout="this.style.background='var(--secondary)'">
+          📍 配達先を変更する
+        </button>
+        
         <label>詳細な住所</label>
         <input type="text" placeholder="例：王城通り 英雄の塔 3階" id="customerAddress">
+        
         <label>受け取り方法</label>
         <select id="deliveryMethod" onchange="updateShippingCost()">
-          ${hasPrime ? '<option value="spell" data-cost="0">呪文転送（Prime会員・無料）</option>' : '<option value="spell" data-cost="800">呪文転送（800G）</option>'}
-          <option value="hawk" data-cost="500">鷹便（翌日・500G）</option>
-          <option value="carriage" data-cost="100">馬車便（3日・100G）</option>
-          <option value="pickup" data-cost="0">指定場所でピックアップ（無料）</option>
+          ${hasPrime ? 
+            '<option value="spell" data-cost="0">🪄 呪文転送（Prime会員・無料）</option>' : 
+            '<option value="spell" data-cost="800">🪄 呪文転送（800G）</option>'
+          }
+          <option value="hawk" data-cost="500">🦅 鷹便（翌日・500G）</option>
+          <option value="carriage" data-cost="100">🐎 馬車便（3日・100G）</option>
+          <option value="pickup" data-cost="0">🏪 指定場所でピックアップ（無料）</option>
         </select>
       </div>
       <button class="btn-checkout" onclick="goStep(2)">次へ → 支払い方法</button>
@@ -1010,12 +1258,26 @@ function openCheckout() {
         <label>魔法認証コード（パスワード）</label>
         <input type="password" placeholder="••••••••" id="authCode">
       </div>
+      
       <div class="cart-summary">
-        <div class="cart-summary-row"><span>小計</span><span id="displaySubtotal">${subtotal.toLocaleString()} G</span></div>
-        <div class="cart-summary-row"><span>転送料</span><span id="displayShipping">計算中...</span></div>
-        <div class="cart-summary-row"><span>魔法税（10%）</span><span id="displayTax">${tax.toLocaleString()} G</span></div>
-        <div class="cart-summary-row total"><span>ご請求額</span><span id="displayTotal">計算中...</span></div>
+        <div class="cart-summary-row">
+          <span>小計</span>
+          <span id="displaySubtotal">${subtotal.toLocaleString()} G</span>
+        </div>
+        <div class="cart-summary-row">
+          <span>転送料・手数料</span>
+          <span id="displayShipping" style="text-align: right;">計算中...</span>
+        </div>
+        <div class="cart-summary-row">
+          <span>魔法税（10%）</span>
+          <span id="displayTax">${tax.toLocaleString()} G</span>
+        </div>
+        <div class="cart-summary-row total">
+          <span>ご請求額</span>
+          <span id="displayTotal">計算中...</span>
+        </div>
       </div>
+      
       <div style="display:flex;gap:8px;margin-top:10px;">
         <button class="btn-cart" style="flex:0.5;" onclick="goStep(1)">← 戻る</button>
         <button class="btn-checkout" style="flex:1;" onclick="completeOrder()">注文を確定する</button>
@@ -1025,9 +1287,10 @@ function openCheckout() {
   
   document.getElementById('checkoutModal').classList.add('active');
   
-  // 初期表示時に送料を計算
+  // 初期表示時に送料を計算（DOM生成を待つため遅延実行）
   setTimeout(() => updateShippingCost(), 100);
 }
+
 
 
 function goStep(n) {
@@ -1048,40 +1311,62 @@ function closeCheckout() {
 
 function getShippingCost(deliveryMethod) {
   const methodElement = document.getElementById('deliveryMethod');
-  if (!methodElement) return 0;
+  let baseCost = 0;
   
-  const selectedOption = methodElement.options[methodElement.selectedIndex];
-  const cost = parseInt(selectedOption.getAttribute('data-cost')) || 0;
+  if (methodElement) {
+    const selectedOption = methodElement.options[methodElement.selectedIndex];
+    baseCost = parseInt(selectedOption.getAttribute('data-cost')) || 0;
+  }
   
-  return cost;
+  // 配達先の追加料金を加算
+  const locationCost = selectedLocation ? selectedLocation.cost : 0;
+  
+  return baseCost + locationCost;
 }
+
 
 function updateShippingCost() {
   try {
     const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
-    const shippingCost = getShippingCost();
+    const methodElement = document.getElementById('deliveryMethod');
+    const baseCost = methodElement ? 
+      parseInt(methodElement.options[methodElement.selectedIndex].getAttribute('data-cost')) || 0 : 0;
+    const locationCost = selectedLocation ? selectedLocation.cost : 0;
+    const totalShipping = baseCost + locationCost;
     const tax = Math.floor(subtotal * 0.1);
-    const total = subtotal + tax + shippingCost;
+    const total = subtotal + tax + totalShipping;
     
     // 表示を更新
     const shippingDisplay = document.getElementById('displayShipping');
     const totalDisplay = document.getElementById('displayTotal');
     
     if (shippingDisplay) {
-      shippingDisplay.textContent = shippingCost === 0 ? '無料' : `${shippingCost.toLocaleString()} G`;
+      if (totalShipping === 0) {
+        shippingDisplay.textContent = '無料';
+      } else if (locationCost > 0) {
+        shippingDisplay.innerHTML = `
+          ${totalShipping.toLocaleString()} G
+          <br><small style="color:var(--silver);font-size:0.75rem;">
+            (配送: ${baseCost}G + 地域: ${locationCost}G)
+          </small>
+        `;
+      } else {
+        shippingDisplay.textContent = `${totalShipping.toLocaleString()} G`;
+      }
     }
     
     if (totalDisplay) {
       totalDisplay.textContent = `💰 ${total.toLocaleString()} G`;
     }
     
-    console.log(`送料更新: ${shippingCost}G, 合計: ${total}G`);
+    console.log(`送料更新: 基本${baseCost}G + 地域${locationCost}G = 合計${totalShipping}G`);
     
   } catch (error) {
     console.error('送料計算エラー:', error);
     showToast('⚠️ 送料計算でエラーが発生しました', '#f59e0b');
   }
 }
+
 
 
 function completeOrder() {
@@ -1320,6 +1605,10 @@ function addReloadButtonToHeader() {
 async function initFamazon() {
   try {
     console.log('🚀 ファマゾン魔法商店 初期化開始');
+    
+    // 配達先設定を復元
+    loadLocationSetting();
+    console.log('✅ 配達先設定復元完了');
     
     loadWishlist();
     console.log('✅ お気に入り復元完了');
