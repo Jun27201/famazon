@@ -1184,17 +1184,7 @@ function showWishlistModal() {
   }
 }
 
-function closeWishlistModal() {
-  const modal = document.getElementById('wishlistModal');
-  if (modal) {
-    modal.classList.remove('active');
-    modal.style.display = 'none';
-    
-    setTimeout(() => {
-      modal.style.display = '';
-    }, 300);
-  }
-}
+
 
 function renderWishlist() {
   const body = document.getElementById('wishlistBody');
