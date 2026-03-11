@@ -930,9 +930,7 @@ function updateCheckoutLocationDisplay() {
   }
 }
 
-// ========== チェックアウト機能（完全修正版） ==========
-
-// ========== チェックアウト機能（ジョークサイト仕様・入力簡単版） ==========
+// ========== チェックアウト機能（完全版・ジョークサイト仕様） ==========
 
 function openCheckout() {
   closeCart();
@@ -947,7 +945,7 @@ function openCheckout() {
   const hasPrime = cart.some(i => i.prime);
 
   document.getElementById('checkoutBody').innerHTML = `
-    <!-- プログレスインジケーター -->
+    <!-- プログレスバー -->
     <div class="checkout-progress">
       <div class="progress-step active" id="progressStep1">
         <div class="progress-number">1</div>
@@ -966,13 +964,13 @@ function openCheckout() {
       
       <div class="checkout-form">
         <div class="form-group">
-          <label class="form-label">お名前・勇者名 <small style="color:var(--silver);">（空欄なら「名無しの勇者」になります）</small></label>
+          <label class="form-label">お名前・勇者名 <small style="color:var(--silver);">（空欄なら自動生成）</small></label>
           <input type="text" class="form-input" placeholder="例：伝説の勇者 アーサー" id="customerName">
         </div>
 
         <div class="form-group">
           <label class="form-label">配達先の界・国</label>
-          <div class="location-display" id="checkoutLocationDisplay" onclick="showLocationModal()">
+          <div class="location-display" onclick="showLocationModal()">
             ${getCheckoutLocationHTML()}
           </div>
           <button type="button" class="btn-change-location" onclick="showLocationModal()">
@@ -989,26 +987,26 @@ function openCheckout() {
           <label class="form-label">受け取り方法</label>
           <select class="form-select" id="deliveryMethod" onchange="updateShippingCost()">
             ${hasPrime ? 
-              '<option value="spell" data-cost="0">🪄 呪文転送（Prime会員・無料）- 即日配達</option>' : 
-              '<option value="spell" data-cost="800">🪄 呪文転送（800G）- 即日配達</option>'
+              '<option value="spell" data-cost="0">🪄 呪文転送（Prime無料）- 即日</option>' : 
+              '<option value="spell" data-cost="800">🪄 呪文転送（800G）- 即日</option>'
             }
-            <option value="hawk" data-cost="500">🦅 鷹便（500G）- 翌日配達</option>
-            <option value="carriage" data-cost="100">🐎 馬車便（100G）- 3日以内配達</option>
-            <option value="pickup" data-cost="0">🏪 指定場所でピックアップ（無料）- 翌日から受取可</option>
+            <option value="hawk" data-cost="500">🦅 鷹便（500G）- 翌日</option>
+            <option value="carriage" data-cost="100">🐎 馬車便（100G）- 3日</option>
+            <option value="pickup" data-cost="0">🏪 ピックアップ（無料）</option>
           </select>
         </div>
       </div>
 
       <div class="checkout-actions">
         <button class="btn-checkout-next" onclick="validateAndGoToStep2()">
-          次へ：お支払い方法 → <small style="font-size:0.8rem;">（未入力でも進めます）</small>
+          次へ：お支払い方法 → <small>（未入力でも進めます）</small>
         </button>
       </div>
     </div>
 
     <!-- ステップ2: お支払い -->
-    <div class="checkout-step" id="step2">
-      <h3 class="checkout-step-title">💰 お支払い情報（魔法でなんとかします）</h3>
+    <div class="checkout-step" id="step2" style="display: none;">
+      <h3 class="checkout-step-title">💰 お支払い情報（魔法で解決！）</h3>
       
       <div class="checkout-form">
         <div class="form-group">
@@ -1017,13 +1015,12 @@ function openCheckout() {
             <option value="gold">💰 ゴールドコイン（直接転送）</option>
             <option value="card">💳 魔法銀行カード</option>
             <option value="diamond">💎 ドラゴンダイヤ（換算）</option>
-            <option value="points">🏆 冒険者ギルドポイント払い</option>
             <option value="magic">✨ 魔法の力でなんとかする</option>
           </select>
         </div>
 
         <div class="form-group">
-          <label class="form-label">送金先 / カード番号 <small style="color:var(--silver);">（適当で大丈夫）</small></label>
+          <label class="form-label">送金先情報 <small style="color:var(--silver);">（適当でOK）</small></label>
           <input type="text" class="form-input" placeholder="魔法でなんとかなります" id="paymentInfo">
         </div>
 
@@ -1081,36 +1078,121 @@ function openCheckout() {
   setTimeout(() => updateShippingCost(), 100);
 }
 
-// バリデーション削除＆自動補完版
+// 【重要】ステップ切り替え関数（これが抜けていました！）
+function goStep(n) {
+  // すべてのステップを確実に非表示
+  document.querySelectorAll('.checkout-step').forEach(el => {
+    el.style.display = 'none';
+    el.classList.remove('active');
+  });
+
+  // 指定されたステップのみを表示
+  const targetStep = document.getElementById('step' + n);
+  if (targetStep) {
+    targetStep.style.display = 'block';
+    targetStep.classList.add('active');
+  }
+
+  // プログレスバーの更新
+  document.querySelectorAll('.progress-step').forEach((el, i) => {
+    el.classList.remove('active', 'completed');
+    if (i + 1 < n) {
+      el.classList.add('completed');
+    } else if (i + 1 === n) {
+      el.classList.add('active');
+    }
+  });
+
+  // ステップ2では送料を再計算
+  if (n === 2) {
+    setTimeout(() => updateShippingCost(), 50);
+  }
+
+  // モーダルを上部にスクロール
+  const modalBody = document.getElementById('checkoutBody');
+  if (modalBody) {
+    modalBody.scrollTop = 0;
+  }
+}
+
+// ジョークサイト仕様：楽しい自動入力付きでステップ2へ
 function validateAndGoToStep2() {
   const nameInput = document.getElementById('customerName');
   const addressInput = document.getElementById('customerAddress');
-  
-  // 空欄なら楽しいデフォルト値を自動入力
-  if (!nameInput.value.trim()) {
+
+  // 名前が空なら楽しい名前を自動生成
+  if (nameInput && !nameInput.value.trim()) {
     const funnyNames = [
       "名無しの冒険者", "通りすがりの勇者", "村人A", 
-      "匿名希望の魔導師", "お腹ペコペコ戦士", "迷子の賢者"
+      "匿名希望の魔導師", "お腹ペコペコ戦士", "迷子の賢者",
+      "謎の仮面勇者", "伝説の怠け者", "寝坊した英雄"
     ];
     nameInput.value = funnyNames[Math.floor(Math.random() * funnyNames.length)];
-    showToast('🔮 透視魔法で勇者名を自動生成しました！', '#a78bfa');
+    showToast('🔮 透視魔法で勇者名を自動生成！', '#a78bfa');
   }
-  
-  if (!addressInput.value.trim()) {
+
+  // 住所が空なら面白い住所を自動生成
+  if (addressInput && !addressInput.value.trim()) {
     const funnyAddresses = [
       "次元の狭間 404番地", "始まりの町 広場前ベンチ", 
       "ダンジョン地下100階", "雲の上の秘密基地",
-      "魔王城の裏口", "世界樹のてっぺん"
+      "魔王城の裏口", "世界樹のてっぺん",
+      "時の神殿 迷子コーナー", "竜の巣 居候部屋"
     ];
     addressInput.value = funnyAddresses[Math.floor(Math.random() * funnyAddresses.length)];
-    showToast('🗺️ 占い魔法で住所を推測しました！', '#10b981');
+    showToast('🗺️ 占い魔法で住所を推測！', '#10b981');
   }
-  
-  // 何があっても次のステップへ進む
-  setTimeout(() => goStep(2), 500); // ちょっと間を置いて演出
+
+  // 演出のため少し待ってからステップ2へ
+  setTimeout(() => goStep(2), 400);
 }
 
-// 注文完了処理も軽量化
+// 配送先表示HTML生成
+function getCheckoutLocationHTML() {
+  const isDanger = selectedLocation.type === 'danger';
+  const isStandard = selectedLocation.type === 'standard';
+  
+  let badgeStyle, costDisplay;
+  
+  if (isDanger) {
+    badgeStyle = 'background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);';
+    costDisplay = `⚠️ +${selectedLocation.cost.toLocaleString()} G`;
+  } else if (isStandard) {
+    badgeStyle = 'background: rgba(167, 139, 250, 0.1); color: var(--glow); border: 1px solid rgba(167, 139, 250, 0.3);';
+    costDisplay = `+${selectedLocation.cost.toLocaleString()} G`;
+  } else {
+    badgeStyle = 'background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3);';
+    costDisplay = '標準エリア';
+  }
+
+  return `
+    <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
+      <span style="font-size: 1.8rem;">${selectedLocation.icon}</span>
+      <div style="flex: 1;">
+        <div style="font-weight: 700; color: var(--text); font-size: 1.1rem;">
+          ${selectedLocation.name}
+        </div>
+        <div style="font-size: 0.8rem; color: var(--silver);">
+          ${selectedLocation.detail}
+        </div>
+      </div>
+    </div>
+    <div style="text-align: right;">
+      <span style="
+        display: inline-block;
+        padding: 8px 14px;
+        border-radius: 20px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        ${badgeStyle}
+      ">
+        ${costDisplay}
+      </span>
+    </div>
+  `;
+}
+
+// 注文完了処理（ジョークサイト仕様）
 function completeOrder() {
   if (cart.length === 0) {
     closeCheckout();
@@ -1126,7 +1208,6 @@ function completeOrder() {
     
     const orderId = `AMZ-${Math.random().toString(36).substr(2, 8).toUpperCase()}-FANTASY`;
     
-    // 入力情報を取得（空でも楽しいデフォルト値）
     const customerName = document.getElementById('customerName')?.value || '神秘の注文者';
     const customerAddress = document.getElementById('customerAddress')?.value || '異世界のどこか';
     
@@ -1165,12 +1246,12 @@ function completeOrder() {
     updateCartBadge();
     closeCheckout();
     
-    // ジョークサイトらしい完了メッセージ
+    // ジョークサイトらしい楽しい完了メッセージ
     const funnyMessages = [
       '🎉 ご注文完了！魔法陣で配送準備中...',
-      '✨ 注文受付！ドラゴン便で爆速配送します！',
-      '🔮 ご注文ありがとうございます！賢者が梱包中...',
-      '⚡ 注文確定！異世界配送システム起動中！'
+      '✨ 注文受付！ドラゴン便で爆速配送！',
+      '🔮 賢者が梱包中...お楽しみに！',
+      '⚡ 異世界配送システム起動中！'
     ];
     const randomMessage = funnyMessages[Math.floor(Math.random() * funnyMessages.length)];
     showToast(randomMessage, '#10b981');
@@ -1179,9 +1260,10 @@ function completeOrder() {
     
   } catch (error) {
     console.error('注文処理エラー:', error);
-    showToast('❌ 魔法陣に干渉が発生しました。もう一度お試しください', '#ef4444');
+    showToast('❌ 魔法陣に干渉が発生しました', '#ef4444');
   }
 }
+
 
 
 // ========== 注文完了モーダル ==========
