@@ -1352,7 +1352,7 @@ async function loadProductsFromSheet() {
 let cart = [];
 let currentView = 'grid';
 let currentCategory = 'all';
-let wishlist = new Set();
+
 
 // ========== RENDER PRODUCTS ==========
 function renderProducts(data) {
@@ -1747,7 +1747,7 @@ function generateQA(p) {
 // ========== WISHLIST ==========
 // 初期化時にローカルストレージからお気に入りを読み込み
 // グローバル変数として確実にSetで初期化
-let wishlist = new Set();
+let wishlist = new Set(); // ← こちらは残す
 
 // ページ読み込み時にお気に入りデータを復元
 function loadWishlist() {
@@ -1769,16 +1769,14 @@ function loadWishlist() {
     }
   } catch (error) {
     console.error('お気に入り復元エラー:', error);
-    // エラーが起きても空のSetでリセットして止まらないようにする
     wishlist = new Set();
-    localStorage.removeItem('famazon_wishlist'); // 壊れたデータを削除
+    localStorage.removeItem('famazon_wishlist');
   }
 }
 
 // お気に入りをローカルストレージに保存
 function saveWishlist() {
   try {
-    // Setを配列に変換して保存
     const arrayToSave = Array.from(wishlist);
     localStorage.setItem('famazon_wishlist', JSON.stringify(arrayToSave));
     console.log(`💾 お気に入り ${arrayToSave.length}件を保存しました`);
