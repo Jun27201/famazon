@@ -982,13 +982,14 @@
   .review-text { font-size: 0.82rem; color: var(--text); line-height: 1.5; }
 
   /* お気に入りモーダルを画面中央に固定表示 */
- #wishlistModal {
+ /* お気に入りモーダルを画面中央に固定表示（修正版） */
+#wishlistModal {
   position: fixed !important;
   top: 0 !important;
   left: 0 !important;
   width: 100vw !important;
   height: 100vh !important;
-  display: flex !important;
+  /* display: flex !important; ← この行を削除 */
   align-items: center !important;
   justify-content: center !important;
   z-index: 2000 !important;
@@ -996,12 +997,18 @@
   backdrop-filter: blur(5px) !important;
 }
 
+/* activeクラスがある時だけflexで表示 */
+#wishlistModal.active {
+  display: flex !important;
+}
+
 #wishlistModal .modal {
   margin: 0 !important;
   max-height: 85vh !important;
   width: 90% !important;
-  max-width: 800px !important;
+  max-width: 900px !important;
 }
+
 
 .location-option {
   display: flex;
