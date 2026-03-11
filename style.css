@@ -981,3 +981,24 @@
   .review-author { font-size: 0.82rem; font-weight: bold; color: var(--glow); }
   .review-text { font-size: 0.82rem; color: var(--text); line-height: 1.5; }
 
+  /* お気に入りモーダルを画面中央に固定表示 */
+  #wishlistModal {
+    position: fixed;        /* スクロールしても画面に固定 */
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    
+    display: flex;          /* 中央寄せ用フレックス */
+    align-items: center;    /* 縦方向中央 */
+    justify-content: center;/* 横方向中央 */
+    z-index: 1000;          /* 他の要素より前に出す（必要なら調整） */
+  }
+  
+  /* wishlistモーダル内のカード本体を中央に置くため、余計なマージンを消す */
+  #wishlistModal .modal {
+    margin: 0;              /* もともと .modal に margin-top などがあれば無効化 */
+    max-height: 80vh;       /* 画面からはみ出さないようにする */
+    overflow: hidden;       /* 中身は .modal-body 側でスクロール */
+  }
+
