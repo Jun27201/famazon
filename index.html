@@ -303,6 +303,12 @@ let wishlist = new Set();
 let currentView = 'grid';
 let currentCategory = 'all';
 
+// 遅延読み込み管理
+const lazyLoadState = {
+  reviews: new Set(),
+  qa: new Set()
+};
+
 // ========== 高速化: デバウンス関数 ==========
 function debounce(func, wait) {
   let timeout;
@@ -315,16 +321,6 @@ function debounce(func, wait) {
     timeout = setTimeout(later, wait);
   };
 }
-
-// 検索入力にデバウンスを適用（300ms遅延）
-document.addEventListener('DOMContentLoaded', function() {
-  const searchInput = document.getElementById('searchInput');
-  if (searchInput) {
-    searchInput.addEventListener('input', debounce(function() {
-      applyFilters();
-    }, 300));
-  }
-});
 
 // ========== キャッシュマネージャー ==========
 const CacheManager = {
@@ -493,7 +489,6 @@ function renderProducts(data) {
 
   document.getElementById('productCount').textContent = `${data.length}件の商品`;
 
-  // DOM操作を最小限にするため、HTML文字列を一度に生成
   container.innerHTML = data.map((p, index) => {
     const stars = renderStars(p.rating);
     const rankBadge = index < 3 ? `<div class="ranking-badge rank-${index+1}">${['🥇','🥈','🥉'][index]}</div>` : '';
@@ -503,18 +498,16 @@ function renderProducts(data) {
     const firstBadge = saleBadge || primeBadge || newBadge;
     const wishActive = wishlist.has(String(p.id)) ? 'active' : '';
     
-    // 画像最適化: loading="lazy"とdecoding="async"を追加
     const optimizedImage = p.image ? 
       p.image.replace('/upload/', '/upload/f_auto,q_auto,w_400,c_limit/') : null;
 
     return `
     <div class="product-card ${currentView === 'list' ? 'list-view' : ''}" 
-         onclick="openDetail(${p.id})" 
          onmouseenter="preloadDetailImage(${p.id})">
       ${firstBadge}
       ${rankBadge}
-      <button class="btn-wishlist ${wishActive}" onclick="toggleWishlist(event, ${p.id})">♥</button>
-      <div class="product-img" style="overflow:hidden;border-radius:8px;">
+      <button class="btn-wishlist ${wishActive}" onclick="event.stopPropagation(); toggleWishlist(event, ${p.id})">♥</button>
+      <div class="product-img" style="overflow:hidden;border-radius:8px;" onclick="openDetail(${p.id})">
         ${p.image ? 
           `<img src="${optimizedImage}" alt="${p.name}" 
             style="width:100%;height:100%;object-fit:cover;border-radius:8px;" 
@@ -522,7 +515,7 @@ function renderProducts(data) {
           : `<span style="font-size:3rem;">${p.emoji}</span>`}
       </div>
       <div class="product-info">
-        <div class="product-name">${p.name}</div>
+        <div class="product-name" onclick="openDetail(${p.id})" style="cursor:pointer;">${p.name}</div>
         <div class="product-seller">出品：${p.seller}</div>
         <div class="stars">
           ${stars}
@@ -552,72 +545,164 @@ function renderStars(rating) {
   return html;
 }
 
-// ========== フィルター・ソート機能 ==========
-function filterCategory(cat, btn) {
-  currentCategory = cat;
-  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  applyFilters();
-}
-
-function filterProducts() { applyFilters(); }
-function sortProducts() { applyFilters(); }
-
-function applyFilters() {
-  const query = document.getElementById('searchInput').value.toLowerCase();
-  const sort = document.getElementById('sortSelect').value;
-  
-  const checkedRarities = [...document.querySelectorAll('.filter-rarity:checked')].map(el => el.value);
-  const priceMinEl = document.getElementById('priceMin');
-  const priceMaxEl = document.getElementById('priceMax');
-  const priceMin = priceMinEl && priceMinEl.value !== '' ? Number(priceMinEl.value) : null;
-  const priceMax = priceMaxEl && priceMaxEl.value !== '' ? Number(priceMaxEl.value) : null;
-  const ratingRadio = document.querySelector('.filter-rating-radio:checked');
-  const minRating = ratingRadio ? Number(ratingRadio.value) : 0;
-
-  let filtered = products.filter(p => {
-    if (currentCategory !== 'all' && p.category !== currentCategory) return false;
-    if (query) {
-      const hit = p.name.toLowerCase().includes(query) || 
-                  p.desc.toLowerCase().includes(query) || 
-                  p.tags.some(t => t.toLowerCase().includes(query)) ||
-                  p.seller.toLowerCase().includes(query);
-      if (!hit) return false;
-    }
-    if (checkedRarities.length > 0 && !checkedRarities.includes(p.rarity)) return false;
-    if (priceMin !== null && p.price < priceMin) return false;
-    if (priceMax !== null && p.price > priceMax) return false;
-    if (minRating > 0 && p.rating < minRating) return false;
-    return true;
-  });
-
-  switch (sort) {
-    case 'price-asc':   filtered.sort((a, b) => a.price - b.price); break;
-    case 'price-desc':  filtered.sort((a, b) => b.price - a.price); break;
-    case 'rating':      filtered.sort((a, b) => b.rating - a.rating); break;
-    case 'new':         filtered.sort((a, b) => b.isNew - a.isNew); break;
-    case 'discount':    filtered.sort((a, b) => b.discount - a.discount); break;
+// ========== 商品詳細モーダル（修正版） ==========
+function openDetail(id) {
+  const p = products.find(x => x.id === id);
+  if (!p) {
+    console.error('商品が見つかりません:', id);
+    return;
   }
-
-  renderProducts(filtered);
+  
+  document.getElementById('detailTitle').textContent = `${p.emoji} ${p.name}`;
+  
+  const optimizedDetailImage = p.image ? 
+    p.image.replace('/upload/', '/upload/f_auto,q_auto,w_800,c_limit/') : null;
+  
+  document.getElementById('detailBody').innerHTML = `
+    <div class="product-detail-grid">
+      <div>
+        <div class="product-detail-img" style="overflow:hidden;padding:0;">
+          ${p.image ? 
+            `<img src="${optimizedDetailImage}" 
+              alt="${p.name}" 
+              loading="lazy" 
+              decoding="async"
+              style="width:100%;height:100%;object-fit:cover;border-radius:10px;">` 
+            : `<span style="font-size:8rem;">${p.emoji}</span>`}
+        </div>
+        <div style="margin-top:10px;">
+          ${p.tags.map(t => `<span style="background:var(--secondary);padding:3px 8px;border-radius:20px;font-size:0.75rem;margin:2px;display:inline-block;color:var(--glow);">${t}</span>`).join('')}
+        </div>
+      </div>
+      <div class="product-detail-info">
+        <h3>${p.name}</h3>
+        <div class="seller">出品者：${p.seller}</div>
+        <div class="stars">${renderStars(p.rating)} <span class="review-count">${p.rating} (${p.reviews.toLocaleString()}件のレビュー)</span></div>
+        <div class="product-detail-price">💰 ${p.price.toLocaleString()} G</div>
+        ${p.discount > 0 ? `<div style="color:var(--danger);font-size:0.85rem;">通常価格 ${p.originalPrice.toLocaleString()} G から <b>${p.discount}% OFF</b></div>` : ''}
+        ${p.prime ? '<div class="prime-badge">⚡ Famazon Prime 対象（翌日お届け可）</div>' : ''}
+        <div class="product-detail-desc">${p.desc}</div>
+        <div class="product-specs">
+          <h4>📋 商品スペック</h4>
+          ${p.specs.map(([k,v]) => `
+            <div class="spec-row"><span class="spec-label">${k}</span><span class="spec-value">${v}</span></div>
+          `).join('')}
+        </div>
+        <div style="font-size:0.82rem;color:var(--silver);margin-top:8px;">🚚 配達方法：${p.delivery}</div>
+        <div style="margin-top:12px;display:flex;gap:8px;">
+          <button class="btn-cart" style="flex:1;padding:12px;" onclick="addToCart(${p.id}); closeDetail();">🛒 カートに追加</button>
+          <button class="btn-buy" style="flex:1;padding:12px;" onclick="addToCart(${p.id}); closeDetail(); openCart();">⚡ 今すぐ購入</button>
+        </div>
+      </div>
+    </div>
+    <div class="detail-tabs">
+      <button class="detail-tab active" onclick="switchTab(this, 'reviews-tab', ${p.id})">💬 レビュー</button>
+      <button class="detail-tab" onclick="switchTab(this, 'qa-tab', ${p.id})">❓ Q&A</button>
+    </div>
+    <div id="reviews-tab">
+      <div class="loading-placeholder" style="padding: 40px; text-align: center; color: var(--silver);">
+        🔮 レビューを水晶玉から読み込み中...
+      </div>
+    </div>
+    <div id="qa-tab" style="display:none;">
+      <div class="loading-placeholder" style="padding: 40px; text-align: center; color: var(--silver);">
+        🔮 Q&Aを賢者から召喚中...
+      </div>
+    </div>
+  `;
+  
+  document.getElementById('productDetailModal').classList.add('active');
+  setTimeout(() => loadReviewsLazy(p.id), 200);
 }
 
-function resetFilters() {
-  document.querySelectorAll('.filter-rarity').forEach(el => el.checked = true);
-  const minEl = document.getElementById('priceMin');
-  const maxEl = document.getElementById('priceMax');
-  if (minEl) minEl.value = '';
-  if (maxEl) maxEl.value = '';
-  const allRatingRadio = document.querySelector('.filter-rating-radio[value="0"]');
-  if (allRatingRadio) allRatingRadio.checked = true;
-  applyFilters();
+function closeDetail() {
+  document.getElementById('productDetailModal').classList.remove('active');
 }
 
-function setView(view) {
-  currentView = view;
-  document.getElementById('gridViewBtn').classList.toggle('active', view === 'grid');
-  document.getElementById('listViewBtn').classList.toggle('active', view === 'list');
-  applyFilters();
+function switchTab(btn, tabId, productId) {
+  document.querySelectorAll('.detail-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  
+  const reviewsTab = document.getElementById('reviews-tab');
+  const qaTab = document.getElementById('qa-tab');
+  
+  if (tabId === 'reviews-tab') {
+    reviewsTab.style.display = 'block';
+    qaTab.style.display = 'none';
+    
+    if (!lazyLoadState.reviews.has(String(productId))) {
+      loadReviewsLazy(productId);
+    }
+  } else if (tabId === 'qa-tab') {
+    reviewsTab.style.display = 'none';
+    qaTab.style.display = 'block';
+    
+    if (!lazyLoadState.qa.has(String(productId))) {
+      loadQALazy(productId);
+    }
+  }
+}
+
+function loadReviewsLazy(productId) {
+  const stringId = String(productId);
+  if (lazyLoadState.reviews.has(stringId)) return;
+  
+  const reviewsTab = document.getElementById('reviews-tab');
+  if (!reviewsTab) return;
+  
+  setTimeout(() => {
+    const reviewData = productReviews[productId] || [
+      { author: '⭐ ファマゾン公認バイヤー', rating: 5, text: '品質・配送ともに最高！また利用します。' }
+    ];
+    
+    const reviewsHTML = reviewData.map(r => `
+      <div class="review">
+        <div class="review-header">
+          <span class="review-author">${r.author}</span>
+          <div>${renderStars(r.rating)}</div>
+        </div>
+        <div class="review-text">${r.text}</div>
+      </div>
+    `).join('');
+    
+    reviewsTab.innerHTML = reviewsHTML;
+    lazyLoadState.reviews.add(stringId);
+    
+    reviewsTab.style.opacity = '0';
+    reviewsTab.style.transition = 'opacity 0.3s ease-in-out';
+    setTimeout(() => { reviewsTab.style.opacity = '1'; }, 50);
+    
+  }, 250);
+}
+
+function loadQALazy(productId) {
+  const stringId = String(productId);
+  if (lazyLoadState.qa.has(stringId)) return;
+  
+  const qaTab = document.getElementById('qa-tab');
+  if (!qaTab) return;
+  
+  setTimeout(() => {
+    const qaData = productQA[productId] || [
+      { q: 'この商品は魔界でも使えますか？', a: 'はい、魔界・異界でも使用可能です。ただし一部の効果が20%減少する場合があります。' },
+      { q: '返品・返金は可能ですか？', a: '未使用品に限り7日以内であれば返品可能です。' }
+    ];
+    
+    const qaHTML = qaData.map(qa => `
+      <div class="review">
+        <div class="review-author">❓ Q: ${qa.q}</div>
+        <div class="review-text">💬 A: ${qa.a}</div>
+      </div>
+    `).join('');
+    
+    qaTab.innerHTML = qaHTML;
+    lazyLoadState.qa.add(stringId);
+    
+    qaTab.style.opacity = '0';
+    qaTab.style.transition = 'opacity 0.3s ease-in-out';
+    setTimeout(() => { qaTab.style.opacity = '1'; }, 50);
+    
+  }, 250);
 }
 
 // ========== カート機能 ==========
@@ -696,220 +781,456 @@ function changeQty(id, delta) {
   renderCart();
 }
 
-// ========== お気に入り機能（拡張版） ==========
-function loadWishlist() {
+// ========== 配達先選択機能（修正版） ==========
+function showLocationModal() {
+  renderLocationOptions();
+  document.getElementById('locationModal').classList.add('active');
+}
+
+function closeLocationModal() {
+  document.getElementById('locationModal').classList.remove('active');
+}
+
+function renderLocationOptions() {
+  const container = document.getElementById('locationGrid');
+  
+  container.innerHTML = LOCATIONS.map((location) => {
+    const isSelected = location.id === selectedLocation.id;
+    const feeDisplay = location.cost === 0 ? '無料' : `+${location.cost.toLocaleString()} G`;
+    const feeClass = location.type;
+    
+    return `
+      <button class="location-option ${location.type} ${isSelected ? 'selected' : ''}" 
+              onclick="selectLocation('${location.id}')">
+        <span class="location-icon">${location.icon}</span>
+        <div class="location-info">
+          <div class="location-name">${location.name}</div>
+          <div class="location-detail">${location.detail}</div>
+        </div>
+        <div class="location-fee ${feeClass}">${feeDisplay}</div>
+      </button>
+    `;
+  }).join('');
+}
+
+function selectLocation(locationId) {
+  const location = LOCATIONS.find(loc => loc.id === locationId);
+  if (!location) return;
+  
+  selectedLocation = location;
+  
+  updateHeaderLocation();
+  saveLocationSetting();
+  renderLocationOptions();
+  closeLocationModal();
+  
+  if (location.cost > 0) {
+    const message = location.type === 'danger' ? 
+      `⚠️ 危険地帯「${location.name}」に設定（危険手当: +${location.cost.toLocaleString()} G）` :
+      `📍 配達先を「${location.name}」に設定（追加料金: +${location.cost.toLocaleString()} G）`;
+    showToast(message, location.type === 'danger' ? '#ef4444' : '#f59e0b');
+  } else {
+    showToast(`📍 配達先を「${location.name}」に設定しました`, '#10b981');
+  }
+  
+  const checkoutModal = document.getElementById('checkoutModal');
+  if (checkoutModal && checkoutModal.classList.contains('active')) {
+    updateCheckoutLocationDisplay();
+    updateShippingCost();
+  }
+}
+
+function updateHeaderLocation() {
+  const locationBtn = document.querySelector('.location-btn');
+  if (locationBtn) {
+    locationBtn.innerHTML = `
+      <span>配達先の界</span>
+      <span>${selectedLocation.icon} ${selectedLocation.name}</span>
+    `;
+  }
+}
+
+function saveLocationSetting() {
   try {
-    const saved = localStorage.getItem('famazon_wishlist');
+    localStorage.setItem(LOCATION_STORAGE_KEY, JSON.stringify(selectedLocation));
+  } catch (error) {
+    console.warn('配達先設定の保存に失敗:', error);
+  }
+}
+
+function loadLocationSetting() {
+  try {
+    const saved = localStorage.getItem(LOCATION_STORAGE_KEY);
     if (saved) {
-      const savedArray = JSON.parse(saved);
-      if (Array.isArray(savedArray)) {
-        wishlist = new Set(savedArray.map(id => String(id)));
-        console.log(`💖 お気に入り ${wishlist.size}件を復元しました`);
-      } else {
-        wishlist = new Set();
-        localStorage.removeItem('famazon_wishlist');
+      const savedLocation = JSON.parse(saved);
+      const location = LOCATIONS.find(loc => loc.id === savedLocation.id);
+      if (location) {
+        selectedLocation = location;
+        updateHeaderLocation();
       }
     }
   } catch (error) {
-    console.error('お気に入り復元エラー:', error);
-    wishlist = new Set();
+    console.warn('配達先設定の復元に失敗:', error);
   }
 }
 
-function saveWishlist() {
-  try {
-    const arrayToSave = Array.from(wishlist);
-    localStorage.setItem('famazon_wishlist', JSON.stringify(arrayToSave));
-  } catch (error) {
-    console.error('お気に入り保存エラー:', error);
-    showToast('⚠️ お気に入りの保存に失敗しました', '#ef4444');
-  }
-}
-
-function toggleWishlist(event, id) {
-  event.stopPropagation();
-  const btn = event.currentTarget;
-  const stringId = String(id);
+// ========== チェックアウト機能（修正版） ==========
+function getCheckoutLocationHTML() {
+  const isDanger = selectedLocation.type === 'danger';
+  const isStandard = selectedLocation.type === 'standard';
+  const isFree = selectedLocation.cost === 0;
   
-  if (!(wishlist instanceof Set)) {
-    wishlist = new Set();
-  }
+  let badgeStyle, costDisplay;
   
-  if (wishlist.has(stringId)) {
-    wishlist.delete(stringId);
-    btn.classList.remove('active');
-    showToast('💔 お気に入りから削除しました', '#ef4444');
+  if (isDanger) {
+    badgeStyle = 'background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);';
+    costDisplay = `⚠️ +${selectedLocation.cost.toLocaleString()} G`;
+  } else if (isStandard) {
+    badgeStyle = 'background: rgba(167, 139, 250, 0.1); color: var(--glow); border: 1px solid rgba(167, 139, 250, 0.3);';
+    costDisplay = `+${selectedLocation.cost.toLocaleString()} G`;
   } else {
-    wishlist.add(stringId);
-    btn.classList.add('active');
-    
-    const product = products.find(p => String(p.id) === stringId);
-    if (product) {
-      showToast(`❤️ 「${product.name.substring(0, 20)}...」をお気に入りに追加！`);
-    }
+    badgeStyle = 'background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3);';
+    costDisplay = '標準エリア';
   }
-  
-  saveWishlist();
-}
 
-function showWishlistModal() {
-  renderWishlist();
-  document.getElementById('wishlistModal').classList.add('active');
-}
-
-function renderWishlist() {
-  const body = document.getElementById('wishlistBody');
-  
-  if (!wishlist || wishlist.size === 0) {
-    body.innerHTML = `
-      <div class="empty-cart">
-        <span class="icon">❤️</span>
-        お気に入りリストは空です
-        <br><small style="margin-top:12px; display:block; color:var(--silver);">
-          気になる商品を見つけたら♥ボタンで追加しましょう！
-        </small>
-      </div>
-    `;
-    return;
-  }
-  
-  const wishlistProducts = products.filter(p => wishlist.has(String(p.id)));
-  
-  if (wishlistProducts.length === 0) {
-    body.innerHTML = `
-      <div class="empty-cart">
-        <span class="icon">💔</span>
-        お気に入りに登録された商品が見つかりません
-        <br><small style="margin-top:12px; display:block; color:var(--silver);">
-          商品データの読み込みを待つか、ページを更新してください
-        </small>
-      </div>
-    `;
-    return;
-  }
-  
-  body.innerHTML = `
-    <!-- お気に入り統計と一括操作ボタン -->
-    <div class="wishlist-toolbar">
-      <div class="wishlist-summary">
-        📊 お気に入り ${wishlistProducts.length}件 | 
-        合計価値: ${wishlistProducts.reduce((sum, p) => sum + p.price, 0).toLocaleString()} G
-      </div>
-      <div class="wishlist-toolbar-buttons">
-        <button class="btn-cart" onclick="addWishlistAllToCart()" style="white-space:nowrap;">
-          ❤️ 全てカートに追加
-        </button>
-        <button class="btn-buy" onclick="closeWishlistModal(); openCart();" style="white-space:nowrap;">
-          🛒 カートを開く
-        </button>
+  return `
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <span style="font-size: 1.8rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
+        ${selectedLocation.icon}
+      </span>
+      <div style="flex: 1;">
+        <div style="font-weight: 700; color: var(--text); font-size: 1.1rem; margin-bottom: 2px;">
+          ${selectedLocation.name}
+        </div>
+        <div style="font-size: 0.8rem; color: var(--silver); line-height: 1.3;">
+          ${selectedLocation.detail}
+        </div>
       </div>
     </div>
-
-    <div class="products-grid wishlist-grid">
-      ${wishlistProducts.map(p => {
-        const stars = renderStars(p.rating);
-        const saleBadge = p.discount > 0 ? `<div class="product-badge">-${p.discount}%</div>` : '';
-        const primeBadge = p.prime ? `<div class="product-badge prime">⚡PRIME</div>` : '';
-        const firstBadge = saleBadge || primeBadge;
-        const optimizedImage = p.image ? 
-          p.image.replace('/upload/', '/upload/f_auto,q_auto,w_300,c_limit/') : null;
-
-        return `
-          <div class="product-card">
-            ${firstBadge}
-            <button class="btn-wishlist active"
-                    onclick="event.stopPropagation(); removeFromWishlistAndUpdate(${p.id});"
-                    title="お気に入りから削除">
-              ♥
-            </button>
-            <div class="product-img"
-                 onclick="closeWishlistModal(); openDetail(${p.id});">
-              ${p.image ?
-                `<img src="${optimizedImage}" alt="${p.name}"
-                  loading="lazy" decoding="async"
-                  style="width:100%;height:100%;object-fit:cover;border-radius:8px;">`
-                : `<span style="font-size:3rem;">${p.emoji}</span>`}
-            </div>
-            <div class="product-info">
-              <div class="product-name"
-                   onclick="closeWishlistModal(); openDetail(${p.id});"
-                   title="${p.name}">
-                ${p.name}
-              </div>
-              <div class="product-seller">出品：${p.seller}</div>
-              <div class="stars">
-                ${stars}
-                <span class="review-count">(${p.reviews.toLocaleString()})</span>
-              </div>
-              <div class="product-price">
-                <span class="price-main">💰 ${p.price.toLocaleString()} G</span>
-                ${p.discount > 0 ?
-                  `<span class="price-original">通常 ${p.originalPrice.toLocaleString()} G</span>` : ''
-                }
-              </div>
-              ${p.prime ? '<div class="prime-badge">⚡ Famazon Prime</div>' : ''}
-            </div>
-            <div class="product-actions">
-              <button class="btn-cart" onclick="addToCart(${p.id}); showToast('カートに追加しました！');">
-                🛒 カートに追加
-              </button>
-              <button class="btn-buy" onclick="closeWishlistModal(); openDetail(${p.id});">
-                📖 詳細を見る
-              </button>
-            </div>
-          </div>
-        `;
-      }).join('')}
+    <div style="text-align: right;">
+      <span style="
+        display: inline-block;
+        padding: 8px 14px;
+        border-radius: 20px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        ${badgeStyle}
+        transition: all 0.2s ease;
+      ">
+        ${costDisplay}
+      </span>
     </div>
   `;
 }
 
-// お気に入り全件を一括でカートに追加
-function addWishlistAllToCart() {
-  const wishlistProducts = products.filter(p => wishlist.has(String(p.id)));
-  if (wishlistProducts.length === 0) {
-    showToast('📭 お気に入りに商品がありません', '#6b7280');
+function updateCheckoutLocationDisplay() {
+  const locationDisplay = document.getElementById('checkoutLocationDisplay');
+  if (locationDisplay) {
+    locationDisplay.innerHTML = getCheckoutLocationHTML();
+  }
+}
+
+function openCheckout() {
+  closeCart();
+  const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  const tax = Math.floor(subtotal * 0.1);
+  const hasPrime = cart.some(i => i.prime);
+
+  document.getElementById('checkoutBody').innerHTML = `
+    <div class="checkout-step active" id="step1">
+      <h3 style="color:var(--glow);margin-bottom:15px;">📍 ステップ 1/2: お届け先</h3>
+      <div class="checkout-form">
+        <label>お名前・勇者名</label>
+        <input type="text" placeholder="例：伝説の勇者 アーサー" id="customerName">
+        
+        <label>配達先の界・国</label>
+        <div id="checkoutLocationDisplay" style="
+          padding: 16px;
+          background: var(--bg);
+          border: 2px solid rgba(167, 139, 250, 0.2);
+          border-radius: 12px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 12px;
+          transition: all 0.3s ease;
+        ">
+          ${getCheckoutLocationHTML()}
+        </div>
+        
+        <button type="button" onclick="showLocationModal()" style="
+          width: 100%;
+          padding: 12px;
+          background: var(--secondary);
+          border: 1px solid var(--glow);
+          border-radius: 8px;
+          color: var(--text);
+          cursor: pointer;
+          transition: all 0.2s;
+          font-weight: 600;
+          margin-bottom: 16px;
+        " onmouseover="this.style.background='var(--hover)'; this.style.transform='translateY(-1px)';"
+           onmouseout="this.style.background='var(--secondary)'; this.style.transform='translateY(0)';">
+          📍 配達先を変更する
+        </button>
+        
+        <label>詳細な住所</label>
+        <input type="text" placeholder="例：王城通り 英雄の塔 3階" id="customerAddress">
+        
+        <label>受け取り方法</label>
+        <select id="deliveryMethod" onchange="updateShippingCost()">
+          ${hasPrime ? 
+            '<option value="spell" data-cost="0">🪄 呪文転送（Prime会員・無料）</option>' : 
+            '<option value="spell" data-cost="800">🪄 呪文転送（800G）</option>'
+          }
+          <option value="hawk" data-cost="500">🦅 鷹便（翌日・500G）</option>
+          <option value="carriage" data-cost="100">🐎 馬車便（3日・100G）</option>
+          <option value="pickup" data-cost="0">🏪 指定場所でピックアップ（無料）</option>
+        </select>
+      </div>
+      <button class="btn-checkout" onclick="goStep(2)">次へ → 支払い方法</button>
+    </div>
+
+    <div class="checkout-step" id="step2">
+      <h3 style="color:var(--glow);margin-bottom:15px;">💰 ステップ 2/2: お支払い</h3>
+      <div class="checkout-form">
+        <label>支払い方法</label>
+        <select id="paymentMethod">
+          <option>ゴールドコイン（直接転送）</option>
+          <option>魔法銀行カード</option>
+          <option>ドラゴンダイヤ（換算）</option>
+          <option>冒険者ギルドポイント払い</option>
+        </select>
+        <label>ゴールドコイン送金先（または魔法銀行カード番号）</label>
+        <input type="text" placeholder="例：0000-MAGE-1234-GOLD" id="paymentInfo">
+        <label>魔法認証コード（パスワード）</label>
+        <input type="password" placeholder="••••••••" id="authCode">
+      </div>
+      
+      <div class="cart-summary">
+        <div class="cart-summary-row">
+          <span>小計</span>
+          <span id="displaySubtotal">${subtotal.toLocaleString()} G</span>
+        </div>
+        <div class="cart-summary-row">
+          <span>転送料・手数料</span>
+          <span id="displayShipping" style="text-align: right;">計算中...</span>
+        </div>
+        <div class="cart-summary-row">
+          <span>魔法税（10%）</span>
+          <span id="displayTax">${tax.toLocaleString()} G</span>
+        </div>
+        <div class="cart-summary-row total">
+          <span>ご請求額</span>
+          <span id="displayTotal">計算中...</span>
+        </div>
+      </div>
+      
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <button class="btn-cart" style="flex:0.5;" onclick="goStep(1)">← 戻る</button>
+        <button class="btn-checkout" style="flex:1;" onclick="completeOrder()">注文を確定する</button>
+      </div>
+    </div>
+  `;
+  
+  document.getElementById('checkoutModal').classList.add('active');
+  setTimeout(() => updateShippingCost(), 100);
+}
+
+function goStep(n) {
+  document.querySelectorAll('.checkout-step').forEach((el, i) => {
+    el.classList.toggle('active', i+1 === n);
+  });
+  
+  if (n === 2) {
+    setTimeout(() => updateShippingCost(), 50);
+  }
+}
+
+function closeCheckout() {
+  document.getElementById('checkoutModal').classList.remove('active');
+}
+
+function getShippingCost() {
+  const methodElement = document.getElementById('deliveryMethod');
+  let baseCost = 0;
+  
+  if (methodElement) {
+    const selectedOption = methodElement.options[methodElement.selectedIndex];
+    baseCost = parseInt(selectedOption.getAttribute('data-cost')) || 0;
+  }
+  
+  const locationCost = selectedLocation ? selectedLocation.cost : 0;
+  
+  return baseCost + locationCost;
+}
+
+function updateShippingCost() {
+  try {
+    const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+    const methodElement = document.getElementById('deliveryMethod');
+    const baseCost = methodElement ? 
+      parseInt(methodElement.options[methodElement.selectedIndex].getAttribute('data-cost')) || 0 : 0;
+    const locationCost = selectedLocation ? selectedLocation.cost : 0;
+    const totalShipping = baseCost + locationCost;
+    const tax = Math.floor(subtotal * 0.1);
+    const total = subtotal + tax + totalShipping;
+    
+    const shippingDisplay = document.getElementById('displayShipping');
+    const totalDisplay = document.getElementById('displayTotal');
+    
+    if (shippingDisplay) {
+      if (totalShipping === 0) {
+        shippingDisplay.textContent = '無料';
+      } else if (locationCost > 0) {
+        shippingDisplay.innerHTML = `
+          ${totalShipping.toLocaleString()} G
+          <br><small style="color:var(--silver);font-size:0.75rem;">
+            (配送: ${baseCost}G + 地域: ${locationCost}G)
+          </small>
+        `;
+      } else {
+        shippingDisplay.textContent = `${totalShipping.toLocaleString()} G`;
+      }
+    }
+    
+    if (totalDisplay) {
+      totalDisplay.textContent = `💰 ${total.toLocaleString()} G`;
+    }
+    
+  } catch (error) {
+    console.error('送料計算エラー:', error);
+    showToast('⚠️ 送料計算でエラーが発生しました', '#f59e0b');
+  }
+}
+
+function completeOrder() {
+  if (cart.length === 0) {
+    closeCheckout();
+    showToast('🛒 カートが空のため注文できません', '#f59e0b');
     return;
   }
 
-  wishlistProducts.forEach(p => {
-    const existing = cart.find(i => i.id === p.id);
-    if (existing) {
-      existing.qty++;
-    } else {
-      cart.push({ ...p, qty: 1 });
-    }
-  });
+  try {
+    const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+    const shipping = getShippingCost();
+    const tax = Math.floor(subtotal * 0.1);
+    const total = subtotal + tax + shipping;
+    
+    const orderId = `AMZ-${Math.random().toString(36).substr(2, 8).toUpperCase()}-FANTASY`;
+    
+    const deliveryMethodElement = document.getElementById('deliveryMethod');
+    const deliveryMethodText = deliveryMethodElement ? 
+      deliveryMethodElement.options[deliveryMethodElement.selectedIndex].text : 
+      '馬車便（3日・100G）';
+    
+    const orderData = {
+      id: orderId,
+      date: new Date().toISOString(),
+      timestamp: Date.now(),
+      items: cart.map(item => ({
+        id: item.id,
+        name: item.name,
+        emoji: item.emoji,
+        price: item.price,
+        qty: item.qty,
+        image: item.image || null,
+        seller: item.seller || '',
+        category: item.category || ''
+      })),
+      subtotal: subtotal,
+      shipping: shipping,
+      tax: tax,
+      total: total,
+      status: 'preparing',
+      deliveryMethod: deliveryMethodText,
+      location: selectedLocation.name
+    };
 
-  updateCartBadge();
-  showToast(`❤️ お気に入り ${wishlistProducts.length}件をカートに追加しました！`, '#ec4899');
-}
-
-function removeFromWishlistAndUpdate(id) {
-  const stringId = String(id);
-  const product = products.find(p => p.id === id);
-
-  if (wishlist.has(stringId)) {
-    wishlist.delete(stringId);
-    saveWishlist();
-    renderWishlist();
-
-    // メイン画面のお気に入りボタンも更新
-    document.querySelectorAll('.btn-wishlist').forEach(btn => {
-      const onclick = btn.getAttribute('onclick') || '';
-      if (onclick.includes(`toggleWishlist(event, ${id})`)) {
-        btn.classList.remove('active');
-      }
-    });
-
-    if (product) {
-      showToast(`💔 「${product.name.substring(0, 20)}...」を削除しました`, '#ef4444');
-    }
+    saveOrderToHistory(orderData);
+    cart = [];
+    updateCartBadge();
+    closeCheckout();
+    
+    showToast('🎉 ご注文が完了しました！');
+    showOrderCompleteModal(orderData);
+    
+  } catch (error) {
+    console.error('注文処理エラー:', error);
+    showToast('❌ 注文処理中にエラーが発生しました', '#ef4444');
   }
 }
 
-function closeWishlistModal() {
-  document.getElementById('wishlistModal').classList.remove('active');
+// ========== 注文完了モーダル ==========
+function showOrderCompleteModal(orderData) {
+  const modalHTML = `
+    <div class="modal-overlay" id="orderCompleteModal" style="
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(5px);
+      z-index: 3000;
+    ">
+      <div class="modal" style="
+        max-width: 520px;
+        text-align: center;
+        background: var(--secondary);
+        border: 2px solid var(--glow);
+        border-radius: 16px;
+        padding: 40px;
+        position: relative;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      ">
+        <button onclick="closeOrderCompleteModal()" style="
+          position: absolute;
+          top: 16px;
+          right: 16px;
+          background: transparent;
+          border: none;
+          color: var(--silver);
+          font-size: 1.5rem;
+          cursor: pointer;
+        ">✕</button>
+        
+        <div style="font-size: 4rem; margin-bottom: 20px;">🎉</div>
+        <h2 style="color: var(--glow); margin-bottom: 16px;">ご注文ありがとうございます！</h2>
+        
+        <div style="background: var(--bg); padding: 20px; border-radius: 12px; margin: 24px 0;">
+          <div style="color: var(--silver); font-size: 0.9rem; margin-bottom: 8px;">注文番号</div>
+          <div style="font-family: monospace; font-size: 1.1rem; color: var(--glow); font-weight: 600;">${orderData.id}</div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding-top: 12px; margin-top: 12px; border-top: 1px solid rgba(167, 139, 250, 0.1);">
+            <div>
+              <div style="color: var(--silver); font-size: 0.8rem;">商品数</div>
+              <div style="color: var(--text); font-weight: 600; font-size: 1.1rem;">${orderData.items.length}件</div>
+            </div>
+            <div>
+              <div style="color: var(--silver); font-size: 0.8rem;">合計金額</div>
+              <div style="color: var(--glow); font-weight: 700; font-size: 1.2rem;">${orderData.total.toLocaleString()} G</div>
+            </div>
+          </div>
+        </div>
+        
+        <button class="btn-checkout" onclick="closeOrderCompleteModal()" style="width: 100%; padding: 16px; margin-top: 20px;">
+          🏠 ショッピングを続ける
+        </button>
+      </div>
+    </div>
+  `;
+  
+  document.body.insertAdjacentHTML('beforeend', modalHTML);
+  setTimeout(() => {
+    const modal = document.getElementById('orderCompleteModal');
+    if (modal) modal.remove();
+  }, 10000);
+}
+
+function closeOrderCompleteModal() {
+  const modal = document.getElementById('orderCompleteModal');
+  if (modal) modal.remove();
 }
 
 // ========== 注文履歴機能（詳細表示対応） ==========
@@ -928,7 +1249,6 @@ function showOrderHistoryModal() {
         const formattedDate = orderDate.toLocaleDateString('ja-JP');
         const itemCount = order.items.length;
         
-        // 商品詳細の表示
         const itemsPreviewHTML = order.items.slice(0, 3).map(item => `
           <div class="order-item-row">
             <div class="order-item-icon">${item.emoji || '📦'}</div>
@@ -999,6 +1319,288 @@ function saveOrderToHistory(orderData) {
   }
 }
 
+// ========== お気に入り機能（拡張版） ==========
+function loadWishlist() {
+  try {
+    const saved = localStorage.getItem('famazon_wishlist');
+    if (saved) {
+      const savedArray = JSON.parse(saved);
+      if (Array.isArray(savedArray)) {
+        wishlist = new Set(savedArray.map(id => String(id)));
+        console.log(`💖 お気に入り ${wishlist.size}件を復元しました`);
+      } else {
+        wishlist = new Set();
+        localStorage.removeItem('famazon_wishlist');
+      }
+    }
+  } catch (error) {
+    console.error('お気に入り復元エラー:', error);
+    wishlist = new Set();
+  }
+}
+
+function saveWishlist() {
+  try {
+    const arrayToSave = Array.from(wishlist);
+    localStorage.setItem('famazon_wishlist', JSON.stringify(arrayToSave));
+  } catch (error) {
+    console.error('お気に入り保存エラー:', error);
+    showToast('⚠️ お気に入りの保存に失敗しました', '#ef4444');
+  }
+}
+
+function toggleWishlist(event, id) {
+  event.stopPropagation();
+  const btn = event.currentTarget;
+  const stringId = String(id);
+  
+  if (!(wishlist instanceof Set)) {
+    wishlist = new Set();
+  }
+  
+  if (wishlist.has(stringId)) {
+    wishlist.delete(stringId);
+    btn.classList.remove('active');
+    showToast('💔 お気に入りから削除しました', '#ef4444');
+  } else {
+    wishlist.add(stringId);
+    btn.classList.add('active');
+    
+    const product = products.find(p => String(p.id) === stringId);
+    if (product) {
+      showToast(`❤️ 「${product.name.substring(0, 20)}...」をお気に入りに追加！`);
+    }
+  }
+  
+  saveWishlist();
+}
+
+function showWishlistModal() {
+  renderWishlist();
+  document.getElementById('wishlistModal').classList.add('active');
+}
+
+function closeWishlistModal() {
+  document.getElementById('wishlistModal').classList.remove('active');
+}
+
+function renderWishlist() {
+  const body = document.getElementById('wishlistBody');
+  
+  if (!wishlist || wishlist.size === 0) {
+    body.innerHTML = `
+      <div class="empty-cart">
+        <span class="icon">❤️</span>
+        お気に入りリストは空です
+        <br><small style="margin-top:12px; display:block; color:var(--silver);">
+          気になる商品を見つけたら♥ボタンで追加しましょう！
+        </small>
+      </div>
+    `;
+    return;
+  }
+  
+  const wishlistProducts = products.filter(p => wishlist.has(String(p.id)));
+  
+  if (wishlistProducts.length === 0) {
+    body.innerHTML = `
+      <div class="empty-cart">
+        <span class="icon">💔</span>
+        お気に入りに登録された商品が見つかりません
+        <br><small style="margin-top:12px; display:block; color:var(--silver);">
+          商品データの読み込みを待つか、ページを更新してください
+        </small>
+      </div>
+    `;
+    return;
+  }
+  
+  body.innerHTML = `
+    <div class="wishlist-toolbar">
+      <div class="wishlist-summary">
+        📊 お気に入り ${wishlistProducts.length}件 | 
+        合計価値: ${wishlistProducts.reduce((sum, p) => sum + p.price, 0).toLocaleString()} G
+      </div>
+      <div class="wishlist-toolbar-buttons">
+        <button class="btn-cart" onclick="addWishlistAllToCart()" style="white-space:nowrap;">
+          ❤️ 全てカートに追加
+        </button>
+        <button class="btn-buy" onclick="closeWishlistModal(); openCart();" style="white-space:nowrap;">
+          🛒 カートを開く
+        </button>
+      </div>
+    </div>
+
+    <div class="products-grid wishlist-grid">
+      ${wishlistProducts.map(p => {
+        const stars = renderStars(p.rating);
+        const saleBadge = p.discount > 0 ? `<div class="product-badge">-${p.discount}%</div>` : '';
+        const primeBadge = p.prime ? `<div class="product-badge prime">⚡PRIME</div>` : '';
+        const firstBadge = saleBadge || primeBadge;
+        const optimizedImage = p.image ? 
+          p.image.replace('/upload/', '/upload/f_auto,q_auto,w_300,c_limit/') : null;
+
+        return `
+          <div class="product-card">
+            ${firstBadge}
+            <button class="btn-wishlist active"
+                    onclick="event.stopPropagation(); removeFromWishlistAndUpdate(${p.id});"
+                    title="お気に入りから削除">
+              ♥
+            </button>
+            <div class="product-img"
+                 onclick="closeWishlistModal(); openDetail(${p.id});">
+              ${p.image ?
+                `<img src="${optimizedImage}" alt="${p.name}"
+                  loading="lazy" decoding="async"
+                  style="width:100%;height:100%;object-fit:cover;border-radius:8px;">`
+                : `<span style="font-size:3rem;">${p.emoji}</span>`}
+            </div>
+            <div class="product-info">
+              <div class="product-name"
+                   onclick="closeWishlistModal(); openDetail(${p.id});"
+                   style="cursor:pointer;"
+                   title="${p.name}">
+                ${p.name}
+              </div>
+              <div class="product-seller">出品：${p.seller}</div>
+              <div class="stars">
+                ${stars}
+                <span class="review-count">(${p.reviews.toLocaleString()})</span>
+              </div>
+              <div class="product-price">
+                <span class="price-main">💰 ${p.price.toLocaleString()} G</span>
+                ${p.discount > 0 ?
+                  `<span class="price-original">通常 ${p.originalPrice.toLocaleString()} G</span>` : ''
+                }
+              </div>
+              ${p.prime ? '<div class="prime-badge">⚡ Famazon Prime</div>' : ''}
+            </div>
+            <div class="product-actions">
+              <button class="btn-cart" onclick="addToCart(${p.id}); showToast('カートに追加しました！');">
+                🛒 カートに追加
+              </button>
+              <button class="btn-buy" onclick="closeWishlistModal(); openDetail(${p.id});">
+                📖 詳細を見る
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+function addWishlistAllToCart() {
+  const wishlistProducts = products.filter(p => wishlist.has(String(p.id)));
+  if (wishlistProducts.length === 0) {
+    showToast('📭 お気に入りに商品がありません', '#6b7280');
+    return;
+  }
+
+  wishlistProducts.forEach(p => {
+    const existing = cart.find(i => i.id === p.id);
+    if (existing) {
+      existing.qty++;
+    } else {
+      cart.push({ ...p, qty: 1 });
+    }
+  });
+
+  updateCartBadge();
+  showToast(`❤️ お気に入り ${wishlistProducts.length}件をカートに追加しました！`, '#ec4899');
+}
+
+function removeFromWishlistAndUpdate(id) {
+  const stringId = String(id);
+  const product = products.find(p => p.id === id);
+
+  if (wishlist.has(stringId)) {
+    wishlist.delete(stringId);
+    saveWishlist();
+    renderWishlist();
+
+    document.querySelectorAll('.btn-wishlist').forEach(btn => {
+      const onclick = btn.getAttribute('onclick') || '';
+      if (onclick.includes(`toggleWishlist(event, ${id})`)) {
+        btn.classList.remove('active');
+      }
+    });
+
+    if (product) {
+      showToast(`💔 「${product.name.substring(0, 20)}...」を削除しました`, '#ef4444');
+    }
+  }
+}
+
+// ========== フィルター・ソート機能 ==========
+function filterCategory(cat, btn) {
+  currentCategory = cat;
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+
+function filterProducts() { applyFilters(); }
+function sortProducts() { applyFilters(); }
+
+function applyFilters() {
+  const query = document.getElementById('searchInput').value.toLowerCase();
+  const sort = document.getElementById('sortSelect').value;
+  
+  const checkedRarities = [...document.querySelectorAll('.filter-rarity:checked')].map(el => el.value);
+  const priceMinEl = document.getElementById('priceMin');
+  const priceMaxEl = document.getElementById('priceMax');
+  const priceMin = priceMinEl && priceMinEl.value !== '' ? Number(priceMinEl.value) : null;
+  const priceMax = priceMaxEl && priceMaxEl.value !== '' ? Number(priceMaxEl.value) : null;
+  const ratingRadio = document.querySelector('.filter-rating-radio:checked');
+  const minRating = ratingRadio ? Number(ratingRadio.value) : 0;
+
+  let filtered = products.filter(p => {
+    if (currentCategory !== 'all' && p.category !== currentCategory) return false;
+    if (query) {
+      const hit = p.name.toLowerCase().includes(query) || 
+                  p.desc.toLowerCase().includes(query) || 
+                  p.tags.some(t => t.toLowerCase().includes(query)) ||
+                  p.seller.toLowerCase().includes(query);
+      if (!hit) return false;
+    }
+    if (checkedRarities.length > 0 && !checkedRarities.includes(p.rarity)) return false;
+    if (priceMin !== null && p.price < priceMin) return false;
+    if (priceMax !== null && p.price > priceMax) return false;
+    if (minRating > 0 && p.rating < minRating) return false;
+    return true;
+  });
+
+  switch (sort) {
+    case 'price-asc':   filtered.sort((a, b) => a.price - b.price); break;
+    case 'price-desc':  filtered.sort((a, b) => b.price - a.price); break;
+    case 'rating':      filtered.sort((a, b) => b.rating - a.rating); break;
+    case 'new':         filtered.sort((a, b) => b.isNew - a.isNew); break;
+    case 'discount':    filtered.sort((a, b) => b.discount - a.discount); break;
+  }
+
+  renderProducts(filtered);
+}
+
+function resetFilters() {
+  document.querySelectorAll('.filter-rarity').forEach(el => el.checked = true);
+  const minEl = document.getElementById('priceMin');
+  const maxEl = document.getElementById('priceMax');
+  if (minEl) minEl.value = '';
+  if (maxEl) maxEl.value = '';
+  const allRatingRadio = document.querySelector('.filter-rating-radio[value="0"]');
+  if (allRatingRadio) allRatingRadio.checked = true;
+  applyFilters();
+}
+
+function setView(view) {
+  currentView = view;
+  document.getElementById('gridViewBtn').classList.toggle('active', view === 'grid');
+  document.getElementById('listViewBtn').classList.toggle('active', view === 'list');
+  applyFilters();
+}
+
 // ========== その他の機能 ==========
 function preloadDetailImage(id) {
   const p = products.find(x => x.id === id);
@@ -1035,11 +1637,22 @@ window.addEventListener('click', function(event) {
 async function initFamazon() {
   try {
     console.log('🚀 ファマゾン魔法商店 初期化開始');
+    
+    loadLocationSetting();
+    console.log('✅ 配達先設定復元完了');
+    
     loadWishlist();
     console.log('✅ お気に入り復元完了');
     
     await loadProductsFromSheet();
     console.log('✅ 商品読み込み完了');
+    
+    // デバウンス処理を検索入力に適用
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+      const debouncedFilter = debounce(applyFilters, 300);
+      searchInput.addEventListener('input', debouncedFilter);
+    }
     
     console.log('🎉 ファマゾン魔法商店 初期化完了');
     
@@ -1059,7 +1672,12 @@ async function initFamazon() {
 }
 
 // DOMの読み込み完了後に初期化実行
-document.addEventListener('DOMContentLoaded', initFamazon);
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initFamazon);
+} else {
+  initFamazon();
+}
+
 </script>
 </body>
 </html>
