@@ -2649,13 +2649,22 @@ function renderProducts(data) {
 
     const wishActive = wishlist.has(p.id) ? 'active' : '';
 
+    // ★ Cloudinary最適化: 商品一覧用に最適なパラメータで画像を自動変換
+    const optimizedImage = p.image ? 
+      p.image.replace('/upload/', '/upload/f_auto,q_auto,w_400,c_limit/') : null;
+
     return `
     <div class="product-card ${currentView === 'list' ? 'list-view' : ''}" onclick="openDetail(${p.id})">
       ${firstBadge}
       ${rankBadge}
       <button class="btn-wishlist ${wishActive}" onclick="toggleWishlist(event, ${p.id})">♥</button>
       <div class="product-img" style="overflow:hidden;border-radius:8px;">
-        ${p.image ? `<img src="${p.image}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" loading="lazy">` : `<span style="font-size:3rem;">${p.emoji}</span>`}
+        ${p.image ? 
+          `<img src="${optimizedImage}" alt="${p.name}" 
+            style="width:100%;height:100%;object-fit:cover;border-radius:8px;" 
+            loading="lazy" 
+            decoding="async">` 
+          : `<span style="font-size:3rem;">${p.emoji}</span>`}
       </div>
       <div class="product-info">
         <div class="product-name">${p.name}</div>
@@ -2679,6 +2688,7 @@ function renderProducts(data) {
     </div>`;
   }).join('');
 }
+
 
 function renderStars(rating) {
   let html = '';
@@ -2889,11 +2899,22 @@ function changeQty(id, delta) {
 function openDetail(id) {
   const p = products.find(x => x.id === id);
   document.getElementById('detailTitle').textContent = `${p.emoji} ${p.name}`;
+  
+  // ★ Cloudinary最適化: 詳細画面用に高解像度（800px）で自動最適化
+  const optimizedDetailImage = p.image ? 
+    p.image.replace('/upload/', '/upload/f_auto,q_auto,w_800,c_limit/') : null;
+  
   document.getElementById('detailBody').innerHTML = `
     <div class="product-detail-grid">
       <div>
         <div class="product-detail-img" style="overflow:hidden;padding:0;">
-          ${p.image ? `<img src="${p.image}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">` : `<span style="font-size:8rem;">${p.emoji}</span>`}
+          ${p.image ? 
+            `<img src="${optimizedDetailImage}" 
+              alt="${p.name}" 
+              loading="lazy" 
+              decoding="async"
+              style="width:100%;height:100%;object-fit:cover;border-radius:10px;">` 
+            : `<span style="font-size:8rem;">${p.emoji}</span>`}
         </div>
         <div style="margin-top:10px;">
           ${p.tags.map(t => `<span style="background:var(--secondary);padding:3px 8px;border-radius:20px;font-size:0.75rem;margin:2px;display:inline-block;color:var(--glow);">${t}</span>`).join('')}
@@ -2933,6 +2954,7 @@ function openDetail(id) {
   `;
   document.getElementById('productDetailModal').classList.add('active');
 }
+
 
 function closeDetail() {
   document.getElementById('productDetailModal').classList.remove('active');
