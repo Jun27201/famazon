@@ -4,107 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ファマゾン魔法商店 - ファンタジー世界最大の通販サイト</title>
+<!-- 高速化: API接続の最適化 -->
+<link rel="preconnect" href="https://script.google.com">
 <link rel="stylesheet" href="style.css">
-<style>
-/* 配達先選択用の追加スタイル */
-.location-option {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 16px;
-  background: var(--bg);
-  border: 2px solid rgba(167, 139, 250, 0.2);
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-align: left;
-  width: 100%;
-  position: relative;
-  overflow: hidden;
-}
-
-.location-option:hover {
-  background: var(--hover);
-  border-color: var(--glow);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(167, 139, 250, 0.3);
-}
-
-.location-option.selected {
-  background: rgba(139, 92, 246, 0.15);
-  border-color: var(--glow);
-  box-shadow: 0 4px 15px rgba(167, 139, 250, 0.2);
-}
-
-.location-option.danger {
-  border-color: rgba(239, 68, 68, 0.4);
-  background: linear-gradient(135deg, var(--bg) 0%, rgba(239, 68, 68, 0.05) 100%);
-}
-
-.location-option.danger:hover {
-  border-color: #ef4444;
-  box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
-}
-
-.location-option.danger::before {
-  content: '⚠️';
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  font-size: 0.8rem;
-  opacity: 0.7;
-}
-
-.location-icon {
-  font-size: 2.2rem;
-  flex-shrink: 0;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-}
-
-.location-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.location-name {
-  font-weight: 700;
-  color: var(--text);
-  font-size: 1.1rem;
-  margin-bottom: 4px;
-}
-
-.location-detail {
-  font-size: 0.8rem;
-  color: var(--silver);
-  line-height: 1.3;
-}
-
-.location-fee {
-  font-weight: 700;
-  font-size: 1.2rem;
-  flex-shrink: 0;
-  padding: 6px 12px;
-  border-radius: 20px;
-  text-align: center;
-  min-width: 80px;
-}
-
-.location-fee.free {
-  color: var(--success);
-  background: rgba(16, 185, 129, 0.1);
-}
-
-.location-fee.standard {
-  color: var(--glow);
-  background: rgba(139, 92, 246, 0.1);
-}
-
-.location-fee.danger {
-  color: #ef4444;
-  background: rgba(239, 68, 68, 0.1);
-  font-weight: 800;
-}
-</style>
 </head>
 <body>
 
@@ -131,12 +33,13 @@
         <option>呪われたアイテム</option>
         <option>食料・珍味</option>
       </select>
-      <input class="search-input" type="text" id="searchInput" placeholder="商品、魔法、生物を検索..." oninput="filterProducts()">
+      <!-- デバウンス処理により高速化 -->
+      <input class="search-input" type="text" id="searchInput" placeholder="商品、魔法、生物を検索...">
       <button class="search-btn">🔍</button>
     </div>
 
     <div class="header-actions">
-      <button class="header-btn" onclick="showLanguageModal()">
+      <button class="header-btn">
         <span class="label">言語</span>
         <span class="value">🌍 エルフ語</span>
       </button>
@@ -245,65 +148,7 @@
       </label>
     </div>
 
-    <div class="filter-section">
-      <h4>配達速度</h4>
-      <label class="filter-option">
-        <input type="checkbox" value="呪文" class="filter-delivery" onchange="applyFilters()">
-        <span>🪄 呪文転送（即日）</span>
-      </label>
-      <label class="filter-option">
-        <input type="checkbox" value="鷹便" class="filter-delivery" onchange="applyFilters()">
-        <span>🦅 鷹便（翌日）</span>
-      </label>
-      <label class="filter-option">
-        <input type="checkbox" value="馬車" class="filter-delivery" onchange="applyFilters()">
-        <span>🐎 馬車便（3日）</span>
-      </label>
-    </div>
-
-    <div class="filter-section">
-      <h4>出品者</h4>
-      <label class="filter-option">
-        <input type="checkbox" value="王立商会" class="filter-seller" onchange="applyFilters()">
-        <span>🏰 王立商会</span>
-      </label>
-      <label class="filter-option">
-        <input type="checkbox" value="魔法師ギルド" class="filter-seller" onchange="applyFilters()">
-        <span>🧙 魔法師ギルド</span>
-      </label>
-      <label class="filter-option">
-        <input type="checkbox" value="エルフ" class="filter-seller" onchange="applyFilters()">
-        <span>🧝 エルフ工房</span>
-      </label>
-      <label class="filter-option">
-        <input type="checkbox" value="ドワーフ" class="filter-seller" onchange="applyFilters()">
-        <span>⚒️ ドワーフ鍛冶</span>
-      </label>
-      <label class="filter-option">
-        <input type="checkbox" value="闇商人" class="filter-seller" onchange="applyFilters()">
-        <span>💀 闇商人</span>
-      </label>
-      <label class="filter-option">
-        <input type="checkbox" value="天界" class="filter-seller" onchange="applyFilters()">
-        <span>✨ 天界商会</span>
-      </label>
-      <label class="filter-option">
-        <input type="checkbox" value="深海" class="filter-seller" onchange="applyFilters()">
-        <span>🌊 深海商会</span>
-      </label>
-      <label class="filter-option">
-        <input type="checkbox" value="冒険者ギルド" class="filter-seller" onchange="applyFilters()">
-        <span>🏆 冒険者ギルド</span>
-      </label>
-    </div>
-
-    <button onclick="resetFilters()" style="
-      width:100%; padding:8px; margin-top:5px;
-      background:var(--secondary); border:1px solid rgba(167,139,250,0.3);
-      color:var(--text); border-radius:6px; cursor:pointer; font-size:0.85rem;
-      transition: background 0.2s;
-    " onmouseover="this.style.background='var(--hover)'"
-       onmouseout="this.style.background='var(--secondary)'">
+    <button onclick="resetFilters()" class="btn-reset-filter">
       🔄 フィルターをリセット
     </button>
   </aside>
@@ -404,9 +249,7 @@
         配送先の次元・地域を選択してください。危険地帯や遠隔地への配送には
         <span style="color:var(--danger); font-weight:600;">特別危険手当</span>が発生します。
       </p>
-      <div id="locationGrid" style="display:grid; gap:12px;">
-        <!-- JavaScriptで動的生成 -->
-      </div>
+      <div id="locationGrid" style="display:grid; gap:12px;"></div>
     </div>
   </div>
 </div>
@@ -418,9 +261,7 @@
       <h2>❤️ 魔法リスト（お気に入り）</h2>
       <button class="close-btn" onclick="closeWishlistModal()">✕</button>
     </div>
-    <div class="modal-body" id="wishlistBody">
-      <!-- JavaScriptで動的生成 -->
-    </div>
+    <div class="modal-body" id="wishlistBody"></div>
   </div>
 </div>
 
@@ -431,72 +272,16 @@
 // ========== 設定とグローバル変数 ==========
 const SHEET_API_URL = 'https://script.google.com/macros/s/AKfycbwQH9QFLM_WEOQ862nQlXodrwKikmee5tImh0O9cORmDkInV3eQZrIrX4sWvGHzu5Kv-Q/exec';
 
-// ========== 配達先管理システム ==========
+// 配達先管理システム
 const LOCATIONS = [
-  { 
-    id: 'kingdom', 
-    name: '中央王国・王都', 
-    icon: '🏰', 
-    cost: 0, 
-    detail: '標準配送エリア・追加料金なし',
-    type: 'free'
-  },
-  { 
-    id: 'elf', 
-    name: 'エルフの里', 
-    icon: '🌳', 
-    cost: 0, 
-    detail: '森林地帯・自然配送ルート',
-    type: 'free'
-  },
-  { 
-    id: 'dwarf', 
-    name: 'ドワーフ山岳都市', 
-    icon: '⛰️', 
-    cost: 300, 
-    detail: '山岳地帯・険しい道のり',
-    type: 'standard'
-  },
-  { 
-    id: 'demon', 
-    name: '魔界（第一層）', 
-    icon: '🔥', 
-    cost: 500, 
-    detail: '異界配送・魔力障壁突破料金',
-    type: 'standard'
-  },
-  { 
-    id: 'sky', 
-    name: '天空都市クラウディア', 
-    icon: '☁️', 
-    cost: 600, 
-    detail: '高高度配送・飛行魔法使用',
-    type: 'standard'
-  },
-  { 
-    id: 'ocean', 
-    name: '深海王国アトランティス', 
-    icon: '🌊', 
-    cost: 700, 
-    detail: '水中配送・防水処理費用',
-    type: 'standard'
-  },
-  { 
-    id: 'dungeon', 
-    name: 'ダンジョン最深部', 
-    icon: '💀', 
-    cost: 1500, 
-    detail: '⚠️ 極度危険地帯・配達員生命保険料込み',
-    type: 'danger'
-  },
-  { 
-    id: 'village', 
-    name: '辺境の村', 
-    icon: '🏡', 
-    cost: 200, 
-    detail: '遠隔地・配送時間延長',
-    type: 'standard'
-  }
+  { id: 'kingdom', name: '中央王国・王都', icon: '🏰', cost: 0, detail: '標準配送エリア・追加料金なし', type: 'free' },
+  { id: 'elf', name: 'エルフの里', icon: '🌳', cost: 0, detail: '森林地帯・自然配送ルート', type: 'free' },
+  { id: 'dwarf', name: 'ドワーフ山岳都市', icon: '⛰️', cost: 300, detail: '山岳地帯・険しい道のり', type: 'standard' },
+  { id: 'demon', name: '魔界（第一層）', icon: '🔥', cost: 500, detail: '異界配送・魔力障壁突破料金', type: 'standard' },
+  { id: 'sky', name: '天空都市クラウディア', icon: '☁️', cost: 600, detail: '高高度配送・飛行魔法使用', type: 'standard' },
+  { id: 'ocean', name: '深海王国アトランティス', icon: '🌊', cost: 700, detail: '水中配送・防水処理費用', type: 'standard' },
+  { id: 'dungeon', name: 'ダンジョン最深部', icon: '💀', cost: 1500, detail: '⚠️ 極度危険地帯・配達員生命保険料込み', type: 'danger' },
+  { id: 'village', name: '辺境の村', icon: '🏡', cost: 200, detail: '遠隔地・配送時間延長', type: 'standard' }
 ];
 
 let selectedLocation = LOCATIONS[0];
@@ -518,11 +303,28 @@ let wishlist = new Set();
 let currentView = 'grid';
 let currentCategory = 'all';
 
-// 遅延読み込み管理
-const lazyLoadState = {
-  reviews: new Set(),
-  qa: new Set()
-};
+// ========== 高速化: デバウンス関数 ==========
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+// 検索入力にデバウンスを適用（300ms遅延）
+document.addEventListener('DOMContentLoaded', function() {
+  const searchInput = document.getElementById('searchInput');
+  if (searchInput) {
+    searchInput.addEventListener('input', debounce(function() {
+      applyFilters();
+    }, 300));
+  }
+});
 
 // ========== キャッシュマネージャー ==========
 const CacheManager = {
@@ -534,13 +336,9 @@ const CacheManager = {
         reviews: data.reviews || {},
         qa: data.qa || {}
       };
-      
       localStorage.setItem(CACHE_CONFIG.PRODUCTS_KEY, JSON.stringify(cacheData));
       localStorage.setItem(CACHE_CONFIG.TIMESTAMP_KEY, Date.now().toString());
-      
       console.log('💾 データをキャッシュに保存しました');
-      this.logCacheInfo();
-      
     } catch (error) {
       console.error('キャッシュ保存エラー:', error);
       if (error.name === 'QuotaExceededError') {
@@ -554,18 +352,14 @@ const CacheManager = {
     try {
       const cached = localStorage.getItem(CACHE_CONFIG.PRODUCTS_KEY);
       if (!cached) return null;
-
       const cacheData = JSON.parse(cached);
-      
       if (!this.isValid()) {
         console.log('⏰ キャッシュの有効期限が切れています');
         this.clear();
         return null;
       }
-
       console.log('⚡ キャッシュからデータを復元しました');
       return cacheData;
-      
     } catch (error) {
       console.error('キャッシュ読み込みエラー:', error);
       this.clear();
@@ -576,7 +370,6 @@ const CacheManager = {
   isValid() {
     const timestamp = localStorage.getItem(CACHE_CONFIG.TIMESTAMP_KEY);
     if (!timestamp) return false;
-    
     const age = Date.now() - parseInt(timestamp);
     return age < CACHE_CONFIG.EXPIRY_TIME;
   },
@@ -585,16 +378,6 @@ const CacheManager = {
     localStorage.removeItem(CACHE_CONFIG.PRODUCTS_KEY);
     localStorage.removeItem(CACHE_CONFIG.TIMESTAMP_KEY);
     console.log('🗑️ キャッシュをクリアしました');
-  },
-
-  logCacheInfo() {
-    const timestamp = localStorage.getItem(CACHE_CONFIG.TIMESTAMP_KEY);
-    if (!timestamp) return;
-
-    const age = Date.now() - parseInt(timestamp);
-    const remainingTime = Math.max(0, Math.floor((CACHE_CONFIG.EXPIRY_TIME - age) / 60000));
-    
-    console.log(`📊 キャッシュ情報: 残り${remainingTime}分 | 商品数: ${products.length}件`);
   }
 };
 
@@ -680,30 +463,10 @@ function handleLoadError(error) {
         エラー: ${error.message}
       </small>
       <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-        <button onclick="forceReloadProducts()" style="
-          padding: 12px 20px;
-          background: var(--glow);
-          color: var(--bg);
-          border: none;
-          border-radius: 8px;
-          cursor: pointer;
-          font-weight: 600;
-          transition: all 0.2s;
-        " onmouseover="this.style.background='#a78bfa'"
-           onmouseout="this.style.background='var(--glow)'">
+        <button onclick="forceReloadProducts()" class="btn-error-primary">
           🔄 再読み込み
         </button>
-        <button onclick="CacheManager.clear(); location.reload();" style="
-          padding: 12px 20px;
-          background: var(--secondary);
-          color: var(--text);
-          border: 1px solid var(--glow);
-          border-radius: 8px;
-          cursor: pointer;
-          font-weight: 600;
-          transition: all 0.2s;
-        " onmouseover="this.style.background='var(--hover)'"
-           onmouseout="this.style.background='var(--secondary)'">
+        <button onclick="CacheManager.clear(); location.reload();" class="btn-error-secondary">
           🗑️ キャッシュクリア
         </button>
       </div>
@@ -717,18 +480,20 @@ async function forceReloadProducts() {
   await loadProductsFromSheet(true);
 }
 
-// ========== 商品表示 ==========
+// ========== 商品表示（最適化版） ==========
 function renderProducts(data) {
   const container = document.getElementById('productsContainer');
   container.className = currentView === 'grid' ? 'products-grid' : 'products-list';
 
   if (data.length === 0) {
     container.innerHTML = '<div class="loading">🔍 商品が見つかりませんでした</div>';
+    document.getElementById('productCount').textContent = '0件の商品';
     return;
   }
 
   document.getElementById('productCount').textContent = `${data.length}件の商品`;
 
+  // DOM操作を最小限にするため、HTML文字列を一度に生成
   container.innerHTML = data.map((p, index) => {
     const stars = renderStars(p.rating);
     const rankBadge = index < 3 ? `<div class="ranking-badge rank-${index+1}">${['🥇','🥈','🥉'][index]}</div>` : '';
@@ -737,6 +502,8 @@ function renderProducts(data) {
     const newBadge = p.isNew ? `<div class="product-badge new">NEW</div>` : '';
     const firstBadge = saleBadge || primeBadge || newBadge;
     const wishActive = wishlist.has(String(p.id)) ? 'active' : '';
+    
+    // 画像最適化: loading="lazy"とdecoding="async"を追加
     const optimizedImage = p.image ? 
       p.image.replace('/upload/', '/upload/f_auto,q_auto,w_400,c_limit/') : null;
 
@@ -785,164 +552,6 @@ function renderStars(rating) {
   return html;
 }
 
-// ========== 商品詳細モーダル（遅延読み込み対応） ==========
-function openDetail(id) {
-  const p = products.find(x => x.id === id);
-  if (!p) return;
-  
-  document.getElementById('detailTitle').textContent = `${p.emoji} ${p.name}`;
-  
-  const optimizedDetailImage = p.image ? 
-    p.image.replace('/upload/', '/upload/f_auto,q_auto,w_800,c_limit/') : null;
-  
-  document.getElementById('detailBody').innerHTML = `
-    <div class="product-detail-grid">
-      <div>
-        <div class="product-detail-img" style="overflow:hidden;padding:0;">
-          ${p.image ? 
-            `<img src="${optimizedDetailImage}" 
-              alt="${p.name}" 
-              loading="lazy" 
-              decoding="async"
-              style="width:100%;height:100%;object-fit:cover;border-radius:10px;">` 
-            : `<span style="font-size:8rem;">${p.emoji}</span>`}
-        </div>
-        <div style="margin-top:10px;">
-          ${p.tags.map(t => `<span style="background:var(--secondary);padding:3px 8px;border-radius:20px;font-size:0.75rem;margin:2px;display:inline-block;color:var(--glow);">${t}</span>`).join('')}
-        </div>
-      </div>
-      <div class="product-detail-info">
-        <h3>${p.name}</h3>
-        <div class="seller">出品者：${p.seller}</div>
-        <div class="stars">${renderStars(p.rating)} <span class="review-count">${p.rating} (${p.reviews.toLocaleString()}件のレビュー)</span></div>
-        <div class="product-detail-price">💰 ${p.price.toLocaleString()} G</div>
-        ${p.discount > 0 ? `<div style="color:var(--danger);font-size:0.85rem;">通常価格 ${p.originalPrice.toLocaleString()} G から <b>${p.discount}% OFF</b></div>` : ''}
-        ${p.prime ? '<div class="prime-badge">⚡ Famazon Prime 対象（翌日お届け可）</div>' : ''}
-        <div class="product-detail-desc">${p.desc}</div>
-        <div class="product-specs">
-          <h4>📋 商品スペック</h4>
-          ${p.specs.map(([k,v]) => `
-            <div class="spec-row"><span class="spec-label">${k}</span><span class="spec-value">${v}</span></div>
-          `).join('')}
-        </div>
-        <div style="font-size:0.82rem;color:var(--silver);margin-top:8px;">🚚 配達方法：${p.delivery}</div>
-        <div style="margin-top:12px;display:flex;gap:8px;">
-          <button class="btn-cart" style="flex:1;padding:12px;" onclick="addToCart(${p.id}); closeDetail();">🛒 カートに追加</button>
-          <button class="btn-buy" style="flex:1;padding:12px;" onclick="addToCart(${p.id}); closeDetail(); openCart();">⚡ 今すぐ購入</button>
-        </div>
-      </div>
-    </div>
-    <div class="detail-tabs">
-      <button class="detail-tab active" onclick="switchTab(this, 'reviews-tab', ${p.id})">💬 レビュー</button>
-      <button class="detail-tab" onclick="switchTab(this, 'qa-tab', ${p.id})">❓ Q&A</button>
-    </div>
-    <div id="reviews-tab">
-      <div class="loading-placeholder" style="padding: 40px; text-align: center; color: var(--silver);">
-        🔮 レビューを水晶玉から読み込み中...
-      </div>
-    </div>
-    <div id="qa-tab" style="display:none;">
-      <div class="loading-placeholder" style="padding: 40px; text-align: center; color: var(--silver);">
-        🔮 Q&Aを賢者から召喚中...
-      </div>
-    </div>
-  `;
-  
-  document.getElementById('productDetailModal').classList.add('active');
-  ensureModalHandlers();
-  setTimeout(() => loadReviewsLazy(p.id), 200);
-}
-
-function closeDetail() {
-  document.getElementById('productDetailModal').classList.remove('active');
-}
-
-function switchTab(btn, tabId, productId) {
-  document.querySelectorAll('.detail-tab').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  
-  const reviewsTab = document.getElementById('reviews-tab');
-  const qaTab = document.getElementById('qa-tab');
-  
-  if (tabId === 'reviews-tab') {
-    reviewsTab.style.display = 'block';
-    qaTab.style.display = 'none';
-    
-    if (!lazyLoadState.reviews.has(String(productId))) {
-      loadReviewsLazy(productId);
-    }
-  } else if (tabId === 'qa-tab') {
-    reviewsTab.style.display = 'none';
-    qaTab.style.display = 'block';
-    
-    if (!lazyLoadState.qa.has(String(productId))) {
-      loadQALazy(productId);
-    }
-  }
-}
-
-function loadReviewsLazy(productId) {
-  const stringId = String(productId);
-  if (lazyLoadState.reviews.has(stringId)) return;
-  
-  const reviewsTab = document.getElementById('reviews-tab');
-  if (!reviewsTab) return;
-  
-  setTimeout(() => {
-    const reviewData = productReviews[productId] || [
-      { author: '⭐ ファマゾン公認バイヤー', rating: 5, text: '品質・配送ともに最高！また利用します。' }
-    ];
-    
-    const reviewsHTML = reviewData.map(r => `
-      <div class="review">
-        <div class="review-header">
-          <span class="review-author">${r.author}</span>
-          <div>${renderStars(r.rating)}</div>
-        </div>
-        <div class="review-text">${r.text}</div>
-      </div>
-    `).join('');
-    
-    reviewsTab.innerHTML = reviewsHTML;
-    lazyLoadState.reviews.add(stringId);
-    
-    reviewsTab.style.opacity = '0';
-    reviewsTab.style.transition = 'opacity 0.3s ease-in-out';
-    setTimeout(() => { reviewsTab.style.opacity = '1'; }, 50);
-    
-  }, 250);
-}
-
-function loadQALazy(productId) {
-  const stringId = String(productId);
-  if (lazyLoadState.qa.has(stringId)) return;
-  
-  const qaTab = document.getElementById('qa-tab');
-  if (!qaTab) return;
-  
-  setTimeout(() => {
-    const qaData = productQA[productId] || [
-      { q: 'この商品は魔界でも使えますか？', a: 'はい、魔界・異界でも使用可能です。ただし一部の効果が20%減少する場合があります。' },
-      { q: '返品・返金は可能ですか？', a: '未使用品に限り7日以内であれば返品可能です。' }
-    ];
-    
-    const qaHTML = qaData.map(qa => `
-      <div class="review">
-        <div class="review-author">❓ Q: ${qa.q}</div>
-        <div class="review-text">💬 A: ${qa.a}</div>
-      </div>
-    `).join('');
-    
-    qaTab.innerHTML = qaHTML;
-    lazyLoadState.qa.add(stringId);
-    
-    qaTab.style.opacity = '0';
-    qaTab.style.transition = 'opacity 0.3s ease-in-out';
-    setTimeout(() => { qaTab.style.opacity = '1'; }, 50);
-    
-  }, 250);
-}
-
 // ========== フィルター・ソート機能 ==========
 function filterCategory(cat, btn) {
   currentCategory = cat;
@@ -965,8 +574,6 @@ function applyFilters() {
   const priceMax = priceMaxEl && priceMaxEl.value !== '' ? Number(priceMaxEl.value) : null;
   const ratingRadio = document.querySelector('.filter-rating-radio:checked');
   const minRating = ratingRadio ? Number(ratingRadio.value) : 0;
-  const checkedDeliveries = [...document.querySelectorAll('.filter-delivery:checked')].map(el => el.value);
-  const checkedSellers = [...document.querySelectorAll('.filter-seller:checked')].map(el => el.value);
 
   let filtered = products.filter(p => {
     if (currentCategory !== 'all' && p.category !== currentCategory) return false;
@@ -981,14 +588,6 @@ function applyFilters() {
     if (priceMin !== null && p.price < priceMin) return false;
     if (priceMax !== null && p.price > priceMax) return false;
     if (minRating > 0 && p.rating < minRating) return false;
-    if (checkedDeliveries.length > 0) {
-      const deliveryMatch = checkedDeliveries.some(kw => p.delivery.includes(kw));
-      if (!deliveryMatch) return false;
-    }
-    if (checkedSellers.length > 0) {
-      const sellerMatch = checkedSellers.some(kw => p.seller.includes(kw));
-      if (!sellerMatch) return false;
-    }
     return true;
   });
 
@@ -1011,8 +610,6 @@ function resetFilters() {
   if (maxEl) maxEl.value = '';
   const allRatingRadio = document.querySelector('.filter-rating-radio[value="0"]');
   if (allRatingRadio) allRatingRadio.checked = true;
-  document.querySelectorAll('.filter-delivery').forEach(el => el.checked = false);
-  document.querySelectorAll('.filter-seller').forEach(el => el.checked = false);
   applyFilters();
 }
 
@@ -1046,7 +643,6 @@ function updateCartBadge() {
 function openCart() {
   renderCart();
   document.getElementById('cartModal').classList.add('active');
-  ensureModalHandlers();
 }
 
 function closeCart() {
@@ -1100,16 +696,7 @@ function changeQty(id, delta) {
   renderCart();
 }
 
-function preloadDetailImage(id) {
-  const p = products.find(x => x.id === id);
-  if (p && p.image) {
-    const optimizedDetailImage = p.image.replace('/upload/', '/upload/f_auto,q_auto,w_800,c_limit/');
-    const img = new Image();
-    img.src = optimizedDetailImage;
-  }
-}
-
-// ========== お気に入り機能（完全統合版） ==========
+// ========== お気に入り機能（拡張版） ==========
 function loadWishlist() {
   try {
     const saved = localStorage.getItem('famazon_wishlist');
@@ -1166,25 +753,9 @@ function toggleWishlist(event, id) {
 }
 
 function showWishlistModal() {
-  const modal = document.getElementById('wishlistModal');
   renderWishlist();
-  
-  if (modal) {
-    modal.style.display = 'flex';
-    modal.classList.add('active');
-    
-    const closeBtn = modal.querySelector('.close-btn');
-    if (closeBtn) {
-      closeBtn.onclick = closeWishlistModal;
-    }
-    
-    ensureModalHandlers();
-  } else {
-    console.error('❌ wishlistModal要素が見つかりません');
-  }
+  document.getElementById('wishlistModal').classList.add('active');
 }
-
-
 
 function renderWishlist() {
   const body = document.getElementById('wishlistBody');
@@ -1218,16 +789,23 @@ function renderWishlist() {
   }
   
   body.innerHTML = `
-    <div style="margin-bottom: 20px; padding: 12px; background: var(--bg); border-radius: 8px; border: 1px solid rgba(167, 139, 250, 0.2);">
-      <div style="color: var(--glow); font-weight: 600; margin-bottom: 4px;">
-        📊 お気に入り統計
+    <!-- お気に入り統計と一括操作ボタン -->
+    <div class="wishlist-toolbar">
+      <div class="wishlist-summary">
+        📊 お気に入り ${wishlistProducts.length}件 | 
+        合計価値: ${wishlistProducts.reduce((sum, p) => sum + p.price, 0).toLocaleString()} G
       </div>
-      <div style="color: var(--silver); font-size: 0.9rem;">
-        ${wishlistProducts.length}件の商品 | 合計価値: ${wishlistProducts.reduce((sum, p) => sum + p.price, 0).toLocaleString()} G
+      <div class="wishlist-toolbar-buttons">
+        <button class="btn-cart" onclick="addWishlistAllToCart()" style="white-space:nowrap;">
+          ❤️ 全てカートに追加
+        </button>
+        <button class="btn-buy" onclick="closeWishlistModal(); openCart();" style="white-space:nowrap;">
+          🛒 カートを開く
+        </button>
       </div>
     </div>
-    
-    <div class="products-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
+
+    <div class="products-grid wishlist-grid">
       ${wishlistProducts.map(p => {
         const stars = renderStars(p.rating);
         const saleBadge = p.discount > 0 ? `<div class="product-badge">-${p.discount}%</div>` : '';
@@ -1235,27 +813,26 @@ function renderWishlist() {
         const firstBadge = saleBadge || primeBadge;
         const optimizedImage = p.image ? 
           p.image.replace('/upload/', '/upload/f_auto,q_auto,w_300,c_limit/') : null;
-        
+
         return `
-          <div class="product-card" style="position: relative; transition: transform 0.2s ease;">
+          <div class="product-card">
             ${firstBadge}
-            <button class="btn-wishlist active" 
-                    onclick="event.stopPropagation(); removeFromWishlistAndUpdate(${p.id});" 
-                    style="position: absolute; top: 8px; right: 8px; z-index: 10;"
+            <button class="btn-wishlist active"
+                    onclick="event.stopPropagation(); removeFromWishlistAndUpdate(${p.id});"
                     title="お気に入りから削除">
               ♥
             </button>
-            <div class="product-img" style="overflow:hidden;border-radius:8px; cursor: pointer;" 
+            <div class="product-img"
                  onclick="closeWishlistModal(); openDetail(${p.id});">
-              ${p.image ? 
-                `<img src="${optimizedImage}" alt="${p.name}" 
-                  style="width:100%;height:100%;object-fit:cover;border-radius:8px;" 
-                  loading="lazy" decoding="async">` 
+              ${p.image ?
+                `<img src="${optimizedImage}" alt="${p.name}"
+                  loading="lazy" decoding="async"
+                  style="width:100%;height:100%;object-fit:cover;border-radius:8px;">`
                 : `<span style="font-size:3rem;">${p.emoji}</span>`}
             </div>
             <div class="product-info">
-              <div class="product-name" style="cursor: pointer;" 
-                   onclick="closeWishlistModal(); openDetail(${p.id});" 
+              <div class="product-name"
+                   onclick="closeWishlistModal(); openDetail(${p.id});"
                    title="${p.name}">
                 ${p.name}
               </div>
@@ -1266,17 +843,17 @@ function renderWishlist() {
               </div>
               <div class="product-price">
                 <span class="price-main">💰 ${p.price.toLocaleString()} G</span>
-                ${p.discount > 0 ? 
+                ${p.discount > 0 ?
                   `<span class="price-original">通常 ${p.originalPrice.toLocaleString()} G</span>` : ''
                 }
               </div>
               ${p.prime ? '<div class="prime-badge">⚡ Famazon Prime</div>' : ''}
             </div>
-            <div class="product-actions" style="margin-top: 12px; display: flex; gap: 8px;">
-              <button class="btn-cart" style="flex: 1;" onclick="addToCart(${p.id}); showToast('カートに追加しました！');">
+            <div class="product-actions">
+              <button class="btn-cart" onclick="addToCart(${p.id}); showToast('カートに追加しました！');">
                 🛒 カートに追加
               </button>
-              <button class="btn-buy" style="flex: 1;" onclick="closeWishlistModal(); openDetail(${p.id});">
+              <button class="btn-buy" onclick="closeWishlistModal(); openDetail(${p.id});">
                 📖 詳細を見る
               </button>
             </div>
@@ -1287,435 +864,130 @@ function renderWishlist() {
   `;
 }
 
+// お気に入り全件を一括でカートに追加
+function addWishlistAllToCart() {
+  const wishlistProducts = products.filter(p => wishlist.has(String(p.id)));
+  if (wishlistProducts.length === 0) {
+    showToast('📭 お気に入りに商品がありません', '#6b7280');
+    return;
+  }
+
+  wishlistProducts.forEach(p => {
+    const existing = cart.find(i => i.id === p.id);
+    if (existing) {
+      existing.qty++;
+    } else {
+      cart.push({ ...p, qty: 1 });
+    }
+  });
+
+  updateCartBadge();
+  showToast(`❤️ お気に入り ${wishlistProducts.length}件をカートに追加しました！`, '#ec4899');
+}
+
 function removeFromWishlistAndUpdate(id) {
   const stringId = String(id);
   const product = products.find(p => p.id === id);
-  
+
   if (wishlist.has(stringId)) {
     wishlist.delete(stringId);
     saveWishlist();
-    
     renderWishlist();
-    
+
+    // メイン画面のお気に入りボタンも更新
     document.querySelectorAll('.btn-wishlist').forEach(btn => {
       const onclick = btn.getAttribute('onclick') || '';
       if (onclick.includes(`toggleWishlist(event, ${id})`)) {
         btn.classList.remove('active');
       }
     });
-    
+
     if (product) {
       showToast(`💔 「${product.name.substring(0, 20)}...」を削除しました`, '#ef4444');
     }
   }
 }
 
-// ========== 配達先選択機能 ==========
-function showLocationModal() {
-  renderLocationOptions();
-  document.getElementById('locationModal').classList.add('active');
-  ensureModalHandlers();
+function closeWishlistModal() {
+  document.getElementById('wishlistModal').classList.remove('active');
 }
 
-function closeLocationModal() {
-  document.getElementById('locationModal').classList.remove('active');
-}
+// ========== 注文履歴機能（詳細表示対応） ==========
+function showOrderHistoryModal() {
+  const history = getOrderHistory();
 
-function renderLocationOptions() {
-  const container = document.getElementById('locationGrid');
-  
-  container.innerHTML = LOCATIONS.map((location) => {
-    const isSelected = location.id === selectedLocation.id;
-    const feeDisplay = location.cost === 0 ? '無料' : `+${location.cost.toLocaleString()} G`;
-    const feeClass = location.type;
-    
-    return `
-      <button class="location-option ${location.type} ${isSelected ? 'selected' : ''}" 
-              onclick="selectLocation('${location.id}')">
-        <span class="location-icon">${location.icon}</span>
-        <div class="location-info">
-          <div class="location-name">${location.name}</div>
-          <div class="location-detail">${location.detail}</div>
-        </div>
-        <div class="location-fee ${feeClass}">${feeDisplay}</div>
-      </button>
-    `;
-  }).join('');
-}
-
-function selectLocation(locationId) {
-  const location = LOCATIONS.find(loc => loc.id === locationId);
-  if (!location) return;
-  
-  selectedLocation = location;
-  
-  updateHeaderLocation();
-  saveLocationSetting();
-  renderLocationOptions();
-  closeLocationModal();
-  
-  if (location.cost > 0) {
-    const message = location.type === 'danger' ? 
-      `⚠️ 危険地帯「${location.name}」に設定（危険手当: +${location.cost.toLocaleString()} G）` :
-      `📍 配達先を「${location.name}」に設定（追加料金: +${location.cost.toLocaleString()} G）`;
-    showToast(message, location.type === 'danger' ? '#ef4444' : '#f59e0b');
-  } else {
-    showToast(`📍 配達先を「${location.name}」に設定しました`, '#10b981');
-  }
-  
-  const checkoutModal = document.getElementById('checkoutModal');
-  if (checkoutModal && checkoutModal.classList.contains('active')) {
-    updateCheckoutLocationDisplay();
-    updateShippingCost();
-    
-    setTimeout(() => {
-      const shippingDisplay = document.getElementById('displayShipping');
-      if (shippingDisplay) {
-        shippingDisplay.style.background = 'rgba(139, 92, 246, 0.1)';
-        shippingDisplay.style.borderRadius = '4px';
-        shippingDisplay.style.padding = '2px 6px';
-        shippingDisplay.style.transition = 'all 0.3s ease';
-        setTimeout(() => {
-          shippingDisplay.style.background = '';
-          shippingDisplay.style.borderRadius = '';
-          shippingDisplay.style.padding = '';
-        }, 1500);
-      }
-    }, 200);
-  }
-}
-
-function updateHeaderLocation() {
-  const locationBtn = document.querySelector('.location-btn');
-  if (locationBtn) {
-    locationBtn.innerHTML = `
-      <span>配達先の界</span>
-      <span>${selectedLocation.icon} ${selectedLocation.name}</span>
-    `;
-  }
-}
-
-function saveLocationSetting() {
-  try {
-    localStorage.setItem(LOCATION_STORAGE_KEY, JSON.stringify(selectedLocation));
-  } catch (error) {
-    console.warn('配達先設定の保存に失敗:', error);
-  }
-}
-
-function loadLocationSetting() {
-  try {
-    const saved = localStorage.getItem(LOCATION_STORAGE_KEY);
-    if (saved) {
-      const savedLocation = JSON.parse(saved);
-      const location = LOCATIONS.find(loc => loc.id === savedLocation.id);
-      if (location) {
-        selectedLocation = location;
-        updateHeaderLocation();
-      }
-    }
-  } catch (error) {
-    console.warn('配達先設定の復元に失敗:', error);
-  }
-}
-
-// ========== チェックアウト機能 ==========
-function getCheckoutLocationHTML() {
-  const isDanger = selectedLocation.type === 'danger';
-  const isStandard = selectedLocation.type === 'standard';
-  const isFree = selectedLocation.cost === 0;
-  
-  let badgeStyle, costDisplay;
-  
-  if (isDanger) {
-    badgeStyle = 'background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);';
-    costDisplay = `⚠️ +${selectedLocation.cost.toLocaleString()} G`;
-  } else if (isStandard) {
-    badgeStyle = 'background: rgba(167, 139, 250, 0.1); color: var(--glow); border: 1px solid rgba(167, 139, 250, 0.3);';
-    costDisplay = `+${selectedLocation.cost.toLocaleString()} G`;
-  } else {
-    badgeStyle = 'background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3);';
-    costDisplay = '標準エリア';
-  }
-
-  return `
-    <div style="display: flex; align-items: center; gap: 12px;">
-      <span style="font-size: 1.8rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
-        ${selectedLocation.icon}
-      </span>
-      <div style="flex: 1;">
-        <div style="font-weight: 700; color: var(--text); font-size: 1.1rem; margin-bottom: 2px;">
-          ${selectedLocation.name}
-        </div>
-        <div style="font-size: 0.8rem; color: var(--silver); line-height: 1.3;">
-          ${selectedLocation.detail}
-        </div>
-      </div>
-    </div>
-    <div style="text-align: right;">
-      <span style="
-        display: inline-block;
-        padding: 8px 14px;
-        border-radius: 20px;
-        font-weight: 700;
-        font-size: 0.95rem;
-        ${badgeStyle}
-        transition: all 0.2s ease;
-      ">
-        ${costDisplay}
-      </span>
-    </div>
-  `;
-}
-
-function updateCheckoutLocationDisplay() {
-  const locationDisplay = document.getElementById('checkoutLocationDisplay');
-  if (locationDisplay) {
-    locationDisplay.innerHTML = getCheckoutLocationHTML();
-    
-    locationDisplay.style.transform = 'scale(0.98)';
-    locationDisplay.style.transition = 'transform 0.2s ease';
-    setTimeout(() => {
-      locationDisplay.style.transform = 'scale(1)';
-    }, 100);
-  }
-}
-
-function openCheckout() {
-  closeCart();
-  const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
-  const tax = Math.floor(subtotal * 0.1);
-  const hasPrime = cart.some(i => i.prime);
-
-  document.getElementById('checkoutBody').innerHTML = `
-    <div class="checkout-step active" id="step1">
-      <h3 style="color:var(--glow);margin-bottom:15px;">📍 ステップ 1/2: お届け先</h3>
-      <div class="checkout-form">
-        <label>お名前・勇者名</label>
-        <input type="text" placeholder="例：伝説の勇者 アーサー" id="customerName">
-        
-        <label>配達先の界・国</label>
-        <div id="checkoutLocationDisplay" style="
-          padding: 16px;
-          background: var(--bg);
-          border: 2px solid rgba(167, 139, 250, 0.2);
-          border-radius: 12px;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 12px;
-          transition: all 0.3s ease;
-        ">
-          ${getCheckoutLocationHTML()}
-        </div>
-        
-        <button type="button" onclick="showLocationModal()" style="
-          width: 100%;
-          padding: 12px;
-          background: var(--secondary);
-          border: 1px solid var(--glow);
-          border-radius: 8px;
-          color: var(--text);
-          cursor: pointer;
-          transition: all 0.2s;
-          font-weight: 600;
-          margin-bottom: 16px;
-        " onmouseover="this.style.background='var(--hover)'; this.style.transform='translateY(-1px)';"
-           onmouseout="this.style.background='var(--secondary)'; this.style.transform='translateY(0)';">
-          📍 配達先を変更する
-        </button>
-        
-        <label>詳細な住所</label>
-        <input type="text" placeholder="例：王城通り 英雄の塔 3階" id="customerAddress">
-        
-        <label>受け取り方法</label>
-        <select id="deliveryMethod" onchange="updateShippingCost()">
-          ${hasPrime ? 
-            '<option value="spell" data-cost="0">🪄 呪文転送（Prime会員・無料）</option>' : 
-            '<option value="spell" data-cost="800">🪄 呪文転送（800G）</option>'
-          }
-          <option value="hawk" data-cost="500">🦅 鷹便（翌日・500G）</option>
-          <option value="carriage" data-cost="100">🐎 馬車便（3日・100G）</option>
-          <option value="pickup" data-cost="0">🏪 指定場所でピックアップ（無料）</option>
-        </select>
-      </div>
-      <button class="btn-checkout" onclick="goStep(2)">次へ → 支払い方法</button>
-    </div>
-
-    <div class="checkout-step" id="step2">
-      <h3 style="color:var(--glow);margin-bottom:15px;">💰 ステップ 2/2: お支払い</h3>
-      <div class="checkout-form">
-        <label>支払い方法</label>
-        <select id="paymentMethod">
-          <option>ゴールドコイン（直接転送）</option>
-          <option>魔法銀行カード</option>
-          <option>ドラゴンダイヤ（換算）</option>
-          <option>冒険者ギルドポイント払い</option>
-        </select>
-        <label>ゴールドコイン送金先（または魔法銀行カード番号）</label>
-        <input type="text" placeholder="例：0000-MAGE-1234-GOLD" id="paymentInfo">
-        <label>魔法認証コード（パスワード）</label>
-        <input type="password" placeholder="••••••••" id="authCode">
-      </div>
-      
-      <div class="cart-summary">
-        <div class="cart-summary-row">
-          <span>小計</span>
-          <span id="displaySubtotal">${subtotal.toLocaleString()} G</span>
-        </div>
-        <div class="cart-summary-row">
-          <span>転送料・手数料</span>
-          <span id="displayShipping" style="text-align: right;">計算中...</span>
-        </div>
-        <div class="cart-summary-row">
-          <span>魔法税（10%）</span>
-          <span id="displayTax">${tax.toLocaleString()} G</span>
-        </div>
-        <div class="cart-summary-row total">
-          <span>ご請求額</span>
-          <span id="displayTotal">計算中...</span>
-        </div>
-      </div>
-      
-      <div style="display:flex;gap:8px;margin-top:10px;">
-        <button class="btn-cart" style="flex:0.5;" onclick="goStep(1)">← 戻る</button>
-        <button class="btn-checkout" style="flex:1;" onclick="completeOrder()">注文を確定する</button>
-      </div>
-    </div>
-  `;
-  
-  document.getElementById('checkoutModal').classList.add('active');
-  ensureModalHandlers();
-  setTimeout(() => updateShippingCost(), 100);
-}
-
-function goStep(n) {
-  document.querySelectorAll('.checkout-step').forEach((el, i) => {
-    el.classList.toggle('active', i+1 === n);
-  });
-  
-  if (n === 2) {
-    setTimeout(() => updateShippingCost(), 50);
-  }
-}
-
-function closeCheckout() {
-  document.getElementById('checkoutModal').classList.remove('active');
-}
-
-function getShippingCost(deliveryMethod) {
-  const methodElement = document.getElementById('deliveryMethod');
-  let baseCost = 0;
-  
-  if (methodElement) {
-    const selectedOption = methodElement.options[methodElement.selectedIndex];
-    baseCost = parseInt(selectedOption.getAttribute('data-cost')) || 0;
-  }
-  
-  const locationCost = selectedLocation ? selectedLocation.cost : 0;
-  
-  return baseCost + locationCost;
-}
-
-function updateShippingCost() {
-  try {
-    const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
-    const methodElement = document.getElementById('deliveryMethod');
-    const baseCost = methodElement ? 
-      parseInt(methodElement.options[methodElement.selectedIndex].getAttribute('data-cost')) || 0 : 0;
-    const locationCost = selectedLocation ? selectedLocation.cost : 0;
-    const totalShipping = baseCost + locationCost;
-    const tax = Math.floor(subtotal * 0.1);
-    const total = subtotal + tax + totalShipping;
-    
-    const shippingDisplay = document.getElementById('displayShipping');
-    const totalDisplay = document.getElementById('displayTotal');
-    
-    if (shippingDisplay) {
-      if (totalShipping === 0) {
-        shippingDisplay.textContent = '無料';
-      } else if (locationCost > 0) {
-        shippingDisplay.innerHTML = `
-          ${totalShipping.toLocaleString()} G
-          <br><small style="color:var(--silver);font-size:0.75rem;">
-            (配送: ${baseCost}G + 地域: ${locationCost}G)
-          </small>
-        `;
-      } else {
-        shippingDisplay.textContent = `${totalShipping.toLocaleString()} G`;
-      }
-    }
-    
-    if (totalDisplay) {
-      totalDisplay.textContent = `💰 ${total.toLocaleString()} G`;
-    }
-    
-    console.log(`送料更新: 基本${baseCost}G + 地域${locationCost}G = 合計${totalShipping}G`);
-    
-  } catch (error) {
-    console.error('送料計算エラー:', error);
-    showToast('⚠️ 送料計算でエラーが発生しました', '#f59e0b');
-  }
-}
-
-function completeOrder() {
-  if (cart.length === 0) {
-    closeCheckout();
-    showToast('🛒 カートが空のため注文できません', '#f59e0b');
+  if (history.length === 0) {
+    showToast('📭 まだ注文履歴がありません', '#6b7280');
     return;
   }
 
-  try {
-    const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
-    const shipping = getShippingCost();
-    const tax = Math.floor(subtotal * 0.1);
-    const total = subtotal + tax + shipping;
-    
-    const orderId = `AMZ-${Math.random().toString(36).substr(2, 8).toUpperCase()}-FANTASY`;
-    
-    const deliveryMethodElement = document.getElementById('deliveryMethod');
-    const deliveryMethodText = deliveryMethodElement ? 
-      deliveryMethodElement.options[deliveryMethodElement.selectedIndex].text : 
-      '馬車便（3日・100G）';
-    
-    const orderData = {
-      id: orderId,
-      date: new Date().toISOString(),
-      timestamp: Date.now(),
-      items: cart.map(item => ({
-        id: item.id,
-        name: item.name,
-        emoji: item.emoji,
-        price: item.price,
-        qty: item.qty,
-        image: item.image || null,
-        seller: item.seller || '',
-        category: item.category || ''
-      })),
-      subtotal: subtotal,
-      shipping: shipping,
-      tax: tax,
-      total: total,
-      status: 'preparing',
-      deliveryMethod: deliveryMethodText,
-      location: selectedLocation.name
-    };
+  const bodyHTML = `
+    <div style="max-height: 60vh; overflow-y: auto;">
+      ${history.slice(0, 10).map(order => {
+        const orderDate = new Date(order.date);
+        const formattedDate = orderDate.toLocaleDateString('ja-JP');
+        const itemCount = order.items.length;
+        
+        // 商品詳細の表示
+        const itemsPreviewHTML = order.items.slice(0, 3).map(item => `
+          <div class="order-item-row">
+            <div class="order-item-icon">${item.emoji || '📦'}</div>
+            <div class="order-item-main">
+              <div class="order-item-name">${item.name}</div>
+              <div class="order-item-meta">
+                数量: ${item.qty} / 小計: ${(item.price * item.qty).toLocaleString()} G
+              </div>
+            </div>
+          </div>
+        `).join('');
 
-    saveOrderToHistory(orderData);
-    cart = [];
-    updateCartBadge();
-    closeCheckout();
-    
-    showToast('🎉 ご注文が完了しました！');
-    showOrderCompleteModal(orderData);
-    
-  } catch (error) {
-    console.error('注文処理エラー:', error);
-    showToast('❌ 注文処理中にエラーが発生しました', '#ef4444');
+        const moreCount = itemCount - 3;
+        const moreHTML = moreCount > 0
+          ? `<div class="order-item-more">… ほか ${moreCount} 点</div>`
+          : '';
+
+        return `
+          <div class="order-history-card">
+            <div class="order-history-header">
+              <div>
+                <div class="order-history-date">${formattedDate}</div>
+                <div class="order-history-id">ID: ${order.id}</div>
+              </div>
+              <div class="order-history-amount">
+                <div class="order-history-total">💰 ${order.total.toLocaleString()} G</div>
+                <div class="order-history-count">${itemCount}件の商品</div>
+                <div class="order-history-delivery">
+                  📍 ${order.location || '不明'} / 🚚 ${order.deliveryMethod || ''}
+                </div>
+              </div>
+            </div>
+            <div class="order-history-items">
+              ${itemsPreviewHTML}
+              ${moreHTML}
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+
+  document.getElementById('orderHistoryBody').innerHTML = bodyHTML;
+  document.getElementById('orderHistoryModal').classList.add('active');
+}
+
+function closeOrderHistory() {
+  document.getElementById('orderHistoryModal').classList.remove('active');
+}
+
+function getOrderHistory() {
+  try {
+    const saved = localStorage.getItem('famazon_order_history');
+    return saved ? JSON.parse(saved) : [];
+  } catch {
+    return [];
   }
 }
 
-// ========== 注文履歴 ==========
 function saveOrderToHistory(orderData) {
   try {
     const history = getOrderHistory();
@@ -1727,168 +999,16 @@ function saveOrderToHistory(orderData) {
   }
 }
 
-function getOrderHistory() {
-  try {
-    const saved = localStorage.getItem('famazon_order_history');
-    return saved ? JSON.parse(saved) : [];
-  } catch (error) {
-    return [];
+// ========== その他の機能 ==========
+function preloadDetailImage(id) {
+  const p = products.find(x => x.id === id);
+  if (p && p.image) {
+    const optimizedDetailImage = p.image.replace('/upload/', '/upload/f_auto,q_auto,w_800,c_limit/');
+    const img = new Image();
+    img.src = optimizedDetailImage;
   }
 }
 
-function showOrderCompleteModal(orderData) {
-  const modalHTML = `
-    <div class="modal-overlay" id="orderCompleteModal" style="
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(5px);
-      z-index: 3000;
-    ">
-      <div class="modal" style="
-        max-width: 520px;
-        text-align: center;
-        background: var(--secondary);
-        border: 2px solid var(--glow);
-        border-radius: 16px;
-        padding: 40px;
-        position: relative;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-      ">
-        <button onclick="closeOrderCompleteModal()" style="
-          position: absolute;
-          top: 16px;
-          right: 16px;
-          background: transparent;
-          border: none;
-          color: var(--silver);
-          font-size: 1.5rem;
-          cursor: pointer;
-        ">✕</button>
-        
-        <div style="font-size: 4rem; margin-bottom: 20px;">🎉</div>
-        <h2 style="color: var(--glow); margin-bottom: 16px;">ご注文ありがとうございます！</h2>
-        
-        <div style="background: var(--bg); padding: 20px; border-radius: 12px; margin: 24px 0;">
-          <div style="color: var(--silver); font-size: 0.9rem; margin-bottom: 8px;">注文番号</div>
-          <div style="font-family: monospace; font-size: 1.1rem; color: var(--glow); font-weight: 600;">${orderData.id}</div>
-          
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding-top: 12px; margin-top: 12px; border-top: 1px solid rgba(167, 139, 250, 0.1);">
-            <div>
-              <div style="color: var(--silver); font-size: 0.8rem;">商品数</div>
-              <div style="color: var(--text); font-weight: 600; font-size: 1.1rem;">${orderData.items.length}件</div>
-            </div>
-            <div>
-              <div style="color: var(--silver); font-size: 0.8rem;">合計金額</div>
-              <div style="color: var(--glow); font-weight: 700; font-size: 1.2rem;">${orderData.total.toLocaleString()} G</div>
-            </div>
-          </div>
-        </div>
-        
-        <button class="btn-checkout" onclick="closeOrderCompleteModal()" style="width: 100%; padding: 16px; margin-top: 20px;">
-          🏠 ショッピングを続ける
-        </button>
-      </div>
-    </div>
-  `;
-  
-  document.body.insertAdjacentHTML('beforeend', modalHTML);
-  setTimeout(() => {
-    const modal = document.getElementById('orderCompleteModal');
-    if (modal) modal.remove();
-  }, 10000);
-}
-
-function closeOrderCompleteModal() {
-  const modal = document.getElementById('orderCompleteModal');
-  if (modal) modal.remove();
-}
-
-function showOrderHistoryModal() {
-  const history = getOrderHistory();
-  
-  if (history.length === 0) {
-    showToast('📭 まだ注文履歴がありません', '#6b7280');
-    return;
-  }
-  
-  const bodyHTML = `
-    <div style="max-height: 60vh; overflow-y: auto;">
-      ${history.slice(0, 10).map(order => {
-        const orderDate = new Date(order.date);
-        const formattedDate = orderDate.toLocaleDateString('ja-JP');
-        
-        return `
-          <div style="background: var(--bg); border: 1px solid rgba(167, 139, 250, 0.2); border-radius: 12px; padding: 20px; margin-bottom: 16px;">
-            <div style="display: flex; justify-content: space-between;">
-              <div>
-                <div style="font-weight: 600; color: var(--text);">${formattedDate}</div>
-                <div style="font-size: 0.8rem; color: var(--silver); font-family: monospace;">ID: ${order.id}</div>
-              </div>
-              <div style="text-align: right;">
-                <div style="font-size: 1.2rem; color: var(--glow); font-weight: 700;">💰 ${order.total.toLocaleString()} G</div>
-                <div style="font-size: 0.75rem; color: var(--silver);">${order.items.length}件の商品</div>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('')}
-    </div>
-  `;
-  
-  document.getElementById('orderHistoryBody').innerHTML = bodyHTML;
-  document.getElementById('orderHistoryModal').classList.add('active');
-  ensureModalHandlers();
-}
-
-function closeOrderHistory() {
-  document.getElementById('orderHistoryModal').classList.remove('active');
-}
-
-// ========== モーダル管理システム ==========
-function setupModalCloseHandlers() {
-  document.querySelectorAll('.modal-overlay').forEach(overlay => {
-    const newOverlay = overlay.cloneNode(true);
-    overlay.parentNode.replaceChild(newOverlay, overlay);
-    
-    newOverlay.addEventListener('click', (e) => {
-      if (e.target === newOverlay) {
-        const modalId = newOverlay.id;
-        switch(modalId) {
-          case 'wishlistModal':
-            closeWishlistModal();
-            break;
-          case 'cartModal':
-            closeCart();
-            break;
-          case 'productDetailModal':
-            closeDetail();
-            break;
-          case 'checkoutModal':
-            closeCheckout();
-            break;
-          case 'orderHistoryModal':
-            closeOrderHistory();
-            break;
-          case 'locationModal':
-            closeLocationModal();
-            break;
-          default:
-            newOverlay.classList.remove('active');
-        }
-      }
-    });
-  });
-}
-
-function ensureModalHandlers() {
-  setupModalCloseHandlers();
-}
-
-// ========== ユーティリティ ==========
 function showToast(msg, bg) {
   const toast = document.getElementById('toast');
   toast.textContent = msg;
@@ -1904,96 +1024,22 @@ function goHome() {
   applyFilters();
 }
 
-function addReloadButtonToHeader() {
-  const headerActions = document.querySelector('.header-actions');
-  if (!headerActions) return;
-  
-  const reloadBtn = document.createElement('button');
-  reloadBtn.className = 'header-btn';
-  reloadBtn.innerHTML = `
-    <span class="label">データ更新</span>
-    <span class="value">🔄 再読み込み</span>
-  `;
-  reloadBtn.onclick = forceReloadProducts;
-  
-  const cartBtn = headerActions.querySelector('.cart-btn');
-  if (cartBtn) {
-    headerActions.insertBefore(reloadBtn, cartBtn);
-  }
-}
-// ========== 🚑 モーダル統一管理システム（緊急修正） ==========
-
-// 1. シンプルなお気に入りモーダル閉鎖// 1. シンプルなお気に入りモーダル閉鎖関数（修正版）
-function closeWishlistModal() {
-  const modal = document.getElementById('wishlistModal');
-  if (modal) {
-    modal.classList.remove('active');
-    modal.style.display = 'none';  // ← この1行を追加
-    console.log('✅ お気に入りモーダルを閉じました');
-  }
-}
-
-
-
-// 2. グローバルクリック監視システム
-// すべてのクリックを監視し、モーダル関連なら統一的に処理
+// モーダルの背景クリックで閉じる機能
 window.addEventListener('click', function(event) {
-  const target = event.target;
-
-  // A. モーダルの背景（黒い部分）をクリックした場合
-  if (target.classList.contains('modal-overlay') && target.id === 'wishlistModal') {
-    closeWishlistModal();
-    return;
+  if (event.target.classList.contains('modal-overlay')) {
+    event.target.classList.remove('active');
   }
-
-  // B. ✕ボタン（またはその内容）をクリックした場合
-  if (target.classList.contains('close-btn') || target.closest('.close-btn')) {
-    const modal = target.closest('.modal-overlay');
-    if (modal && modal.id === 'wishlistModal') {
-      closeWishlistModal();
-      return;
-    }
-    
-    // 他のモーダルの場合は既存の処理に任せる
-    if (modal) {
-      modal.classList.remove('active');
-    }
-  }
-}, true); // true = キャプチャフェーズで実行（最優先）
-
-// 3. 複雑な処理を無効化（既存コードとの競合を防ぐ）
-function ensureModalHandlers() {
-  // 何もしない（グローバル監視に任せる）
-  return;
-}
-
-function setupModalCloseHandlers() {
-  // 何もしない（グローバル監視に任せる）
-  return;
-}
-
-console.log('🛡️ モーダル統一管理システムを適用しました');
-
-  
+});
 
 // ========== 初期化 ==========
 async function initFamazon() {
   try {
     console.log('🚀 ファマゾン魔法商店 初期化開始');
-    
-    loadLocationSetting();
-    console.log('✅ 配達先設定復元完了');
-    
     loadWishlist();
     console.log('✅ お気に入り復元完了');
     
     await loadProductsFromSheet();
     console.log('✅ 商品読み込み完了');
-    
-    addReloadButtonToHeader();
-    CacheManager.logCacheInfo();
-    
-    ensureModalHandlers();
     
     console.log('🎉 ファマゾン魔法商店 初期化完了');
     
@@ -2012,24 +1058,8 @@ async function initFamazon() {
   }
 }
 
-// 緊急時の強制修正（保険用）
-setTimeout(() => {
-  const wishlistModal = document.getElementById('wishlistModal');
-  if (wishlistModal) {
-    const closeBtn = wishlistModal.querySelector('.close-btn');
-    if (closeBtn) {
-      closeBtn.addEventListener('click', closeWishlistModal);
-    }
-    
-    wishlistModal.addEventListener('click', (e) => {
-      if (e.target === wishlistModal) {
-        closeWishlistModal();
-      }
-    });
-  }
-}, 1000);
-
-initFamazon();
+// DOMの読み込み完了後に初期化実行
+document.addEventListener('DOMContentLoaded', initFamazon);
 </script>
 </body>
 </html>
