@@ -44,6 +44,10 @@
         <span class="label">アカウント</span>
         <span class="value">勇者さん ▾</span>
       </button>
+      <button class="header-btn" onclick="showOrderHistoryModal()">
+      <span class="label">冒険の記録</span>
+      <span class="value">📦 注文履歴</span>
+      </button>
       <button class="header-btn" onclick="showWishlistModal()">
         <span class="label">魔法リスト</span>
         <span class="value">❤️ お気に入り</span>
@@ -273,6 +277,16 @@
       <button class="close-btn" onclick="closeCheckout()">✕</button>
     </div>
     <div class="modal-body" id="checkoutBody"></div>
+  </div>
+</div>
+<!-- ORDER HISTORY MODAL -->
+<div class="modal-overlay" id="orderHistoryModal">
+  <div class="modal" style="max-width:950px;">
+    <div class="modal-header">
+      <h2>📦 冒険の記録（注文履歴）</h2>
+      <button class="close-btn" onclick="closeOrderHistory()">✕</button>
+    </div>
+    <div class="modal-body" id="orderHistoryBody"></div>
   </div>
 </div>
 
@@ -1906,10 +1920,693 @@ function closeCheckout() {
 }
 
 function completeOrder() {
-  cart = [];
+  if (cart.length === 0) {
+    closeCheckout();
+    showToast('🛒 カートが空のため注文できません', '#f59e0b');
+    return;
+  }
+
+  try {
+    // 注文データを作成
+    const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+    const shipping = cart.some(i => i.prime) ? 0 : 500;
+    const tax = Math.floor(subtotal * 0.1);
+    const total = subtotal + tax + shipping;
+    
+    const orderId = `AMZ-${Math.random().toString(36).substr(2, 8).toUpperCase()}-FANTASY`;
+    
+    const orderData = {
+      id: orderId,
+      date: new Date().toISOString(),
+      timestamp: Date.now(),
+      items: cart.map(item => ({
+        id: item.id,
+        name: item.name,
+        emoji: item.emoji,
+        price: item.price,
+        qty: item.qty,
+        image: item.image || null,
+        seller: item.seller || '',
+        category: item.category || ''
+      })),
+      subtotal: subtotal,
+      shipping: shipping,
+      tax: tax,
+      total: total,
+      status: 'preparing', // preparing, shipping, delivered
+      deliveryMethod: cart.some(i => i.prime) ? '魔法陣転送（翌日）' : '馬車便（3日）'
+    };
+
+    // 注文履歴を保存
+    saveOrderToHistory(orderData);
+    
+    // カートをクリア
+    cart = [];
+    updateCartBadge();
+    closeCheckout();
+    
+    // 完了メッセージ
+    showToast('🎉 ご注文が完了しました！注文履歴に保存されました');
+    
+    // 注文完了の特別モーダルを表示
+    showOrderCompleteModal(orderData);
+    
+  } catch (error) {
+    console.error('注文処理エラー:', error);
+    showToast('❌ 注文処理中にエラーが発生しました', '#ef4444');
+  }
+}
+
+// ========== 注文履歴システム ==========
+
+// 注文を履歴に保存
+function saveOrderToHistory(orderData) {
+  try {
+    const history = getOrderHistory();
+    
+    // 新しい注文を先頭に追加
+    history.unshift(orderData);
+    
+    // 最大50件まで保存（古いものから削除）
+    if (history.length > 50) {
+      history.splice(50);
+    }
+    
+    localStorage.setItem('famazon_order_history', JSON.stringify(history));
+    console.log('💾 注文履歴を保存しました:', orderData.id);
+    
+  } catch (error) {
+    console.error('注文履歴保存エラー:', error);
+  }
+}
+
+// 注文履歴を取得
+function getOrderHistory() {
+  try {
+    const saved = localStorage.getItem('famazon_order_history');
+    if (saved) {
+      const history = JSON.parse(saved);
+      return Array.isArray(history) ? history : [];
+    }
+    return [];
+  } catch (error) {
+    console.error('注文履歴読み込みエラー:', error);
+    return [];
+  }
+}
+
+// 注文完了の特別モーダル
+function showOrderCompleteModal(orderData) {
+  const modalHTML = `
+    <div class="modal-overlay" id="orderCompleteModal" style="
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(5px);
+      z-index: 3000;
+    ">
+      <div class="modal" style="
+        max-width: 500px;
+        text-align: center;
+        background: var(--secondary);
+        border: 2px solid var(--glow);
+        border-radius: 16px;
+        padding: 40px;
+      ">
+        <div style="font-size: 4rem; margin-bottom: 20px;">🎉</div>
+        <h2 style="color: var(--glow); margin-bottom: 16px;">ご注文ありがとうございます！</h2>
+        
+        <div style="
+          background: var(--bg);
+          padding: 16px;
+          border-radius: 10px;
+          margin: 20px 0;
+          border: 1px solid rgba(167, 139, 250, 0.2);
+        ">
+          <div style="color: var(--silver); font-size: 0.9rem; margin-bottom: 8px;">注文番号</div>
+          <div style="
+            font-family: monospace;
+            font-size: 1.1rem;
+            color: var(--glow);
+            font-weight: 600;
+          ">${orderData.id}</div>
+        </div>
+        
+        <p style="
+          color: var(--silver);
+          margin: 20px 0;
+          line-height: 1.6;
+        ">
+          📦 ${orderData.items.length}件の商品を${orderData.deliveryMethod}でお届けいたします。<br>
+          💰 合計金額: <span style="color: var(--glow); font-weight: 600;">${orderData.total.toLocaleString()} G</span>
+        </p>
+        
+        <div style="
+          display: flex;
+          gap: 12px;
+          justify-content: center;
+          margin-top: 30px;
+          flex-wrap: wrap;
+        ">
+          <button class="btn-cart" onclick="closeOrderCompleteModal()" style="
+            padding: 12px 20px;
+            font-size: 0.95rem;
+          ">
+            🏠 買い物を続ける
+          </button>
+          <button class="btn-checkout" onclick="closeOrderCompleteModal(); showOrderHistoryModal();" style="
+            padding: 12px 20px;
+            font-size: 0.95rem;
+          ">
+            📦 注文履歴を見る
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  document.body.insertAdjacentHTML('beforeend', modalHTML);
+  
+  // 10秒後に自動的に閉じる
+  setTimeout(() => {
+    const modal = document.getElementById('orderCompleteModal');
+    if (modal) modal.remove();
+  }, 10000);
+}
+
+function closeOrderCompleteModal() {
+  const modal = document.getElementById('orderCompleteModal');
+  if (modal) modal.remove();
+}
+
+// 注文履歴モーダルを表示
+function showOrderHistoryModal() {
+  const history = getOrderHistory();
+  
+  if (history.length === 0) {
+    showToast('📭 まだ注文履歴がありません', '#6b7280');
+    return;
+  }
+  
+  // 統計情報を計算
+  const totalOrders = history.length;
+  const totalAmount = history.reduce((sum, order) => sum + order.total, 0);
+  const totalItems = history.reduce((sum, order) => sum + order.items.reduce((s, i) => s + i.qty, 0), 0);
+  
+  const bodyHTML = `
+    <!-- 統計情報パネル -->
+    <div style="
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+      padding: 20px;
+      background: linear-gradient(135deg, rgba(167, 139, 250, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+      border-radius: 12px;
+      border: 1px solid rgba(167, 139, 250, 0.2);
+    ">
+      <div style="text-align: center;">
+        <div style="font-size: 0.8rem; color: var(--silver); margin-bottom: 4px;">総注文数</div>
+        <div style="font-size: 1.8rem; color: var(--glow); font-weight: 700;">${totalOrders}</div>
+      </div>
+      <div style="text-align: center;">
+        <div style="font-size: 0.8rem; color: var(--silver); margin-bottom: 4px;">総購入額</div>
+        <div style="font-size: 1.8rem; color: var(--glow); font-weight: 700;">${totalAmount.toLocaleString()} G</div>
+      </div>
+      <div style="text-align: center;">
+        <div style="font-size: 0.8rem; color: var(--silver); margin-bottom: 4px;">総商品数</div>
+        <div style="font-size: 1.8rem; color: var(--glow); font-weight: 700;">${totalItems}</div>
+      </div>
+    </div>
+    
+    <!-- 注文履歴リスト -->
+    <div style="max-height: 60vh; overflow-y: auto;">
+      ${history.map((order, index) => {
+        const orderDate = new Date(order.date);
+        const formattedDate = orderDate.toLocaleDateString('ja-JP', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        
+        const statusInfo = getOrderStatusInfo(order.status);
+        
+        return `
+          <div style="
+            background: var(--bg);
+            border: 1px solid rgba(167, 139, 250, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            transition: all 0.3s;
+          " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 16px rgba(167, 139, 250, 0.3)'"
+             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+            
+            <!-- 注文ヘッダー情報 -->
+            <div style="
+              display: flex;
+              justify-content: space-between;
+              align-items: start;
+              margin-bottom: 16px;
+              flex-wrap: wrap;
+              gap: 12px;
+            ">
+              <div style="flex: 1; min-width: 200px;">
+                <div style="
+                  font-size: 0.85rem;
+                  color: var(--silver);
+                  margin-bottom: 4px;
+                ">注文日時</div>
+                <div style="
+                  font-size: 1rem;
+                  color: var(--text);
+                  font-weight: 600;
+                  margin-bottom: 4px;
+                ">${formattedDate}</div>
+                <div style="
+                  font-size: 0.8rem;
+                  color: var(--silver);
+                  font-family: monospace;
+                ">ID: ${order.id}</div>
+              </div>
+              
+              <div style="text-align: right;">
+                <div style="
+                  display: inline-flex;
+                  align-items: center;
+                  gap: 6px;
+                  background: ${statusInfo.bgColor};
+                  color: ${statusInfo.textColor};
+                  padding: 6px 12px;
+                  border-radius: 20px;
+                  font-size: 0.85rem;
+                  font-weight: 600;
+                  margin-bottom: 8px;
+                ">
+                  <span>${statusInfo.icon}</span>
+                  <span>${statusInfo.label}</span>
+                </div>
+                <div style="
+                  font-size: 1.3rem;
+                  color: var(--glow);
+                  font-weight: 700;
+                ">💰 ${order.total.toLocaleString()} G</div>
+                <div style="
+                  font-size: 0.75rem;
+                  color: var(--silver);
+                  margin-top: 2px;
+                ">${order.deliveryMethod || '魔法陣転送'}</div>
+              </div>
+            </div>
+            
+            <!-- 注文商品リスト -->
+            <div style="
+              border-top: 1px solid rgba(167, 139, 250, 0.1);
+              padding-top: 16px;
+              margin-bottom: 16px;
+            ">
+              ${order.items.map(item => {
+                const optimizedImage = item.image ? 
+                  item.image.replace('/upload/', '/upload/f_auto,q_auto,w_80,c_limit/') : null;
+                
+                return `
+                  <div style="
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    padding: 10px;
+                    background: var(--secondary);
+                    border-radius: 8px;
+                    margin-bottom: 8px;
+                    cursor: pointer;
+                    transition: background 0.2s;
+                  " onclick="openDetail(${item.id}); closeOrderHistory();"
+                     onmouseover="this.style.background='var(--hover)'"
+                     onmouseout="this.style.background='var(--secondary)'">
+                    
+                    <div style="
+                      width: 50px;
+                      height: 50px;
+                      border-radius: 6px;
+                      overflow: hidden;
+                      background: var(--bg);
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      flex-shrink: 0;
+                    ">
+                      ${item.image ? 
+                        `<img src="${optimizedImage}" alt="${item.name}" 
+                          style="width: 100%; height: 100%; object-fit: cover;" loading="lazy">` 
+                        : `<span style="font-size: 1.5rem;">${item.emoji}</span>`}
+                    </div>
+                    
+                    <div style="flex: 1; min-width: 0;">
+                      <div style="
+                        font-size: 0.9rem;
+                        color: var(--text);
+                        margin-bottom: 4px;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                      ">${item.name}</div>
+                      <div style="
+                        font-size: 0.8rem;
+                        color: var(--silver);
+                      ">数量: ${item.qty}個 × ${item.price.toLocaleString()} G</div>
+                    </div>
+                    
+                    <div style="
+                      font-size: 0.95rem;
+                      color: var(--glow);
+                      font-weight: 600;
+                      white-space: nowrap;
+                    ">${(item.price * item.qty).toLocaleString()} G</div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+            
+            <!-- 価格内訳 -->
+            <div style="
+              background: rgba(167, 139, 250, 0.05);
+              border: 1px solid rgba(167, 139, 250, 0.1);
+              border-radius: 8px;
+              padding: 12px;
+              margin-bottom: 16px;
+            ">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                <span style="color: var(--silver); font-size: 0.85rem;">小計</span>
+                <span style="color: var(--text); font-size: 0.85rem;">${order.subtotal.toLocaleString()} G</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                <span style="color: var(--silver); font-size: 0.85rem;">配送料</span>
+                <span style="color: var(--text); font-size: 0.85rem;">${order.shipping === 0 ? '無料（Prime）' : order.shipping.toLocaleString() + ' G'}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span style="color: var(--silver); font-size: 0.85rem;">税（10%）</span>
+                <span style="color: var(--text); font-size: 0.85rem;">${order.tax.toLocaleString()} G</span>
+              </div>
+              <div style="
+                display: flex;
+                justify-content: space-between;
+                border-top: 1px solid rgba(167, 139, 250, 0.2);
+                padding-top: 8px;
+                font-weight: 600;
+              ">
+                <span style="color: var(--text);">合計</span>
+                <span style="color: var(--glow); font-size: 1.1rem;">${order.total.toLocaleString()} G</span>
+              </div>
+            </div>
+            
+            <!-- アクションボタン -->
+            <div style="
+              display: flex;
+              gap: 8px;
+              flex-wrap: wrap;
+            ">
+              <button onclick="reorderFromHistory(${index})" style="
+                flex: 1;
+                min-width: 140px;
+                padding: 12px 16px;
+                background: var(--glow);
+                color: var(--bg);
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                font-weight: 600;
+                font-size: 0.9rem;
+                transition: all 0.2s;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+              " onmouseover="this.style.background='#a78bfa'"
+                 onmouseout="this.style.background='var(--glow)'">
+                <span>🔄</span>
+                <span>再注文</span>
+              </button>
+              
+              <button onclick="addToCartFromHistory(${index})" style="
+                flex: 1;
+                min-width: 140px;
+                padding: 12px 16px;
+                background: var(--secondary);
+                color: var(--text);
+                border: 1px solid var(--glow);
+                border-radius: 8px;
+                cursor: pointer;
+                font-weight: 600;
+                font-size: 0.9rem;
+                transition: all 0.2s;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+              " onmouseover="this.style.background='var(--hover)'"
+                 onmouseout="this.style.background='var(--secondary)'">
+                <span>🛒</span>
+                <span>カートに追加</span>
+              </button>
+              
+              <button onclick="shareOrder('${order.id}')" style="
+                padding: 12px 16px;
+                background: transparent;
+                color: var(--silver);
+                border: 1px solid var(--silver);
+                border-radius: 8px;
+                cursor: pointer;
+                font-weight: 600;
+                font-size: 0.9rem;
+                transition: all 0.2s;
+              " onmouseover="this.style.color='var(--glow)'; this.style.borderColor='var(--glow)'"
+                 onmouseout="this.style.color='var(--silver)'; this.style.borderColor='var(--silver)'">
+                📤
+              </button>
+              
+              <button onclick="deleteOrderFromHistory(${index})" style="
+                padding: 12px 16px;
+                background: transparent;
+                color: #ef4444;
+                border: 1px solid #ef4444;
+                border-radius: 8px;
+                cursor: pointer;
+                font-weight: 600;
+                font-size: 0.9rem;
+                transition: all 0.2s;
+              " onmouseover="this.style.background='rgba(239, 68, 68, 0.1)'"
+                 onmouseout="this.style.background='transparent'">
+                🗑️
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('')}
+      
+      <!-- 全履歴クリアボタン -->
+      ${history.length > 0 ? `
+        <div style="
+          margin-top: 24px;
+          padding-top: 20px;
+          border-top: 1px solid rgba(167, 139, 250, 0.1);
+          text-align: center;
+        ">
+          <button onclick="clearAllOrderHistory()" style="
+            padding: 10px 20px;
+            background: transparent;
+            color: var(--silver);
+            border: 1px solid var(--silver);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+          " onmouseover="this.style.color='#ef4444'; this.style.borderColor='#ef4444'"
+             onmouseout="this.style.color='var(--silver)'; this.style.borderColor='var(--silver)'">
+            🗑️ すべての注文履歴をクリア
+          </button>
+        </div>
+      ` : ''}
+    </div>
+  `;
+  
+  document.getElementById('orderHistoryBody').innerHTML = bodyHTML;
+  document.getElementById('orderHistoryModal').classList.add('active');
+}
+
+// 注文履歴モーダルを閉じる
+function closeOrderHistory() {
+  document.getElementById('orderHistoryModal').classList.remove('active');
+}
+
+// 注文ステータス情報を取得
+function getOrderStatusInfo(status) {
+  const statusMap = {
+    preparing: {
+      icon: '📦',
+      label: '準備中',
+      bgColor: 'rgba(59, 130, 246, 0.2)',
+      textColor: '#3b82f6'
+    },
+    shipping: {
+      icon: '🚚',
+      label: '配送中',
+      bgColor: 'rgba(245, 158, 11, 0.2)',
+      textColor: '#f59e0b'
+    },
+    delivered: {
+      icon: '✅',
+      label: '配達完了',
+      bgColor: 'rgba(16, 185, 129, 0.2)',
+      textColor: '#10b981'
+    }
+  };
+  
+  return statusMap[status] || statusMap.preparing;
+}
+
+// 履歴から再注文（カートに追加して即座にチェックアウト）
+function reorderFromHistory(orderIndex) {
+  const history = getOrderHistory();
+  const order = history[orderIndex];
+  
+  if (!order) {
+    showToast('❌ 注文情報が見つかりません', '#ef4444');
+    return;
+  }
+  
+  let addedCount = 0;
+  let unavailableItems = [];
+  
+  // 注文商品をカートに追加
+  order.items.forEach(item => {
+    const product = products.find(p => p.id === item.id);
+    if (product) {
+      const existing = cart.find(i => i.id === item.id);
+      if (existing) {
+        existing.qty += item.qty;
+      } else {
+        cart.push({ ...product, qty: item.qty });
+      }
+      addedCount++;
+    } else {
+      unavailableItems.push(item.name);
+    }
+  });
+  
   updateCartBadge();
-  closeCheckout();
-  showToast('🎉 ご注文が完了しました！素晴らしい冒険を！');
+  
+  if (addedCount > 0) {
+    closeOrderHistory();
+    openCart();
+    
+    if (unavailableItems.length > 0) {
+      showToast(`🔄 ${addedCount}件をカートに追加！${unavailableItems.length}件は現在取扱なし`, '#f59e0b');
+    } else {
+      showToast(`🔄 ${addedCount}件の商品を再注文用にカートに追加しました！`);
+    }
+  } else {
+    showToast('❌ すべての商品が現在取扱されていません', '#ef4444');
+  }
+}
+
+// 履歴からカートに追加（チェックアウト画面は開かない）
+function addToCartFromHistory(orderIndex) {
+  const history = getOrderHistory();
+  const order = history[orderIndex];
+  
+  if (!order) {
+    showToast('❌ 注文情報が見つかりません', '#ef4444');
+    return;
+  }
+  
+  let addedCount = 0;
+  
+  order.items.forEach(item => {
+    const product = products.find(p => p.id === item.id);
+    if (product) {
+      const existing = cart.find(i => i.id === item.id);
+      if (existing) {
+        existing.qty += item.qty;
+      } else {
+        cart.push({ ...product, qty: item.qty });
+      }
+      addedCount++;
+    }
+  });
+  
+  updateCartBadge();
+  
+  if (addedCount > 0) {
+    showToast(`🛒 ${addedCount}件の商品をカートに追加しました！`);
+  } else {
+    showToast('❌ 商品が見つかりませんでした', '#ef4444');
+  }
+}
+
+// 注文情報を共有
+function shareOrder(orderId) {
+  const shareText = `⚔️ ファマゾン魔法商店で冒険用品を購入しました！\n📦 注文番号: ${orderId}\n🏰 ファンタジー世界最大の通販サイト`;
+  
+  if (navigator.share) {
+    navigator.share({
+      title: 'ファマゾン魔法商店での購入',
+      text: shareText,
+      url: window.location.href
+    }).catch(err => console.log('共有エラー:', err));
+  } else {
+    // フォールバック：クリップボードにコピー
+    navigator.clipboard.writeText(shareText).then(() => {
+      showToast('📋 注文情報をクリップボードにコピーしました！');
+    }).catch(() => {
+      showToast('⚠️ コピーに失敗しました', '#f59e0b');
+    });
+  }
+}
+
+// 個別の注文を削除
+function deleteOrderFromHistory(orderIndex) {
+  if (!confirm('⚠️ この注文履歴を削除しますか？\nこの操作は取り消せません。')) {
+    return;
+  }
+  
+  const history = getOrderHistory();
+  const deletedOrder = history[orderIndex];
+  history.splice(orderIndex, 1);
+  
+  localStorage.setItem('famazon_order_history', JSON.stringify(history));
+  
+  showToast(`🗑️ 注文「${deletedOrder.id}」を削除しました`);
+  
+  // モーダルを再表示
+  if (history.length > 0) {
+    showOrderHistoryModal();
+  } else {
+    closeOrderHistory();
+    showToast('📭 すべての注文履歴が削除されました', '#6b7280');
+  }
+}
+
+// すべての注文履歴をクリア
+function clearAllOrderHistory() {
+  const history = getOrderHistory();
+  
+  if (history.length === 0) {
+    showToast('📭 削除する履歴がありません', '#6b7280');
+    return;
+  }
+  
+  if (!confirm(`⚠️ すべての注文履歴（${history.length}件）を削除しますか？\nこの操作は取り消せません。`)) {
+    return;
+  }
+  
+  localStorage.removeItem('famazon_order_history');
+  showToast(`🗑️ ${history.length}件の注文履歴をすべて削除しました`);
+  closeOrderHistory();
 }
 
 // ========== TOAST ==========
