@@ -44,7 +44,7 @@
         <span class="label">アカウント</span>
         <span class="value">勇者さん ▾</span>
       </button>
-      <button class="header-btn">
+      <button class="header-btn" onclick="showWishlistModal()">
         <span class="label">魔法リスト</span>
         <span class="value">❤️ お気に入り</span>
       </button>
@@ -1374,7 +1374,7 @@ function renderProducts(data) {
     const newBadge = p.isNew ? `<div class="product-badge new">NEW</div>` : '';
     const firstBadge = saleBadge || primeBadge || newBadge;
 
-    const wishActive = wishlist.has(p.id) ? 'active' : '';
+    const wishActive = wishlist.has(String(p.id)) ? 'active' : '';
 
     // 商品一覧用のCloudinary最適化（400px幅）
     const optimizedImage = p.image ? 
@@ -1745,19 +1745,62 @@ function generateQA(p) {
 }
 
 // ========== WISHLIST ==========
+// 初期化時にローカルストレージからお気に入りを読み込み
+let wishlist = new Set();
+
+// ページ読み込み時にお気に入りデータを復元
+function loadWishlist() {
+  try {
+    const saved = localStorage.getItem('famazon_wishlist');
+    if (saved) {
+      const savedArray = JSON.parse(saved);
+      // IDを文字列として統一して保存
+      wishlist = new Set(savedArray.map(id => String(id)));
+      console.log(`💖 お気に入り ${wishlist.size}件を復元しました`);
+    }
+  } catch (error) {
+    console.error('お気に入り復元エラー:', error);
+    wishlist = new Set();
+  }
+}
+
+// お気に入りをローカルストレージに保存
+function saveWishlist() {
+  try {
+    localStorage.setItem('famazon_wishlist', JSON.stringify([...wishlist]));
+  } catch (error) {
+    console.error('お気に入り保存エラー:', error);
+  }
+}
+
 function toggleWishlist(event, id) {
   event.stopPropagation();
   const btn = event.currentTarget;
-  if (wishlist.has(id)) {
-    wishlist.delete(id);
+  
+  // IDを文字列として統一（重要：型の一貫性を保つ）
+  const stringId = String(id);
+  
+  if (wishlist.has(stringId)) {
+    // お気に入りから削除
+    wishlist.delete(stringId);
     btn.classList.remove('active');
     showToast('💔 お気に入りから削除しました', '#ef4444');
   } else {
-    wishlist.add(id);
+    // お気に入りに追加
+    wishlist.add(stringId);
     btn.classList.add('active');
-    showToast('❤️ お気に入りに追加しました！');
+    
+    // 商品名を取得して表示
+    const product = products.find(p => p.id == id);
+    if (product) {
+      showToast(`❤️ 「${product.name.substring(0, 20)}...」をお気に入りに追加！`);
+    } else {
+      showToast('❤️ お気に入りに追加しました！');
+    }
   }
-}
+  
+  // ローカルストレージに保存
+  saveWishlist()
 
 // ========== CHECKOUT ==========
 function openCheckout() {
@@ -1880,8 +1923,95 @@ document.querySelectorAll('.modal-overlay').forEach(overlay => {
   });
 });
 
+// ========== お気に入り一覧表示機能 ==========
+function showWishlistModal() {
+  const wishlistProducts = products.filter(p => wishlist.has(String(p.id)));
+  
+  if (wishlistProducts.length === 0) {
+    showToast('💔 お気に入りはまだありません', '#ef4444');
+    return;
+  }
+  
+  const modalHTML = `
+    <div class="modal-overlay" id="wishlistModal" style="display:flex;">
+      <div class="modal" style="max-width:800px;">
+        <div class="modal-header">
+          <h2>❤️ お気に入りリスト（${wishlistProducts.length}件）</h2>
+          <button class="close-btn" onclick="closeWishlistModal()">✕</button>
+        </div>
+        <div class="modal-body" style="max-height:70vh;overflow-y:auto;">
+          <div class="products-grid" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));">
+            ${wishlistProducts.map(p => {
+              const optimizedImage = p.image ? 
+                p.image.replace('/upload/', '/upload/f_auto,q_auto,w_300,c_limit/') : null;
+              
+              return `
+                <div class="product-card" onclick="openDetail(${p.id}); closeWishlistModal();" style="cursor:pointer;">
+                  <button class="btn-wishlist active" onclick="toggleWishlist(event, ${p.id})">♥</button>
+                  <div class="product-img" style="overflow:hidden;border-radius:8px;height:150px;">
+                    ${p.image ? 
+                      `<img src="${optimizedImage}" alt="${p.name}" 
+                        style="width:100%;height:100%;object-fit:cover;" loading="lazy">` 
+                      : `<span style="font-size:2rem;">${p.emoji}</span>`}
+                  </div>
+                  <div class="product-info">
+                    <div class="product-name" style="font-size:0.85rem;margin:8px 0;">${p.name}</div>
+                    <div class="product-price">
+                      <span class="price-main" style="font-size:0.9rem;">💰 ${p.price.toLocaleString()} G</span>
+                    </div>
+                  </div>
+                  <div class="product-actions" onclick="event.stopPropagation()">
+                    <button class="btn-cart" style="padding:6px 12px;font-size:0.8rem;" onclick="addToCart(${p.id})">🛒 カートへ</button>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  document.body.insertAdjacentHTML('beforeend', modalHTML);
+  
+  // オーバーレイクリックで閉じる
+  document.getElementById('wishlistModal').addEventListener('click', (e) => {
+    if (e.target.id === 'wishlistModal') {
+      closeWishlistModal();
+    }
+  });
+}
+
+function closeWishlistModal() {
+  const modal = document.getElementById('wishlistModal');
+  if (modal) {
+    modal.remove();
+  }
+}
+
+// ヘッダーのお気に入りボタンにクリック機能を追加
+function updateWishlistHeader() {
+  const wishBtn = document.querySelector('.header-btn:has(.value)');
+  if (wishBtn) {
+    const valueSpan = wishBtn.querySelector('.value');
+    if (valueSpan && valueSpan.textContent.includes('お気に入り')) {
+      valueSpan.textContent = `❤️ お気に入り${wishlist.size > 0 ? ` (${wishlist.size})` : ''}`;
+      wishBtn.onclick = showWishlistModal;
+    }
+  }
+}
+
 // ========== INIT ==========
-loadProductsFromSheet(); 
+async function initFamazon() {
+  // お気に入りデータを復元
+  loadWishlist();
+  
+  // 商品データを読み込み
+  await loadProductsFromSheet();
+}
+
+// ページ読み込み時に実行
+initFamazon();
 </script>
 </body>
 </html>
