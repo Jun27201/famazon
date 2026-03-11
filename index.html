@@ -1841,7 +1841,7 @@ function openCheckout() {
 
   document.getElementById('checkoutBody').innerHTML = `
     <div class="checkout-step active" id="step1">
-      <h3 style="color:var(--glow);margin-bottom:15px;">📍 ステップ 1/3: お届け先</h3>
+      <h3 style="color:var(--glow);margin-bottom:15px;">📍 ステップ 1/2: お届け先</h3>
       <div class="checkout-form">
         <label>お名前・勇者名</label>
         <input type="text" placeholder="例：伝説の勇者 アーサー" id="name">
@@ -1868,7 +1868,7 @@ function openCheckout() {
     </div>
 
     <div class="checkout-step" id="step2">
-      <h3 style="color:var(--glow);margin-bottom:15px;">💰 ステップ 2/3: お支払い</h3>
+      <h3 style="color:var(--glow);margin-bottom:15px;">💰 ステップ 2/2: お支払い</h3>
       <div class="checkout-form">
         <label>支払い方法</label>
         <select id="payMethod">
@@ -1891,18 +1891,7 @@ function openCheckout() {
       </div>
       <div style="display:flex;gap:8px;margin-top:10px;">
         <button class="btn-cart" style="flex:0.5;" onclick="goStep(1)">← 戻る</button>
-        <button class="btn-checkout" style="flex:1;" onclick="goStep(3)">注文を確定する</button>
-      </div>
-    </div>
-
-    <div class="checkout-step" id="step3">
-      <div class="order-complete">
-        <span class="icon">🎉</span>
-        <h3>ご注文ありがとうございます！</h3>
-        <p>ご注文番号</p>
-        <div class="order-number">AMZ-${Math.random().toString(36).substr(2,8).toUpperCase()}-FANTASY</div>
-        <p style="margin-top:12px;">ご注文いただいた商品は魔法陣転送にて<br>お届けいたします。<br><br>🪄 呪文陣確認メールをお使いの魔法水晶に送りました。<br>配達状況は「勇者マイページ」でご確認いただけます。<br><br>⚔️ 良い冒険を！</p>
-        <button class="btn-checkout" style="margin-top:15px;width:auto;padding:10px 25px;" onclick="completeOrder()">🏠 ショッピングを続ける</button>
+        <button class="btn-checkout" style="flex:1;" onclick="completeOrder()">注文を確定する</button>
       </div>
     </div>
   `;
