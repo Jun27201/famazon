@@ -2649,12 +2649,14 @@ function renderProducts(data) {
 
     const wishActive = wishlist.has(p.id) ? 'active' : '';
 
-    // ★ Cloudinary最適化: 商品一覧用に最適なパラメータで画像を自動変換
+    // 商品一覧用のCloudinary最適化（400px幅）
     const optimizedImage = p.image ? 
       p.image.replace('/upload/', '/upload/f_auto,q_auto,w_400,c_limit/') : null;
 
     return `
-    <div class="product-card ${currentView === 'list' ? 'list-view' : ''}" onclick="openDetail(${p.id})">
+    <div class="product-card ${currentView === 'list' ? 'list-view' : ''}" 
+         onclick="openDetail(${p.id})" 
+         onmouseenter="preloadDetailImage(${p.id})">
       ${firstBadge}
       ${rankBadge}
       <button class="btn-wishlist ${wishActive}" onclick="toggleWishlist(event, ${p.id})">♥</button>
@@ -2688,6 +2690,7 @@ function renderProducts(data) {
     </div>`;
   }).join('');
 }
+
 
 
 function renderStars(rating) {
@@ -2894,6 +2897,25 @@ function changeQty(id, delta) {
   updateCartBadge();
   renderCart();
 }
+// ========== PRELOAD (先読み機能) ==========
+function preloadDetailImage(id) {
+  const p = products.find(x => x.id === id);
+  if (p && p.image) {
+    // 詳細画面と同じCloudinary最適化パラメータを使用
+    const optimizedDetailImage = p.image.replace(
+      '/upload/', 
+      '/upload/f_auto,q_auto,w_800,c_limit/'
+    );
+    
+    // ブラウザキャッシュに画像を先読み
+    const img = new Image();
+    img.src = optimizedDetailImage;
+    
+    // デバッグ用（動作確認後は削除可能）
+    console.log(`🔮 プリロード開始: ${p.name.substring(0, 25)}...`);
+  }
+}
+
 
 // ========== PRODUCT DETAIL ==========
 function openDetail(id) {
