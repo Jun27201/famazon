@@ -294,21 +294,17 @@
 <div class="toast" id="toast"></div>
 
 <script>
-
-
-// ========== 商品データを空の配列で初期化 ==========
-
 // ========== 設定とグローバル変数 ==========
 const SHEET_API_URL = 'https://script.google.com/macros/s/AKfycbw0G5R3_yTpsyW3hrQVEhJgCIksFv9-cT_0xggrQA6m_1jpksYmxVcuV_oEKelnRWvelQ/exec';
 
-// キャッシュ設定（30分 = バランスの良い設定）
+// キャッシュ設定（30分）
 const CACHE_CONFIG = {
   PRODUCTS_KEY: 'famazon_products_cache_v2',
   TIMESTAMP_KEY: 'famazon_cache_timestamp_v2',
   EXPIRY_TIME: 30 * 60 * 1000, // 30分
 };
 
-// 状態管理
+// グローバル状態管理（1回だけ宣言）
 let products = [];
 let productReviews = {};
 let productQA = {};
@@ -325,9 +321,6 @@ const lazyLoadState = {
 
 // ========== キャッシュマネージャー ==========
 const CacheManager = {
-  /**
-   * データをキャッシュに保存
-   */
   save(data) {
     try {
       const cacheData = {
@@ -352,9 +345,6 @@ const CacheManager = {
     }
   },
 
-  /**
-   * キャッシュからデータを読み込み
-   */
   load() {
     try {
       const cached = localStorage.getItem(CACHE_CONFIG.PRODUCTS_KEY);
@@ -362,7 +352,6 @@ const CacheManager = {
 
       const cacheData = JSON.parse(cached);
       
-      // 有効期限チェック
       if (!this.isValid()) {
         console.log('⏰ キャッシュの有効期限が切れています');
         this.clear();
@@ -379,9 +368,6 @@ const CacheManager = {
     }
   },
 
-  /**
-   * キャッシュの有効性をチェック
-   */
   isValid() {
     const timestamp = localStorage.getItem(CACHE_CONFIG.TIMESTAMP_KEY);
     if (!timestamp) return false;
@@ -390,18 +376,12 @@ const CacheManager = {
     return age < CACHE_CONFIG.EXPIRY_TIME;
   },
 
-  /**
-   * キャッシュをクリア
-   */
   clear() {
     localStorage.removeItem(CACHE_CONFIG.PRODUCTS_KEY);
     localStorage.removeItem(CACHE_CONFIG.TIMESTAMP_KEY);
     console.log('🗑️ キャッシュをクリアしました');
   },
 
-  /**
-   * キャッシュ情報をログ出力
-   */
   logCacheInfo() {
     const timestamp = localStorage.getItem(CACHE_CONFIG.TIMESTAMP_KEY);
     if (!timestamp) return;
@@ -418,14 +398,12 @@ async function loadProductsFromSheet(forceReload = false) {
   try {
     const container = document.getElementById('productsContainer');
     
-    // キャッシュから読み込み（強制再読み込みでない場合）
+    // キャッシュから読み込み
     if (!forceReload) {
       const cachedData = CacheManager.load();
       if (cachedData) {
         applyProductData(cachedData);
         showToast(`⚡ キャッシュから${products.length}件の商品を高速読み込み！`, '#8b5cf6');
-        
-        // バックグラウンドで最新データをチェック（ユーザーに影響しない）
         setTimeout(() => backgroundRefresh(), 2000);
         return;
       }
@@ -448,7 +426,6 @@ async function loadProductsFromSheet(forceReload = false) {
       throw new Error(data.message || 'スプレッドシートでエラーが発生しました');
     }
     
-    // データを適用してキャッシュに保存
     applyProductData(data);
     CacheManager.save(data);
     
@@ -460,9 +437,6 @@ async function loadProductsFromSheet(forceReload = false) {
   }
 }
 
-/**
- * データを適用する共通関数
- */
 function applyProductData(data) {
   products = Array.isArray(data.products) ? data.products : [];
   productReviews = data.reviews || {};
@@ -477,9 +451,6 @@ function applyProductData(data) {
   renderProducts(products);
 }
 
-/**
- * バックグラウンドでデータを更新（UIに影響しない）
- */
 async function backgroundRefresh() {
   try {
     console.log('🔄 バックグラウンドで最新データを確認中...');
@@ -497,9 +468,6 @@ async function backgroundRefresh() {
   }
 }
 
-/**
- * エラーハンドリング
- */
 function handleLoadError(error) {
   const container = document.getElementById('productsContainer');
   container.innerHTML = `
@@ -540,9 +508,6 @@ function handleLoadError(error) {
   `;
 }
 
-/**
- * 強制再読み込み
- */
 async function forceReloadProducts() {
   CacheManager.clear();
   showToast('🔄 最新データを取得中...', '#3b82f6');
@@ -681,8 +646,6 @@ function openDetail(id) {
   `;
   
   document.getElementById('productDetailModal').classList.add('active');
-  
-  // レビューを最初のタブとして遅延読み込み
   setTimeout(() => loadReviewsLazy(p.id), 200);
 }
 
@@ -690,7 +653,6 @@ function closeDetail() {
   document.getElementById('productDetailModal').classList.remove('active');
 }
 
-// ========== タブ切り替え（遅延読み込み対応） ==========
 function switchTab(btn, tabId, productId) {
   document.querySelectorAll('.detail-tab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
@@ -715,7 +677,6 @@ function switchTab(btn, tabId, productId) {
   }
 }
 
-// ========== 遅延読み込み実装 ==========
 function loadReviewsLazy(productId) {
   const stringId = String(productId);
   if (lazyLoadState.reviews.has(stringId)) return;
@@ -741,7 +702,6 @@ function loadReviewsLazy(productId) {
     reviewsTab.innerHTML = reviewsHTML;
     lazyLoadState.reviews.add(stringId);
     
-    // フェードインアニメーション
     reviewsTab.style.opacity = '0';
     reviewsTab.style.transition = 'opacity 0.3s ease-in-out';
     setTimeout(() => { reviewsTab.style.opacity = '1'; }, 50);
@@ -772,7 +732,6 @@ function loadQALazy(productId) {
     qaTab.innerHTML = qaHTML;
     lazyLoadState.qa.add(stringId);
     
-    // フェードインアニメーション
     qaTab.style.opacity = '0';
     qaTab.style.transition = 'opacity 0.3s ease-in-out';
     setTimeout(() => { qaTab.style.opacity = '1'; }, 50);
@@ -936,14 +895,12 @@ function changeQty(id, delta) {
   renderCart();
 }
 
-// ========== プリロード機能 ==========
 function preloadDetailImage(id) {
   const p = products.find(x => x.id === id);
   if (p && p.image) {
     const optimizedDetailImage = p.image.replace('/upload/', '/upload/f_auto,q_auto,w_800,c_limit/');
     const img = new Image();
     img.src = optimizedDetailImage;
-    console.log(`🔮 プリロード開始: ${p.name.substring(0, 25)}...`);
   }
 }
 
@@ -957,17 +914,13 @@ function loadWishlist() {
         wishlist = new Set(savedArray.map(id => String(id)));
         console.log(`💖 お気に入り ${wishlist.size}件を復元しました`);
       } else {
-        console.warn('お気に入りデータの形式が不正です。リセットします。');
         wishlist = new Set();
         localStorage.removeItem('famazon_wishlist');
       }
-    } else {
-      console.log('💖 お気に入りデータなし（初回起動）');
     }
   } catch (error) {
     console.error('お気に入り復元エラー:', error);
     wishlist = new Set();
-    localStorage.removeItem('famazon_wishlist');
   }
 }
 
@@ -975,7 +928,6 @@ function saveWishlist() {
   try {
     const arrayToSave = Array.from(wishlist);
     localStorage.setItem('famazon_wishlist', JSON.stringify(arrayToSave));
-    console.log(`💾 お気に入り ${arrayToSave.length}件を保存しました`);
   } catch (error) {
     console.error('お気に入り保存エラー:', error);
     showToast('⚠️ お気に入りの保存に失敗しました', '#ef4444');
@@ -988,7 +940,6 @@ function toggleWishlist(event, id) {
   const stringId = String(id);
   
   if (!(wishlist instanceof Set)) {
-    console.warn('wishlistが破損していました。再生成します。');
     wishlist = new Set();
   }
   
@@ -1003,8 +954,6 @@ function toggleWishlist(event, id) {
     const product = products.find(p => String(p.id) === stringId);
     if (product) {
       showToast(`❤️ 「${product.name.substring(0, 20)}...」をお気に入りに追加！`);
-    } else {
-      showToast('❤️ お気に入りに追加しました！');
     }
   }
   
@@ -1051,12 +1000,11 @@ function openCheckout() {
       <h3 style="color:var(--glow);margin-bottom:15px;">💰 ステップ 2/2: お支払い</h3>
       <div class="checkout-form">
         <label>支払い方法</label>
-        <select id="payMethod">
+        <select>
           <option>ゴールドコイン（直接転送）</option>
           <option>魔法銀行カード</option>
           <option>ドラゴンダイヤ（換算）</option>
           <option>冒険者ギルドポイント払い</option>
-          <option>魔法アイテムでの物々交換（要審査）</option>
         </select>
         <label>ゴールドコイン送金先（または魔法銀行カード番号）</label>
         <input type="text" placeholder="例：0000-MAGE-1234-GOLD">
@@ -1130,7 +1078,7 @@ function completeOrder() {
     updateCartBadge();
     closeCheckout();
     
-    showToast('🎉 ご注文が完了しました！注文履歴に保存されました');
+    showToast('🎉 ご注文が完了しました！');
     showOrderCompleteModal(orderData);
     
   } catch (error) {
@@ -1139,16 +1087,13 @@ function completeOrder() {
   }
 }
 
-// ========== 注文履歴システム ==========
+// ========== 注文履歴 ==========
 function saveOrderToHistory(orderData) {
   try {
     const history = getOrderHistory();
     history.unshift(orderData);
-    if (history.length > 50) {
-      history.splice(50);
-    }
+    if (history.length > 50) history.splice(50);
     localStorage.setItem('famazon_order_history', JSON.stringify(history));
-    console.log('💾 注文履歴を保存しました:', orderData.id);
   } catch (error) {
     console.error('注文履歴保存エラー:', error);
   }
@@ -1157,13 +1102,8 @@ function saveOrderToHistory(orderData) {
 function getOrderHistory() {
   try {
     const saved = localStorage.getItem('famazon_order_history');
-    if (saved) {
-      const history = JSON.parse(saved);
-      return Array.isArray(history) ? history : [];
-    }
-    return [];
+    return saved ? JSON.parse(saved) : [];
   } catch (error) {
-    console.error('注文履歴読み込みエラー:', error);
     return [];
   }
 }
@@ -1199,147 +1139,44 @@ function showOrderCompleteModal(orderData) {
           color: var(--silver);
           font-size: 1.5rem;
           cursor: pointer;
-          padding: 4px;
-          border-radius: 4px;
-          transition: color 0.2s;
-          line-height: 1;
-        " onmouseover="this.style.color='var(--text)'"
-           onmouseout="this.style.color='var(--silver)'">✕</button>
+        ">✕</button>
         
-        <div style="font-size: 4rem; margin-bottom: 20px; animation: bounce 0.8s;">🎉</div>
-        <h2 style="color: var(--glow); margin-bottom: 16px; font-size: 1.6rem;">
-          ご注文ありがとうございます！
-        </h2>
+        <div style="font-size: 4rem; margin-bottom: 20px;">🎉</div>
+        <h2 style="color: var(--glow); margin-bottom: 16px;">ご注文ありがとうございます！</h2>
         
-        <div style="
-          background: var(--bg);
-          padding: 20px;
-          border-radius: 12px;
-          margin: 24px 0;
-          border: 1px solid rgba(167, 139, 250, 0.2);
-        ">
+        <div style="background: var(--bg); padding: 20px; border-radius: 12px; margin: 24px 0;">
           <div style="color: var(--silver); font-size: 0.9rem; margin-bottom: 8px;">注文番号</div>
-          <div style="
-            font-family: monospace;
-            font-size: 1.1rem;
-            color: var(--glow);
-            font-weight: 600;
-            margin-bottom: 16px;
-            letter-spacing: 0.5px;
-          ">${orderData.id}</div>
+          <div style="font-family: monospace; font-size: 1.1rem; color: var(--glow); font-weight: 600;">${orderData.id}</div>
           
-          <div style="
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            padding-top: 12px;
-            border-top: 1px solid rgba(167, 139, 250, 0.1);
-          ">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding-top: 12px; margin-top: 12px; border-top: 1px solid rgba(167, 139, 250, 0.1);">
             <div>
-              <div style="color: var(--silver); font-size: 0.8rem; margin-bottom: 4px;">商品数</div>
+              <div style="color: var(--silver); font-size: 0.8rem;">商品数</div>
               <div style="color: var(--text); font-weight: 600; font-size: 1.1rem;">${orderData.items.length}件</div>
             </div>
             <div>
-              <div style="color: var(--silver); font-size: 0.8rem; margin-bottom: 4px;">合計金額</div>
+              <div style="color: var(--silver); font-size: 0.8rem;">合計金額</div>
               <div style="color: var(--glow); font-weight: 700; font-size: 1.2rem;">${orderData.total.toLocaleString()} G</div>
             </div>
           </div>
         </div>
         
-        <p style="
-          color: var(--silver);
-          margin: 20px 0;
-          line-height: 1.6;
-          font-size: 0.95rem;
-        ">
-          📦 ${orderData.deliveryMethod}でお届けいたします<br>
-          <small style="color: var(--silver); font-size: 0.85rem;">
-            💡 配達状況や過去の注文は、ヘッダーの「📦 注文履歴」からご確認いただけます
-          </small>
-        </p>
-        
-        <button class="btn-checkout" onclick="closeOrderCompleteModal()" style="
-          width: 100%;
-          padding: 16px 24px;
-          font-size: 1.1rem;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 10px;
-          margin-top: 30px;
-          transition: all 0.2s;
-          font-weight: 600;
-        " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 16px rgba(167, 139, 250, 0.4)'"
-           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
-          <span>🏠</span>
-          <span>ショッピングを続ける</span>
+        <button class="btn-checkout" onclick="closeOrderCompleteModal()" style="width: 100%; padding: 16px; margin-top: 20px;">
+          🏠 ショッピングを続ける
         </button>
-        
-        <button onclick="closeOrderCompleteModal(); showOrderHistoryModal();" style="
-          margin-top: 16px;
-          background: transparent;
-          border: none;
-          color: var(--glow);
-          font-size: 0.9rem;
-          cursor: pointer;
-          text-decoration: underline;
-          padding: 8px;
-          transition: all 0.2s;
-          opacity: 0.8;
-        " onmouseover="this.style.opacity='1'; this.style.color='#a78bfa'"
-           onmouseout="this.style.opacity='0.8'; this.style.color='var(--glow)'">
-          📦 今すぐ注文履歴を確認する
-        </button>
-        
-        <div style="
-          margin-top: 20px;
-          color: var(--silver);
-          font-size: 0.75rem;
-          opacity: 0.7;
-        ">
-          💡 このウィンドウは10秒後に自動的に閉じます
-        </div>
       </div>
     </div>
-    
-    <style>
-      @keyframes bounce {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-15px); }
-      }
-    </style>
   `;
   
   document.body.insertAdjacentHTML('beforeend', modalHTML);
-  
-  const modal = document.getElementById('orderCompleteModal');
-  modal.addEventListener('click', (e) => {
-    if (e.target.id === 'orderCompleteModal') {
-      closeOrderCompleteModal();
-    }
-  });
-  
-  const handleEscape = (e) => {
-    if (e.key === 'Escape') {
-      closeOrderCompleteModal();
-      document.removeEventListener('keydown', handleEscape);
-    }
-  };
-  document.addEventListener('keydown', handleEscape);
-  
   setTimeout(() => {
     const modal = document.getElementById('orderCompleteModal');
-    if (modal) {
-      modal.remove();
-    }
+    if (modal) modal.remove();
   }, 10000);
 }
 
 function closeOrderCompleteModal() {
   const modal = document.getElementById('orderCompleteModal');
-  if (modal) {
-    modal.remove();
-  }
+  if (modal) modal.remove();
 }
 
 function showOrderHistoryModal() {
@@ -1350,7 +1187,6 @@ function showOrderHistoryModal() {
     return;
   }
   
-  // 簡易版の注文履歴表示（完全版は元のコードを参照）
   const bodyHTML = `
     <div style="max-height: 60vh; overflow-y: auto;">
       ${history.slice(0, 10).map(order => {
@@ -1358,14 +1194,8 @@ function showOrderHistoryModal() {
         const formattedDate = orderDate.toLocaleDateString('ja-JP');
         
         return `
-          <div style="
-            background: var(--bg);
-            border: 1px solid rgba(167, 139, 250, 0.2);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 16px;
-          ">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+          <div style="background: var(--bg); border: 1px solid rgba(167, 139, 250, 0.2); border-radius: 12px; padding: 20px; margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between;">
               <div>
                 <div style="font-weight: 600; color: var(--text);">${formattedDate}</div>
                 <div style="font-size: 0.8rem; color: var(--silver); font-family: monospace;">ID: ${order.id}</div>
@@ -1389,7 +1219,7 @@ function closeOrderHistory() {
   document.getElementById('orderHistoryModal').classList.remove('active');
 }
 
-// ========== ユーティリティ関数 ==========
+// ========== ユーティリティ ==========
 function showToast(msg, bg) {
   const toast = document.getElementById('toast');
   toast.textContent = msg;
@@ -1405,7 +1235,6 @@ function goHome() {
   applyFilters();
 }
 
-// モーダルのオーバーレイクリック処理
 document.querySelectorAll('.modal-overlay').forEach(overlay => {
   overlay.addEventListener('click', (e) => {
     if (e.target === overlay) {
@@ -1414,7 +1243,6 @@ document.querySelectorAll('.modal-overlay').forEach(overlay => {
   });
 });
 
-// ========== ヘッダーに再読み込みボタンを追加 ==========
 function addReloadButtonToHeader() {
   const headerActions = document.querySelector('.header-actions');
   if (!headerActions) return;
@@ -1426,7 +1254,6 @@ function addReloadButtonToHeader() {
     <span class="value">🔄 再読み込み</span>
   `;
   reloadBtn.onclick = forceReloadProducts;
-  reloadBtn.style.cursor = 'pointer';
   
   const cartBtn = headerActions.querySelector('.cart-btn');
   if (cartBtn) {
@@ -1434,29 +1261,18 @@ function addReloadButtonToHeader() {
   }
 }
 
-// ========== 開発者用コンソールコマンド ==========
-// ブラウザのコンソールで以下のコマンドが使用可能：
-// - CacheManager.logCacheInfo() : キャッシュ情報を表示
-// - CacheManager.clear()        : キャッシュをクリア
-// - forceReloadProducts()       : 強制再読み込み
-
-// ========== 初期化処理 ==========
+// ========== 初期化 ==========
 async function initFamazon() {
   try {
     console.log('🚀 ファマゾン魔法商店 初期化開始');
     
-    // Step 1: お気に入りデータを復元
     loadWishlist();
     console.log('✅ お気に入り復元完了');
     
-    // Step 2: 商品データを読み込み（キャッシュ優先）
     await loadProductsFromSheet();
     console.log('✅ 商品読み込み完了');
     
-    // Step 3: ヘッダーに再読み込みボタンを追加
     addReloadButtonToHeader();
-    
-    // Step 4: キャッシュ情報をログ出力
     CacheManager.logCacheInfo();
     
     console.log('🎉 ファマゾン魔法商店 初期化完了');
@@ -1469,17 +1285,13 @@ async function initFamazon() {
       container.innerHTML = `
         <div class="loading">
           ⚠️ 魔法陣の初期化に失敗しました<br>
-          <small style="color:var(--silver);">
-            エラー: ${error.message}<br>
-            ページをリロード（F5）してください
-          </small>
+          <small style="color:var(--silver);">エラー: ${error.message}</small>
         </div>
       `;
     }
   }
 }
 
-// ページ読み込み時に実行
 initFamazon();
 </script>
 </body>
