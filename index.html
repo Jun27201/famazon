@@ -1931,6 +1931,57 @@ function addReloadButtonToHeader() {
     headerActions.insertBefore(reloadBtn, cartBtn);
   }
 }
+// ========== 🚑 モーダル統一管理システム（緊急修正） ==========
+
+// 1. シンプルなお気に入りモーダル閉鎖関数
+function closeWishlistModal() {
+  const modal = document.getElementById('wishlistModal');
+  if (modal) {
+    modal.classList.remove('active');
+    console.log('✅ お気に入りモーダルを閉じました');
+  }
+}
+
+// 2. グローバルクリック監視システム
+// すべてのクリックを監視し、モーダル関連なら統一的に処理
+window.addEventListener('click', function(event) {
+  const target = event.target;
+
+  // A. モーダルの背景（黒い部分）をクリックした場合
+  if (target.classList.contains('modal-overlay') && target.id === 'wishlistModal') {
+    closeWishlistModal();
+    return;
+  }
+
+  // B. ✕ボタン（またはその内容）をクリックした場合
+  if (target.classList.contains('close-btn') || target.closest('.close-btn')) {
+    const modal = target.closest('.modal-overlay');
+    if (modal && modal.id === 'wishlistModal') {
+      closeWishlistModal();
+      return;
+    }
+    
+    // 他のモーダルの場合は既存の処理に任せる
+    if (modal) {
+      modal.classList.remove('active');
+    }
+  }
+}, true); // true = キャプチャフェーズで実行（最優先）
+
+// 3. 複雑な処理を無効化（既存コードとの競合を防ぐ）
+function ensureModalHandlers() {
+  // 何もしない（グローバル監視に任せる）
+  return;
+}
+
+function setupModalCloseHandlers() {
+  // 何もしない（グローバル監視に任せる）
+  return;
+}
+
+console.log('🛡️ モーダル統一管理システムを適用しました');
+
+  
 
 // ========== 初期化 ==========
 async function initFamazon() {
