@@ -931,6 +931,75 @@ function updateCheckoutLocationDisplay() {
 }
 
 // ========== チェックアウト機能（完全版・ジョークサイト仕様） ==========
+// ========== 配送料計算システム（修正版） ==========
+
+function getShippingCost() {
+  try {
+    const methodElement = document.getElementById('deliveryMethod');
+    let baseCost = 0;
+    
+    if (methodElement && methodElement.selectedIndex >= 0) {
+      const selectedOption = methodElement.options[methodElement.selectedIndex];
+      baseCost = parseInt(selectedOption.getAttribute('data-cost')) || 0;
+    }
+    
+    const locationCost = selectedLocation ? selectedLocation.cost : 0;
+    return baseCost + locationCost;
+  } catch (error) {
+    console.error('送料計算エラー:', error);
+    return 0; // エラー時は0を返して処理を継続
+  }
+}
+
+function updateShippingCost() {
+  try {
+    const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+    const totalShipping = getShippingCost();
+    const tax = Math.floor(subtotal * 0.1);
+    const total = subtotal + tax + totalShipping;
+    
+    // 画面表示を更新
+    const shippingDisplay = document.getElementById('displayShipping');
+    const totalDisplay = document.getElementById('displayTotal');
+    const taxDisplay = document.getElementById('displayTax');
+    
+    if (shippingDisplay) {
+      if (totalShipping === 0) {
+        shippingDisplay.innerHTML = '<span style="color: var(--success); font-weight: 600;">無料 🎉</span>';
+      } else {
+        shippingDisplay.innerHTML = `<span style="color: var(--accent); font-weight: 600;">${totalShipping.toLocaleString()} G</span>`;
+      }
+    }
+    
+    if (taxDisplay) {
+      taxDisplay.textContent = `${tax.toLocaleString()} G`;
+    }
+    
+    if (totalDisplay) {
+      totalDisplay.innerHTML = `<span style="color: var(--glow); font-weight: 700; font-size: 1.3rem;">💰 ${total.toLocaleString()} G</span>`;
+    }
+    
+    console.log('✅ 配送料計算完了:', { totalShipping, total });
+    
+  } catch (error) {
+    console.error('❌ 配送料計算エラー:', error);
+    
+    // エラー時のフォールバック表示
+    const shippingDisplay = document.getElementById('displayShipping');
+    const totalDisplay = document.getElementById('displayTotal');
+    
+    if (shippingDisplay) {
+      shippingDisplay.innerHTML = '<span style="color: var(--silver);">500 G</span>';
+    }
+    
+    if (totalDisplay) {
+      const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+      const tax = Math.floor(subtotal * 0.1);
+      const fallbackTotal = subtotal + tax + 500;
+      totalDisplay.innerHTML = `<span style="color: var(--glow); font-weight: 700;">💰 ${fallbackTotal.toLocaleString()} G</span>`;
+    }
+  }
+}
 
 function openCheckout() {
   closeCart();
@@ -1075,7 +1144,12 @@ function openCheckout() {
   `;
   
   document.getElementById('checkoutModal').classList.add('active');
-  setTimeout(() => updateShippingCost(), 100);
+  
+  // 初期表示時に配送料を計算（重要！）
+  setTimeout(() => {
+    updateShippingCost();
+    console.log('📦 チェックアウト画面を開き、配送料を計算しました');
+  }, 150);
 }
 
 // 【重要】ステップ切り替え関数（これが抜けていました！）
@@ -1104,8 +1178,11 @@ function goStep(n) {
   });
 
   // ステップ2では送料を再計算
-  if (n === 2) {
-    setTimeout(() => updateShippingCost(), 50);
+   if (n === 2) {
+    setTimeout(() => {
+      updateShippingCost();
+      console.log('💰 ステップ2: 配送料を再計算しました');
+    }, 100);
   }
 
   // モーダルを上部にスクロール
