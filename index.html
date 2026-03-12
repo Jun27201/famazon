@@ -973,7 +973,7 @@ function openCheckout() {
         </div>
         <div class="form-group">
           <label class="form-label">配達先の界・国</label>
-          <div class="location-display" onclick="showLocationModal()">
+          <div class="location-display"  id="checkoutLocationDisplay" onclick="showLocationModal()">
             ${getCheckoutLocationHTML()}
           </div>
           <button type="button" class="btn-change-location" onclick="showLocationModal()">
