@@ -1286,7 +1286,24 @@ function showOrderHistoryModal() {
     return;
   }
 
+  const totalAmount = history.reduce((sum, order) => sum + (order.total || 0), 0);
+
   const bodyHTML = `
+    <!-- 証拠隠滅ツールバー -->
+    <div class="history-toolbar">
+      <div>
+        <div style="font-weight:700; color:var(--glow); font-size:1.1rem;">
+          📦 冒険の記録 ${history.length}件
+        </div>
+        <div style="color:var(--silver); font-size:0.9rem; margin-top:4px;">
+          総購入金額: ${totalAmount.toLocaleString()} G（内緒です）
+        </div>
+      </div>
+      <button class="btn-delete-all" onclick="destroyEvidenceCompletely()">
+        🔥 証拠隠滅（完全抹消）
+      </button>
+    </div>
+
     <div style="max-height: 60vh; overflow-y: auto;">
       ${history.slice(0, 10).map(order => {
         const orderDate = new Date(order.date);
@@ -1337,6 +1354,57 @@ function showOrderHistoryModal() {
 
   document.getElementById('orderHistoryBody').innerHTML = bodyHTML;
   document.getElementById('orderHistoryModal').classList.add('active');
+}
+
+// 注文履歴完全抹消関数（証拠隠滅仕様）
+function destroyEvidenceCompletely() {
+  const count = getOrderHistory().length;
+  
+  const secretReasons = [
+    '奥さんにバレたくない購入履歴がある',
+    '親に内緒で買った魔法アイテムがある', 
+    '会社の経費で買ったことにしたい',
+    '単純に買いすぎて恥ずかしい',
+    '闇商人から買った物が含まれている'
+  ];
+  const randomReason = secretReasons[Math.floor(Math.random() * secretReasons.length)];
+  
+  if (!confirm(`🔥 証拠隠滅システムを起動しますか？\n\n対象: ${count}件の注文履歴\n推定理由: ${randomReason}\n\n⚠️ この操作は「記憶改変魔法」でも取り消せません！`)) {
+    return;
+  }
+  
+  // 証拠隠滅演出
+  showToast('🔥 証拠隠滅システム起動中...', '#f59e0b');
+  
+  setTimeout(() => {
+    localStorage.removeItem('famazon_order_history');
+    
+    // モーダルの中身を隠滅完了表示に更新
+    document.getElementById('orderHistoryBody').innerHTML = `
+      <div class="empty-cart">
+        <span class="icon">🔥</span>
+        <div style="font-size:1.3rem; color:var(--danger); margin-bottom:12px;">
+          証拠隠滅完了
+        </div>
+        <div style="color:var(--silver); line-height:1.6;">
+          ${count}件の注文履歴が完全に抹消されました<br>
+          <small style="margin-top:8px; display:block;">
+            これで誰もあなたの購入履歴を知ることはできません...<br>
+            🤫 秘密は守られました
+          </small>
+        </div>
+      </div>
+    `;
+    
+    const destructionMessages = [
+      '🔥 証拠隠滅完了！履歴は灰も残らず消去されました',
+      '💥 爆破魔法により全記録が粉砕されました',
+      '🌪️ 記憶消去の竜巻が全てを飲み込みました', 
+      '⚡ 雷撃魔法で痕跡ごと蒸発させました'
+    ];
+    const randomMessage = destructionMessages[Math.floor(Math.random() * destructionMessages.length)];
+    showToast(randomMessage, '#ef4444');
+  }, 1000);
 }
 
 function closeOrderHistory() {
@@ -1472,6 +1540,9 @@ function renderWishlist() {
         <button class="btn-buy" onclick="closeWishlistModal(); openCart();" style="white-space:nowrap;">
           🛒 カートを開く
         </button>
+        <button class="btn-delete-all" onclick="clearWishlistWithMagic()">
+          🔮 魔法で全て消去
+        </button>
       </div>
     </div>
 
@@ -1534,6 +1605,40 @@ function renderWishlist() {
     </div>
   `;
 }
+
+// お気に入り一括削除関数（魔法仕様）
+function clearWishlistWithMagic() {
+  const count = wishlist.size;
+  
+  if (!confirm(`🔮 魔法の力で${count}件のお気に入りを消去しますか？\n\n⚠️ この魔法は「時の巻き戻し呪文」でも元に戻せません！\n（本当に削除されます）`)) {
+    return;
+  }
+  
+  // 魔法エフェクト演出
+  showToast('🔮 消去魔法を詠唱中...', '#a78bfa');
+  
+  setTimeout(() => {
+    wishlist.clear();
+    saveWishlist();
+    
+    // メイン画面のハートマークも全部消す
+    document.querySelectorAll('.btn-wishlist.active').forEach(btn => {
+      btn.classList.remove('active');
+    });
+    
+    renderWishlist();
+    
+    const magicMessages = [
+      '✨ 消去魔法が成功しました！記憶も一緒に消えました',
+      '🌟 魔法の力でお気に入りが異次元に消失しました',
+      '💫 呪文詠唱完了！痕跡も残らず消去されました',
+      '⚡ 高等魔法により完全消去が実行されました'
+    ];
+    const randomMessage = magicMessages[Math.floor(Math.random() * magicMessages.length)];
+    showToast(randomMessage, '#ef4444');
+  }, 800);
+}
+
 
 function addWishlistAllToCart() {
   const wishlistProducts = products.filter(p => wishlist.has(String(p.id)));
