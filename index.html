@@ -1009,17 +1009,26 @@ function openCheckout() {
       <h3 class="checkout-step-title">💰 お支払い情報</h3>
       <div class="checkout-form">
         <div class="form-group">
-          <label class="form-label">支払い方法</label>
-          <select class="form-select" id="paymentMethod">
-            <option value="gold">💰 ゴールドコイン（直接転送）</option>
-            <option value="card">💳 魔法銀行カード</option>
-            <option value="magic">✨ 魔法の力でなんとかする</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">送金先情報</label>
-          <input type="text" class="form-input" id="paymentInfo" placeholder="魔法でなんとかなります">
-        </div>
+            <label class="form-label">支払い方法</label>
+            <select class="form-select" id="paymentMethod" onchange="updatePaymentHint()">
+              <option value="gold">💰 ゴールドコイン（直接転送）</option>
+              <option value="card">💳 魔法銀行カード</option>
+              <option value="guild">🏆 冒険者ギルドポイント</option>
+              <option value="diamond">💎 ドラゴンダイヤ（時価換算）</option>
+              <option value="crystal">🔮 魔力結晶（エネルギー変換）</option>
+              <option value="barter">⚔️ 装備品との物々交換</option>
+              <option value="contract">📜 悪魔との契約（リボ払い）</option>
+              <option value="soul">👻 魂の一部（闇商人ルート）</option>
+              <option value="time">⏳ 寿命の一部を差し出す</option>
+              <option value="magic">✨ 魔法の力でなんとかする</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">送金先情報 <small style="color:var(--silver);">（適当でOK）</small></label>
+            <input type="text" class="form-input" id="paymentInfo" placeholder="魔法でなんとかなります">
+            <small class="form-hint" id="paymentHint" style="color:var(--silver);">選択した支払い方法に応じて情報を入力してください</small>
+          </div>
+
         <div class="form-group">
           <label class="form-label">魔法認証コード</label>
           <input type="password" class="form-input" id="authCode" placeholder="••••••••">
@@ -1131,6 +1140,7 @@ function completeOrder() {
     return;
   }
 
+
   const shipping = getShippingCost();
   const tax = Math.floor(checkoutSubtotal * 0.1);
   const total = checkoutSubtotal + tax + shipping;
@@ -1158,6 +1168,67 @@ function completeOrder() {
   showToast('🎉 ご注文完了！ドラゴン便で爆速配送！', '#10b981');
   showOrderCompleteModal(orderData);
 }
+
+// ========== 支払い方法に応じてヒントを変更（ジョーク仕様） ==========
+function updatePaymentHint() {
+  const paymentMethod = document.getElementById('paymentMethod').value;
+  const paymentInfo = document.getElementById('paymentInfo');
+  const paymentHint = document.getElementById('paymentHint');
+  
+  const hints = {
+    gold: {
+      placeholder: '例：王立金庫 口座番号 G-12345678',
+      hint: 'ゴールドコインの送金先を入力してください'
+    },
+    card: {
+      placeholder: '例：1234-5678-9012-MAGE',
+      hint: '魔法銀行カード番号を入力してください'
+    },
+    guild: {
+      placeholder: '例：冒険者ID ADV-99999（保有: 999,999pt）',
+      hint: 'ギルドポイントが自動換算されます（1pt = 1G）'
+    },
+    diamond: {
+      placeholder: '例：ドラゴンダイヤ 3カラット',
+      hint: '現在レート: 1カラット = 100,000G'
+    },
+    crystal: {
+      placeholder: '例：魔力結晶 Sランク × 5個',
+      hint: '魔力を通貨に変換します（変換効率85%）'
+    },
+    barter: {
+      placeholder: '例：エクスカリバー+10、賢者の杖など',
+      hint: '装備品は自動鑑定で価値を算定します'
+    },
+    contract: {
+      placeholder: '例：「魂を担保に月々1万G払います」',
+      hint: '⚠️ 悪魔との契約により金利666%が適用されます'
+    },
+    soul: {
+      placeholder: '例：魂の純度85%、記憶の一部込み',
+      hint: '⚠️ 売却した魂は返却されません'
+    },
+    time: {
+      placeholder: '例：残り寿命から5年分を差し引く',
+      hint: '⚠️ 実際に寿命が減少します（保険適用外）'
+    },
+    magic: {
+      placeholder: '何も入力しなくても魔法がなんとかします',
+      hint: '✨ 高度な魔法により自動的に支払いが完了します'
+    }
+  };
+  
+  const selected = hints[paymentMethod] || hints.magic;
+  
+  if (paymentInfo) {
+    paymentInfo.placeholder = selected.placeholder;
+  }
+  
+  if (paymentHint) {
+    paymentHint.textContent = selected.hint;
+  }
+}
+
 
 // ========== ステップ切り替え関数（追加） ==========
 function goStep(n) {
